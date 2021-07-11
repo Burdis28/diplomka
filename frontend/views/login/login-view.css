@@ -1,0 +1,12 @@
+login-view .vaadinVerticalLayout {
+    background-color: #0b8043;
+}
+
+login-view vaadin-vertical-layout{
+    background-color: var(--lumo-contrast-10pct);
+    box-shadow: var(--lumo-box-shadow-xl);
+}
+
+login-view h1{
+    text-shadow: 2px 2px 4px #000000;
+}

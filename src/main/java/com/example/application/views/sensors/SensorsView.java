@@ -1,21 +1,28 @@
 package com.example.application.views.sensors;
 
+import java.awt.*;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
 import com.example.application.data.service.SensorRepository;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
+
+import com.vaadin.flow.component.charts.model.style.Theme;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.Tag;
@@ -34,11 +41,9 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.example.application.views.main.MainView;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @JsModule("./views/sensors/sensors-view.ts")
@@ -60,12 +65,13 @@ public class SensorsView extends LitTemplate {
     private Grid.Column<Sensor> typeColumn;
     private Grid.Column<Sensor> dateColumn;
     private Grid.Column<Sensor> buttonColumn;
-
+    private Grid.Column<Sensor> toolsColumn;
 
     private final SensorRepository sensorRepository;
 
     public SensorsView(@Autowired SensorRepository sensorRepository) {
         this.sensorRepository = sensorRepository;
+        grid.setSelectionMode(SelectionMode.NONE);
         createGrid();
     }
 
@@ -76,12 +82,72 @@ public class SensorsView extends LitTemplate {
     }
 
     private void createGridComponent() {
-        grid.setSelectionMode(SelectionMode.MULTI);
-        grid.addThemeVariants(GridVariant.LUMO_NO_BORDER, GridVariant.LUMO_COLUMN_BORDERS);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setHeight("100%");
 
         List<Sensor> sensors = getSensors();
+        grid.addItemClickListener(event -> {
+            grid.select(event.getItem());
+        });
+
         gridListDataView = grid.setItems(sensors);
+        GridContextMenu<Sensor> contextMenu = grid.addContextMenu();
+        createContextEditMenu(contextMenu);
+        contextMenu.add(new Hr());
+        createDeleteContextMenu(contextMenu);
+    }
+
+    private void createDeleteContextMenu(GridContextMenu<Sensor> contextMenu) {
+        contextMenu.addItem("Delete", event -> {
+            Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
+            if(sensor != null) {
+                createDeleteSensorDialog(sensor);
+            }
+        });
+    }
+
+    private void createDeleteSensorDialog(Sensor sensor) {
+        Notification.show(sensor.getId().toString());
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setHeader("Confirm delete");
+        dialog.setText("Are you sure you want to delete \"" + sensor.getName() + "\" sensor?");
+        dialog.setCancelable(true);
+        dialog.setCancelText("Cancel");
+        dialog.setConfirmText("Delete");
+        dialog.addCancelListener(event1 -> {});
+        dialog.addConfirmListener(event1 -> {
+            sensorRepository.delete(sensor);
+        });
+        dialog.setConfirmButtonTheme("error primary");
+        dialog.open();
+        gridListDataView.refreshAll();
+    }
+
+    private void createContextEditMenu(GridContextMenu<Sensor> contextMenu) {
+        contextMenu.addItem("View & edit", event -> {
+            Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
+            if(sensor != null) {
+                navigateToSensorDetail(sensor);
+            }
+        });
+    }
+
+    private void navigateToSensorDetail(Sensor sensor) {
+        Notification.show(sensor.getId().toString());
+        VaadinSession.getCurrent().setAttribute("sensorId", sensor.getId());
+        switch (sensor.getType()) {
+            case "e":
+                UI.getCurrent().navigate("sensor-el-detail");
+                return;
+            case "w":
+                UI.getCurrent().navigate("sensor-wat-detail");
+                return;
+            case "g":
+                UI.getCurrent().navigate("sensor-gas-detail");
+                return;
+            default:
+        }
     }
 
     private void addColumnsToGrid() {
@@ -91,35 +157,36 @@ public class SensorsView extends LitTemplate {
         createLimitMonthColumn();
         createTypeColumn();
         createDateColumn();
-        createButtonColumn();
+        createToolsColumn();
     }
 
     private void createIdColumn() {
-        idColumn = grid.addColumn(Sensor::getId, "id").setHeader("ID").setWidth("120px").setFlexGrow(0);
+        idColumn = grid.addColumn(Sensor::getId, "id").setHeader("ID").setWidth("100px").setFlexGrow(0);
     }
 
     private void createNameColumn() {
         nameColumn = grid.addColumn(Sensor::getName, "name").setHeader("Name")
-                .setComparator(Sensor::getName);
+                .setComparator(Sensor::getName).setWidth("200px").setFlexGrow(0);;
     }
 
     private void createLimitDayColumn() {
         limitDay = grid.addColumn(Sensor::getLimit_day, "limit_day").setHeader("Daily limit")
-                .setWidth("200px").setFlexGrow(0).setComparator(Sensor::getLimit_day);
+                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_day).setFlexGrow(0);;
     }
 
     private void createLimitMonthColumn() {
         limitMonth = grid.addColumn(Sensor::getLimit_day, "limit_month").setHeader("Monthly limit")
-                .setWidth("200px").setFlexGrow(0).setComparator(Sensor::getLimit_day);
+                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_day).setFlexGrow(0);;
     }
 
     private void createTypeColumn() {
-        typeColumn = grid.addColumn(new ComponentRenderer<>(sensor -> {
+        typeColumn = grid.addComponentColumn(sensor -> {
             Span span = new Span();
             span.setText(SensorTypes.valueOf(sensor.getType()).toString());
             span.getElement().setAttribute("theme", getBadgeType(sensor));
+            span.setWidth("115px");
             return span;
-        })).setComparator(Sensor::getType).setHeader("Type");
+        }).setHeader("Type").setWidth("150px").setComparator(Sensor::getType).setFlexGrow(0);;
     }
 
     private String getBadgeType(Sensor sensor) {
@@ -134,29 +201,27 @@ public class SensorsView extends LitTemplate {
     private void createDateColumn() {
         dateColumn = grid
                 .addColumn(Sensor::getCreatedDate)
-                .setComparator(Sensor::getCreatedDate).setHeader("Created date");
+                .setComparator(Sensor::getCreatedDate).setHeader("Created date").setWidth("200px").setFlexGrow(0);;
     }
 
-    private void createButtonColumn() {
-        buttonColumn = grid.addColumn(new ComponentRenderer<>(sensor -> {
-            Button detailButton = new Button();
-            detailButton.setText("Detail");
-            detailButton.setThemeName("secondary");
-            detailButton.addClickListener(buttonClickEvent -> {
-                Notification.show(sensor.getId().toString());
-                VaadinSession.getCurrent().setAttribute("sensorId", sensor.getId());
-                switch (sensor.getType()) {
-                    case "e": UI.getCurrent().navigate("sensor-el-detail");
-                        return;
-                    case "w": UI.getCurrent().navigate("sensor-wat-detail");
-                        return;
-                    case "g": UI.getCurrent().navigate("sensor-gas-detail");
-                        return;
-                    default:
+    private void createToolsColumn() {
+        toolsColumn = grid.addComponentColumn(sensor -> {
+
+            Icon toolboxIcon = new Icon(VaadinIcon.TOOLS);
+            toolboxIcon.addClickListener(event -> navigateToSensorDetail(sensor));
+            toolboxIcon.getElement().setAttribute("theme", "badge secondary");
+            Icon trashCanIcon = new Icon(VaadinIcon.TRASH);
+            trashCanIcon.addClickListener(event -> createDeleteSensorDialog(sensor));
+            trashCanIcon.getElement().setAttribute("theme", "badge error secondary");
+
+            return new HorizontalLayout(){
+                {
+                    addComponentAsFirst(toolboxIcon);
+                    setSpacing(true);
+                    addComponentAtIndex(1, trashCanIcon);
                 }
-            });
-            return detailButton;
-        })).setHeader("").setWidth("120px").setFlexGrow(0);
+            };
+        }).setHeader("Tools").setWidth("80px");
     }
 
     /*

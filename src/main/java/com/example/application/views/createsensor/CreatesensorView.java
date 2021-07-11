@@ -10,7 +10,7 @@ import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.littemplate.LitTemplate;
@@ -18,12 +18,8 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.ParentLayout;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
 import com.example.application.views.main.MainView;
-import com.vaadin.flow.data.renderer.TemplateRenderer;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.Component;
 
 /**
  * A Designer generated component for the person-form-view template.
@@ -61,6 +57,8 @@ public class CreatesensorView extends LitTemplate {
     private Button cancel;
 
     private Binder<SamplePerson> binder = new Binder(SamplePerson.class);
+    @Id("div")
+    private Div div;
 
     public CreatesensorView(SamplePersonService personService) {
         countryCode.setItems("+354", "+91", "+62", "+98", "+964", "+353", "+44", "+972", "+39", "+225");
