@@ -18,4 +18,10 @@ public class SensorService extends CrudService<Sensor, Integer> {
     protected SensorRepository getRepository() {
         return sensorRepository;
     }
+
+    @Override
+    public void delete(Integer integer) {
+        // TODO smazat ostatní záznamy z tabulek, na které tenhle sensor odkazuje
+        super.delete(integer);
+    }
 }

@@ -2,6 +2,7 @@ dependencies:
   '@polymer/iron-icon': 3.0.1
   '@polymer/iron-list': 3.1.0
   '@polymer/polymer': 3.2.0
+  '@vaadin-component-factory/vcf-toggle-button': 1.0.3
   '@vaadin/flow-frontend': 'link:target/flow-frontend'
   '@vaadin/form': 'link:target/flow-frontend/form'
   '@vaadin/router': 1.7.4
@@ -187,6 +188,16 @@ packages:
     dev: true
     resolution:
       integrity: sha512-gHUHI6pJaANIO2r6WcbT7+WMgbL9GZooR4tWpuBOETpDIqFNxwaJluE+6rj6VGYe8k6OkfhbHz2Fkm8kl06Igw==
+  /@vaadin-component-factory/vcf-toggle-button/1.0.3:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-checkbox': 2.5.0
+      '@vaadin/vaadin-element-mixin': 2.4.2
+      '@vaadin/vaadin-lumo-styles': 1.6.1
+      '@vaadin/vaadin-themable-mixin': 1.6.2
+    dev: false
+    resolution:
+      integrity: sha512-fl3QY4odMLv9Uq5TeWXke25XVPcnFP4m2BjOmlAfbP2gIp8I1xXX/Fru3+8NZlZz/pcY+s/v6fuShkkhHoDkmQ==
   /@vaadin/router/1.7.4:
     dependencies:
       '@vaadin/vaadin-usage-statistics': 2.1.0
@@ -2922,7 +2933,7 @@ packages:
       integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==
   /faye-websocket/0.10.0:
     dependencies:
-      websocket-driver: 0.6.5
+      websocket-driver: 0.7.4
     dev: true
     engines:
       node: '>=0.4.0'
@@ -6333,6 +6344,7 @@ specifiers:
   '@polymer/iron-list': 3.1.0
   '@polymer/polymer': 3.2.0
   '@types/validator': 13.1.0
+  '@vaadin-component-factory/vcf-toggle-button': 1.0.3
   '@vaadin/flow-frontend': ./target/flow-frontend
   '@vaadin/form': ./target/flow-frontend/form
   '@vaadin/router': 1.7.4

@@ -11,11 +11,13 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.router.PageTitle;
@@ -32,6 +34,7 @@ import java.math.BigDecimal;
  */
 @Tag("electric-sensor-view")
 @JsModule("./views/sensors/electric-sensor-view.ts")
+@CssImport("./views/sensors/electric-sensor-view.css")
 @ParentLayout(MainView.class)
 @PageTitle("Electric sensor detail")
 public class ElectricSensorView extends LitTemplate {
@@ -66,6 +69,8 @@ public class ElectricSensorView extends LitTemplate {
     private Div implPerKwSuffix;
     @Id("highRateCheckbox")
     private Checkbox highRateCheckbox;
+    @Id("vaadinHorizontalLayout")
+    private HorizontalLayout vaadinHorizontalLayout;
 
     private final SensorService sensorService;
     private final SensorElectricService sensorElectricService;

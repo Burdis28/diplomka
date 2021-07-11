@@ -18,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -66,6 +68,24 @@ public class AuthService {
             routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
             routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
             routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+        }
+        return routes;
+    }
+
+    public Map<String, AuthorizedRoute> getAuthorizedRoutesMap(boolean admin) {
+        Map<String, AuthorizedRoute> routes = new HashMap<>();
+
+        if (admin) {
+            routes.put("sensors", new AuthorizedRoute("sensors", "Sensors", SensorsView.class, VaadinIcon.LIST));
+            routes.put("sensorcreate", new AuthorizedRoute("sensorcreate", "Sensor Create", CreatesensorView.class, VaadinIcon.FORM));
+            routes.put("dashboard", new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
+            routes.put("logs", new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
+            routes.put("user", new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
+            routes.put("logout", new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+        } else {
+            routes.put("dashboard", new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
+            routes.put("put", new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
+            routes.put("logout", new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
         }
         return routes;
     }

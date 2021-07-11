@@ -1,0 +1,18 @@
+electric-sensor-view {
+    background-color: var(--lumo-contrast-10pct);
+    box-sizing: border-box;
+    display: block;
+    font-size: var(--lumo-font-size-m);
+    height: 100%;
+    overflow: auto;
+    padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+}
+
+electric-sensor-view #wrapperDiv{
+    display: block;
+    background-color: var(--lumo-base-color);
+    margin: var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-m);
+    box-shadow: var(--lumo-box-shadow-l);
+    padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+    width: 1024px;
+}

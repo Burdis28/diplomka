@@ -1,9 +1,23 @@
 createsensor-view {
+  background-color: var(--lumo-contrast-10pct);
+  box-sizing: border-box;
   display: block;
-  margin: 0 auto;
-  max-width: 1024px;
-  padding: 0 var(--lumo-space-l);
+  font-size: var(--lumo-font-size-m);
+  height: 100%;
+  overflow: auto;
+  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
 }
+
+createsensor-view div{
+  background-color: var(--lumo-base-color);
+  display: block;
+  margin: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+  box-shadow: var(--lumo-box-shadow-l);
+  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+  max-width: 1024px;
+  max-height: min-content;
+}
+
 createsensor-view .button-layout {
   margin-bottom: var(--lumo-space-l);
   margin-top: var(--lumo-space-m);

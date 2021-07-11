@@ -19,10 +19,8 @@ import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.router.ParentLayout;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
 import com.example.application.views.main.MainView;
-import com.vaadin.flow.router.RouteAlias;
 
 @JsModule("./views/dashboard/dashboard-view.ts")
 @CssImport("./views/dashboard/dashboard-view.css")

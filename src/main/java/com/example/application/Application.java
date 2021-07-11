@@ -1,6 +1,9 @@
 package com.example.application;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.BodySize;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
 
 import org.springframework.boot.SpringApplication;
@@ -23,6 +26,7 @@ public class Application extends SpringBootServletInitializer implements AppShel
 
     public static void main(String[] args) {
         LaunchUtil.launchBrowserInDevelopmentMode(SpringApplication.run(Application.class, args));
+        //UI.getCurrent().getElement().getThemeList().add("dark");
     }
 
 }

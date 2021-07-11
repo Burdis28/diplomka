@@ -22,3 +22,11 @@ sensors-view .name {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+sensors-view vaadin-grid-pro.v-grid-select-all-checkbox {
+  display: none;
+}
+sensors-view vaadin-grid-pro span {
+  align-items: center;
+  text-align: center;
+  width: var(--lumo-size-m);
+}
