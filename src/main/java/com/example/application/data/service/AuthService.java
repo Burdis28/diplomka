@@ -9,6 +9,7 @@ import com.example.application.views.logs.LogsView;
 import com.example.application.views.main.MainView;
 import com.example.application.views.sensors.ElectricSensorView;
 import com.example.application.views.sensors.SensorsView;
+import com.example.application.views.sensors.WaterSensorView;
 import com.example.application.views.user.UserView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -50,7 +51,7 @@ public class AuthService {
                     RouteConfiguration.forSessionScope().setRoute(route.route, route.view, MainView.class);
                 });
         RouteConfiguration.forSessionScope().setRoute("sensor-el-detail", ElectricSensorView.class, MainView.class);
-        //RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainView.class);
 
     }
 

@@ -1,6 +1,5 @@
 package com.example.application.views.sensors;
 
-import java.awt.*;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -9,10 +8,8 @@ import java.util.List;
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
 import com.example.application.data.service.SensorRepository;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 
-import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Hr;
@@ -22,7 +19,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.theme.lumo.Lumo;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.Tag;
@@ -40,7 +36,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.example.application.views.main.MainView;
@@ -179,8 +174,8 @@ public class SensorsView extends LitTemplate {
     }
 
     private void createLimitMonthColumn() {
-        limitMonth = grid.addColumn(Sensor::getLimit_day, "limit_month").setHeader("Monthly limit")
-                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_day).setFlexGrow(0);;
+        limitMonth = grid.addColumn(Sensor::getLimit_month, "limit_month").setHeader("Monthly limit")
+                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_month).setFlexGrow(0);;
     }
 
     private void createTypeColumn() {
