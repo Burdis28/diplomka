@@ -1,19 +1,21 @@
 package com.example.application.views.main;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.example.application.data.entity.User;
 import com.example.application.data.service.AuthService;
+import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.avatar.Avatar;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.Icon;
@@ -21,26 +23,15 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
-import com.example.application.views.main.MainView;
-import com.example.application.views.dashboard.DashboardView;
-import com.example.application.views.logs.LogsView;
-import com.example.application.views.sensors.SensorsView;
-import com.example.application.views.createsensor.CreatesensorView;
-import com.example.application.views.hardwares.HardwaresView;
-import com.example.application.views.createhardware.CreatehardwareView;
-import com.example.application.views.adminpanel.AdminpanelView;
 import com.vaadin.flow.theme.lumo.Lumo;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -81,29 +72,31 @@ public class MainView extends AppLayout {
     private Component getThemeSwitchButton() {
         ThemeList themeList = UI.getCurrent().getElement().getThemeList();
         System.out.println(themeList);
-        Button btn = new Button("");
-        if(themeList.contains(Lumo.DARK)) {
-            btn.setIcon(VaadinIcon.MOON_O.create());
-        } else {
-            btn.setIcon(VaadinIcon.MOON.create());
-        }
-
-        btn.addClickListener(click -> {
+        Div div = new Div();
+        div.setId("themeSwitcher");
+        HorizontalLayout layout = new HorizontalLayout();
+        //layout.setId("themeSwitcher");
+        Component icon = new Icon(VaadinIcon.MOON);
+        ToggleButton btn = new ToggleButton();
+        btn.addValueChangeListener(click -> {
             if (themeList.contains(Lumo.DARK)) {
                 System.out.println("je tam dark");
                 UI.getCurrent().getPage().executeJavaScript("document.documentElement.setAttribute(\"theme\",\"light\")");
                 themeList.remove(Lumo.DARK);
                 themeList.add(Lumo.LIGHT);
-                btn.setIcon(VaadinIcon.MOON.create());
             } else {
                 System.out.println("je tam light");
                 UI.getCurrent().getPage().executeJavaScript("document.documentElement.setAttribute(\"theme\",\"dark\")");
                 themeList.remove(Lumo.LIGHT);
                 themeList.add(Lumo.DARK);
-                btn.setIcon(VaadinIcon.MOON_O.create());
             }
         });
-        return btn;
+        icon.setId("themeSwitcherIcon");
+        btn.setId("themeSwitcherButton");
+        layout.add(icon);
+        layout.add(btn);
+        div.add(layout);
+        return div;
     }
 
     private Component createUserAvatar() {
@@ -136,8 +129,20 @@ public class MainView extends AppLayout {
         tabs.addThemeVariants(TabsVariant.LUMO_CENTERED);
         tabs.setId("tabs");
         tabs.add(createMenuItems());
+        //List<AuthService.AuthorizedRoute> routesList = new ArrayList<>(); // todo
+        //tabs.add(createDropDownMenu(routesList));
         return tabs;
     }
+
+    private Component createDropDownMenu(List<AuthService.AuthorizedRoute> routesList) {
+        User user = VaadinSession.getCurrent().getAttribute(User.class);
+        Component[] tabs = authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
+                createTab(route.name(), route.view(), route.icon())).toArray(Component[]::new);
+        Select<Tab> select = new Select<>();
+        select.add(tabs);
+        select.addComponentAsFirst(new Text("Management"));
+        return select;
+    };
 
     private Component[] createMenuItems() {
         // Využiju Vaadin session, získám usera a podle jeho role vytvořím jednotlivé taby, které může navštívit

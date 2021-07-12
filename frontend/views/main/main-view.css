@@ -15,6 +15,23 @@ vaadin-app-layout[dir='rtl'] #header vaadin-avatar {
   margin-right: auto;
 }
 
+vaadin-app-layout #themeSwitcher {
+  margin-right: var(--lumo-space-l);
+  padding: var(--lumo-space-xs) var(--lumo-space-m) var(--lumo-space-xs) var(--lumo-space-m);
+  background-color: var(--lumo-contrast-5pct);
+  border-radius: 5px;
+  align-items: center;
+  align-content: center;
+}
+
+vaadin-app-layout #themeSwitcherIcon {
+  margin-top: 3px;
+}
+
+vaadin-app-layout #themeSwitcherButton {
+  margin-bottom: 2px;
+}
+
 #header h1 {
   font-size: var(--lumo-font-size-l);
   margin: 0;
