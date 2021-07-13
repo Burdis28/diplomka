@@ -13,13 +13,16 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -41,7 +44,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @JsModule("./js/theme-selector.js")
 public class MainView extends AppLayout {
 
-    private final Tabs menu;
+    private final VerticalMenu verticalMenu;
     private H1 viewTitle;
 
     private final AuthService authService;
@@ -50,14 +53,14 @@ public class MainView extends AppLayout {
         this.authService = authService;
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
-        menu = createMenu();
-        addToDrawer(createDrawerContent(menu));
+        verticalMenu = new VerticalMenu(this.authService);
+        verticalMenu.setId("verticalMenu");
+        addToDrawer(createDrawerContent(verticalMenu));
     }
 
     private Component createHeaderContent() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setId("header");
-        //layout.getThemeList().set("dark", true);
         layout.setWidthFull();
         layout.setSpacing(false);
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -107,7 +110,7 @@ public class MainView extends AppLayout {
         return avatar;
     }
 
-    private Component createDrawerContent(Tabs menu) {
+    private Component createDrawerContent(VerticalMenu menu) {
         VerticalLayout layout = new VerticalLayout();
         layout.setSizeFull();
         layout.setPadding(false);
@@ -119,58 +122,15 @@ public class MainView extends AppLayout {
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         logoLayout.add(new Image("images/logo.png", "Diplomka logo"));
         logoLayout.add(new H1("Diplomka"));
-        layout.add(logoLayout, menu);
+        layout.add(logoLayout);
+        layout.add(menu);
         return layout;
-    }
-
-    private Tabs createMenu() {
-        final Tabs tabs = new Tabs();
-        tabs.setOrientation(Tabs.Orientation.VERTICAL);
-        tabs.addThemeVariants(TabsVariant.LUMO_CENTERED);
-        tabs.setId("tabs");
-        tabs.add(createMenuItems());
-        //List<AuthService.AuthorizedRoute> routesList = new ArrayList<>(); // todo
-        //tabs.add(createDropDownMenu(routesList));
-        return tabs;
-    }
-
-    private Component createDropDownMenu(List<AuthService.AuthorizedRoute> routesList) {
-        User user = VaadinSession.getCurrent().getAttribute(User.class);
-        Component[] tabs = authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
-                createTab(route.name(), route.view(), route.icon())).toArray(Component[]::new);
-        Select<Tab> select = new Select<>();
-        select.add(tabs);
-        select.addComponentAsFirst(new Text("Management"));
-        return select;
-    };
-
-    private Component[] createMenuItems() {
-        // Využiju Vaadin session, získám usera a podle jeho role vytvořím jednotlivé taby, které může navštívit
-        User user = VaadinSession.getCurrent().getAttribute(User.class);
-        return authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
-                createTab(route.name(), route.view(), route.icon())).toArray(Component[]::new);
-    }
-
-    private static Tab createTab(String text, Class<? extends Component> navigationTarget, VaadinIcon icon) {
-        final Tab tab = new Tab();
-        tab.add(new RouterLink(text, navigationTarget));
-        Icon iconObj = new Icon(icon);
-        iconObj.setSize("25px");
-        tab.addComponentAtIndex(0, iconObj);
-        ComponentUtil.setData(tab, Class.class, navigationTarget);
-        return tab;
     }
 
     @Override
     protected void afterNavigation() {
         super.afterNavigation();
-        getTabForComponent(getContent()).ifPresent(menu::setSelectedTab);
         viewTitle.setText(getCurrentPageTitle());
-    }
-
-    private Optional<Tab> getTabForComponent(Component component) {
-        return menu.getChildren().filter(tab -> ComponentUtil.getData(tab, Class.class).equals(component.getClass()))
-                .findFirst().map(Tab.class::cast);
     }
 
     private String getCurrentPageTitle() {

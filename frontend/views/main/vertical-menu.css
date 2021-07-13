@@ -1,0 +1,8 @@
+:host([theme~="menu-vertical"]) [part="container"]  {
+    flex-direction: column;
+}
+
+.iconLeft {
+    align-content: flex-start;
+    align-items: flex-start;
+}

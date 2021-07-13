@@ -23,6 +23,7 @@ water-sensor-view #verticalLayoutElectric {
     margin-right: var(--lumo-space-l);
     padding-right: var(--lumo-space-l);
     padding-left: var(--lumo-space-l);
+    padding-bottom: var(--lumo-space-l);
 }
 
 water-sensor-view #sensorInfoLayout {

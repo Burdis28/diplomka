@@ -2,12 +2,14 @@ package com.example.application.data.service;
 
 import com.example.application.data.entity.User;
 import com.example.application.data.exceptions.AuthException;
+import com.example.application.utils.RouteNames;
 import com.example.application.views.createsensor.CreatesensorView;
 import com.example.application.views.dashboard.DashboardView;
 import com.example.application.views.login.LogoutView;
 import com.example.application.views.logs.LogsView;
 import com.example.application.views.main.MainView;
 import com.example.application.views.sensors.ElectricSensorView;
+import com.example.application.views.sensors.GasSensorView;
 import com.example.application.views.sensors.SensorsView;
 import com.example.application.views.sensors.WaterSensorView;
 import com.example.application.views.user.UserView;
@@ -52,6 +54,8 @@ public class AuthService {
                 });
         RouteConfiguration.forSessionScope().setRoute("sensor-el-detail", ElectricSensorView.class, MainView.class);
         RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-gas-detail", GasSensorView.class, MainView.class);
+
 
     }
 
@@ -59,16 +63,16 @@ public class AuthService {
         List<AuthorizedRoute> routes = new ArrayList<>();
 
         if (admin) {
-            routes.add(new AuthorizedRoute("sensors", "Sensors", SensorsView.class, VaadinIcon.LIST));
-            routes.add(new AuthorizedRoute("sensorcreate", "Sensor Create", CreatesensorView.class, VaadinIcon.FORM));
-            routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
-            routes.add(new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
-            routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
-            routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+            routes.add(new AuthorizedRoute("sensors", RouteNames.SENSORS.getName(), SensorsView.class, VaadinIcon.LIST));
+            routes.add(new AuthorizedRoute("sensorcreate", RouteNames.SENSOR_CREATE.getName(), CreatesensorView.class, VaadinIcon.FORM));
+            routes.add(new AuthorizedRoute("dashboard", RouteNames.DASHBOARD.getName(), DashboardView.class, VaadinIcon.BAR_CHART_H));
+            routes.add(new AuthorizedRoute("logs", RouteNames.LOGS.getName(), LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
+            routes.add(new AuthorizedRoute("user", RouteNames.USER.getName(), UserView.class, VaadinIcon.USER));
+            routes.add(new AuthorizedRoute("logout", RouteNames.LOGOUT.getName(), LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
         } else {
-            routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
-            routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
-            routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+            routes.add(new AuthorizedRoute("dashboard", RouteNames.DASHBOARD.getName(), DashboardView.class, VaadinIcon.BAR_CHART_H));
+            routes.add(new AuthorizedRoute("user", RouteNames.USER.getName(), UserView.class, VaadinIcon.USER));
+            routes.add(new AuthorizedRoute("logout", RouteNames.LOGOUT.getName(), LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
         }
         return routes;
     }
@@ -77,16 +81,16 @@ public class AuthService {
         Map<String, AuthorizedRoute> routes = new HashMap<>();
 
         if (admin) {
-            routes.put("sensors", new AuthorizedRoute("sensors", "Sensors", SensorsView.class, VaadinIcon.LIST));
-            routes.put("sensorcreate", new AuthorizedRoute("sensorcreate", "Sensor Create", CreatesensorView.class, VaadinIcon.FORM));
-            routes.put("dashboard", new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
-            routes.put("logs", new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
-            routes.put("user", new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
-            routes.put("logout", new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+            routes.put("sensors", new AuthorizedRoute("sensors", RouteNames.SENSORS.getName(), SensorsView.class, VaadinIcon.LIST));
+            routes.put("sensorcreate", new AuthorizedRoute("sensorcreate", RouteNames.SENSOR_CREATE.getName(), CreatesensorView.class, VaadinIcon.FORM));
+            routes.put("dashboard", new AuthorizedRoute("dashboard", RouteNames.DASHBOARD.getName(), DashboardView.class, VaadinIcon.BAR_CHART_H));
+            routes.put("logs", new AuthorizedRoute("logs", RouteNames.LOGS.getName(), LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
+            routes.put("user", new AuthorizedRoute("user", RouteNames.USER.getName(), UserView.class, VaadinIcon.USER));
+            routes.put("logout", new AuthorizedRoute("logout", RouteNames.LOGOUT.getName(), LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
         } else {
-            routes.put("dashboard", new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
-            routes.put("put", new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
-            routes.put("logout", new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+            routes.put("dashboard", new AuthorizedRoute("dashboard", RouteNames.DASHBOARD.getName(), DashboardView.class, VaadinIcon.BAR_CHART_H));
+            routes.put("put", new AuthorizedRoute("user", RouteNames.USER.getName(), UserView.class, VaadinIcon.USER));
+            routes.put("logout", new AuthorizedRoute("logout", RouteNames.LOGOUT.getName(), LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
         }
         return routes;
     }

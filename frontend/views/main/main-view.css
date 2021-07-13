@@ -65,3 +65,7 @@ vaadin-tab[selected] {
   background-color: var(--lumo-primary-color-10pct);
   color: var(--lumo-primary-text-color);
 }
+
+:host([theme~="menu-vertical"]) [part="container"]  {
+  flex-direction: column;
+}
