@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-//@Tag("sensorInfo")
 public class SensorInfoComponent extends VerticalLayout {
 
     private VerticalLayout layout;

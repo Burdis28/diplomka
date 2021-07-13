@@ -49,8 +49,6 @@ public class UserView extends LitTemplate {
     private Button saveButton;
     @Id("editButton")
     private Button editButton;
-    @Id("vaadinChart")
-    private Chart vaadinChart;
     @Id("formDiv")
     private Div formDiv;
 

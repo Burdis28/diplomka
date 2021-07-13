@@ -153,7 +153,7 @@ public class MainView extends AppLayout {
         final Tab tab = new Tab();
         tab.add(new RouterLink(text, navigationTarget));
         Icon iconObj = new Icon(icon);
-        iconObj.setSize("25px");
+        iconObj.setSize("35px");
         tab.addComponentAtIndex(0, iconObj);
         ComponentUtil.setData(tab, Class.class, navigationTarget);
         return tab;

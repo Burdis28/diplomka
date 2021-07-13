@@ -1,0 +1,9 @@
+hardware-tile-styles {
+  display: block;
+}
+
+hardware-tile-styles #titleLayout {
+  background-color: var(--lumo-contrast-5pct);
+  height: 100%;
+  width: 500px;
+}
