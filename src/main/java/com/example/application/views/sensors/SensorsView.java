@@ -244,40 +244,16 @@ public class SensorsView extends LitTemplate {
     private void addFiltersToGrid() {
         HeaderRow filterRow = grid.appendHeaderRow();
 
-        TextField idFilter = new TextField();
-        idFilter.setPlaceholder("Filter");
-        idFilter.setClearButtonVisible(true);
-        idFilter.setWidth("100%");
-        idFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        idFilter.addValueChangeListener(event -> gridListDataView.addFilter(
-                client -> StringUtils.containsIgnoreCase(Integer.toString(client.getId()), idFilter.getValue())));
+        TextField idFilter = getIdFilter();
         filterRow.getCell(idColumn).setComponent(idFilter);
 
-        TextField nameFilter = new TextField();
-        nameFilter.setPlaceholder("Filter");
-        nameFilter.setClearButtonVisible(true);
-        nameFilter.setWidth("100%");
-        nameFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        nameFilter.addValueChangeListener(event -> gridListDataView
-                .addFilter(sensor -> StringUtils.containsIgnoreCase(sensor.getName(), nameFilter.getValue())));
+        TextField nameFilter = getNameFilter();
         filterRow.getCell(nameColumn).setComponent(nameFilter);
 
-        TextField dailyLimitFilter = new TextField();
-        dailyLimitFilter.setPlaceholder("Filter");
-        dailyLimitFilter.setClearButtonVisible(true);
-        dailyLimitFilter.setWidth("100%");
-        dailyLimitFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        dailyLimitFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
-                .containsIgnoreCase(Double.toString(sensor.getLimit_day()), dailyLimitFilter.getValue())));
+        TextField dailyLimitFilter = getDailyLimitFilter();
         filterRow.getCell(limitDay).setComponent(dailyLimitFilter);
 
-        TextField monthlyLimitFilter = new TextField();
-        monthlyLimitFilter.setPlaceholder("Filter");
-        monthlyLimitFilter.setClearButtonVisible(true);
-        monthlyLimitFilter.setWidth("100%");
-        monthlyLimitFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        monthlyLimitFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
-                .containsIgnoreCase(Double.toString(sensor.getLimit_month()), monthlyLimitFilter.getValue())));
+        TextField monthlyLimitFilter = getMonthlyLimitFilter();
         filterRow.getCell(limitMonth).setComponent(monthlyLimitFilter);
 
         ComboBox<String> typeFilter = new ComboBox<>();
@@ -314,6 +290,50 @@ public class SensorsView extends LitTemplate {
         correlationConsumptionFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
                 .containsIgnoreCase(Double.toString(sensor.getConsumptionCorrelation()), correlationConsumptionFilter.getValue())));
         filterRow.getCell(consumptionCorrelationColumn).setComponent(correlationConsumptionFilter);
+    }
+
+    private TextField getMonthlyLimitFilter() {
+        TextField monthlyLimitFilter = new TextField();
+        monthlyLimitFilter.setPlaceholder("Filter");
+        monthlyLimitFilter.setClearButtonVisible(true);
+        monthlyLimitFilter.setWidth("100%");
+        monthlyLimitFilter.setValueChangeMode(ValueChangeMode.EAGER);
+        monthlyLimitFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
+                .containsIgnoreCase(Double.toString(sensor.getLimit_month()), monthlyLimitFilter.getValue())));
+        return monthlyLimitFilter;
+    }
+
+    private TextField getDailyLimitFilter() {
+        TextField dailyLimitFilter = new TextField();
+        dailyLimitFilter.setPlaceholder("Filter");
+        dailyLimitFilter.setClearButtonVisible(true);
+        dailyLimitFilter.setWidth("100%");
+        dailyLimitFilter.setValueChangeMode(ValueChangeMode.EAGER);
+        dailyLimitFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
+                .containsIgnoreCase(Double.toString(sensor.getLimit_day()), dailyLimitFilter.getValue())));
+        return dailyLimitFilter;
+    }
+
+    private TextField getNameFilter() {
+        TextField nameFilter = new TextField();
+        nameFilter.setPlaceholder("Filter");
+        nameFilter.setClearButtonVisible(true);
+        nameFilter.setWidth("100%");
+        nameFilter.setValueChangeMode(ValueChangeMode.EAGER);
+        nameFilter.addValueChangeListener(event -> gridListDataView
+                .addFilter(sensor -> StringUtils.containsIgnoreCase(sensor.getName(), nameFilter.getValue())));
+        return nameFilter;
+    }
+
+    private TextField getIdFilter() {
+        TextField idFilter = new TextField();
+        idFilter.setPlaceholder("Filter");
+        idFilter.setClearButtonVisible(true);
+        idFilter.setWidth("100%");
+        idFilter.setValueChangeMode(ValueChangeMode.EAGER);
+        idFilter.addValueChangeListener(event -> gridListDataView.addFilter(
+                client -> StringUtils.containsIgnoreCase(Integer.toString(client.getId()), idFilter.getValue())));
+        return idFilter;
     }
 
     private boolean areTypesEqual(Sensor sensor, ComboBox<String> statusFilter) {

@@ -129,8 +129,6 @@ public class MainView extends AppLayout {
         tabs.addThemeVariants(TabsVariant.LUMO_CENTERED);
         tabs.setId("tabs");
         tabs.add(createMenuItems());
-        //List<AuthService.AuthorizedRoute> routesList = new ArrayList<>(); // todo
-        //tabs.add(createDropDownMenu(routesList));
         return tabs;
     }
 
