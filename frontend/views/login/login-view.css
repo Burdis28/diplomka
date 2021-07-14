@@ -3,10 +3,14 @@ login-view .vaadinVerticalLayout {
 }
 
 login-view vaadin-vertical-layout{
-    background-color: var(--lumo-contrast-10pct);
+    background-color: var(--lumo-contrast-15pct);
     box-shadow: var(--lumo-box-shadow-xl);
 }
 
 login-view h1{
     text-shadow: 2px 2px 4px #000000;
+}
+
+login-view h3{
+    margin-top: var(--lumo-box-shadow-xl);
 }

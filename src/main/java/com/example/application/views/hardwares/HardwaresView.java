@@ -17,9 +17,11 @@ import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @JsModule("./views/hardwares/hardwares-view.ts")
 @CssImport("./views/hardwares/hardwares-view.css")
@@ -50,6 +52,7 @@ public class HardwaresView extends LitTemplate {
 
         List<Hardware> hardwareList = hardwareRepository.findAll();
         List<HardwareLive> hardwareLiveList = hardwareLiveRepository.findAll();
+        List<String> attachedSensorsNames = new ArrayList<>();
 
         Map<String, HardwareLive> hardwareLiveMap = new HashMap<>();
         for (HardwareLive live : hardwareLiveList) {
@@ -57,7 +60,10 @@ public class HardwaresView extends LitTemplate {
         }
 
         for (Hardware hardware : hardwareList ) {
-            HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()));
+            attachedSensorsNames = sensorRepository.findSensorByIdHw(hardware.getSerial_HW()).stream().map(sensor ->
+                    "[" + sensor.getId() + "] " + sensor.getName()).collect(Collectors.toList());
+            HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensorsNames,
+                    userRepository.getHardwareOwner(hardware.getSerial_HW()).getFullName());
             tile.addClassName("tile");
             verticalBaseLayout.add(tile);
         }

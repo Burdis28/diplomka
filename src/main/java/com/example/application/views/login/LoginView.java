@@ -7,6 +7,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -45,6 +46,8 @@ public class LoginView extends LitTemplate {
     private Button loginButton;
     @Id("vaadinVerticalLayout")
     private Element vaadinVerticalLayout;
+    @Id("loginTitleH3")
+    private H3 loginTitleH3;
 
     /**
      * Creates a new LoginView.

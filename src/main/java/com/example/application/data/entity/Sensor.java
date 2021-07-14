@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 @Entity
 public class Sensor extends AbstractEntity {
 
+    private String idHw;
     private String name;
     private String type;
     private Timestamp createdDate;
@@ -17,6 +18,14 @@ public class Sensor extends AbstractEntity {
     private Double consumptionActual;
     private Double consumptionCorrelation;
     private String currencyString;
+
+    public String getIdHw() {
+        return idHw;
+    }
+
+    public void setIdHw(String idHw) {
+        this.idHw = idHw;
+    }
 
     public String getName() {
         return name;
