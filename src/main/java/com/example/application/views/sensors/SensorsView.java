@@ -45,7 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @CssImport("./views/sensors/sensors-view.css")
 @Tag("sensors-view")
 @ParentLayout(MainView.class)
-@PageTitle("Sensors")
+@PageTitle("Sensors management")
 public class SensorsView extends LitTemplate {
 
     @Id("grid")
@@ -156,7 +156,6 @@ public class SensorsView extends LitTemplate {
         createConsumptionActualColumn();
         createConsumptionCorrelationColumn();
         createToolsColumn();
-
     }
 
     private void createIdColumn() {
@@ -256,32 +255,20 @@ public class SensorsView extends LitTemplate {
         TextField monthlyLimitFilter = getMonthlyLimitFilter();
         filterRow.getCell(limitMonth).setComponent(monthlyLimitFilter);
 
-        ComboBox<String> typeFilter = new ComboBox<>();
-        typeFilter.setItems(Arrays.asList("Water", "Electric", "Gas"));
-        typeFilter.setPlaceholder("Filter");
-        typeFilter.setClearButtonVisible(true);
-        typeFilter.setWidth("100%");
-        typeFilter.addValueChangeListener(
-                event -> gridListDataView.addFilter(sensor -> areTypesEqual(sensor, typeFilter)));
+        ComboBox<String> typeFilter = getTypeFilter();
         filterRow.getCell(typeColumn).setComponent(typeFilter);
 
-        DatePicker dateFilter = new DatePicker();
-        dateFilter.setPlaceholder("Filter");
-        dateFilter.setClearButtonVisible(true);
-        dateFilter.setWidth("100%");
-        dateFilter.addValueChangeListener(
-                event -> gridListDataView.addFilter(sensor -> areDatesEqual(sensor, dateFilter)));
+        DatePicker dateFilter = getDateFilter();
         filterRow.getCell(dateColumn).setComponent(dateFilter);
 
-        TextField actualConsumptionFilter = new TextField();
-        actualConsumptionFilter.setPlaceholder("Filter");
-        actualConsumptionFilter.setClearButtonVisible(true);
-        actualConsumptionFilter.setWidth("100%");
-        actualConsumptionFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        actualConsumptionFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
-                .containsIgnoreCase(Double.toString(sensor.getConsumptionActual()), actualConsumptionFilter.getValue())));
+        TextField actualConsumptionFilter = getActualConsumptionFilter();
         filterRow.getCell(consumptionActualColumn).setComponent(actualConsumptionFilter);
 
+        TextField correlationConsumptionFilter = getCorrelationConsumptionFilter();
+        filterRow.getCell(consumptionCorrelationColumn).setComponent(correlationConsumptionFilter);
+    }
+
+    private TextField getCorrelationConsumptionFilter() {
         TextField correlationConsumptionFilter = new TextField();
         correlationConsumptionFilter.setPlaceholder("Filter");
         correlationConsumptionFilter.setClearButtonVisible(true);
@@ -289,7 +276,39 @@ public class SensorsView extends LitTemplate {
         correlationConsumptionFilter.setValueChangeMode(ValueChangeMode.EAGER);
         correlationConsumptionFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
                 .containsIgnoreCase(Double.toString(sensor.getConsumptionCorrelation()), correlationConsumptionFilter.getValue())));
-        filterRow.getCell(consumptionCorrelationColumn).setComponent(correlationConsumptionFilter);
+        return correlationConsumptionFilter;
+    }
+
+    private TextField getActualConsumptionFilter() {
+        TextField actualConsumptionFilter = new TextField();
+        actualConsumptionFilter.setPlaceholder("Filter");
+        actualConsumptionFilter.setClearButtonVisible(true);
+        actualConsumptionFilter.setWidth("100%");
+        actualConsumptionFilter.setValueChangeMode(ValueChangeMode.EAGER);
+        actualConsumptionFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
+                .containsIgnoreCase(Double.toString(sensor.getConsumptionActual()), actualConsumptionFilter.getValue())));
+        return actualConsumptionFilter;
+    }
+
+    private DatePicker getDateFilter() {
+        DatePicker dateFilter = new DatePicker();
+        dateFilter.setPlaceholder("Filter");
+        dateFilter.setClearButtonVisible(true);
+        dateFilter.setWidth("100%");
+        dateFilter.addValueChangeListener(
+                event -> gridListDataView.addFilter(sensor -> areDatesEqual(sensor, dateFilter)));
+        return dateFilter;
+    }
+
+    private ComboBox<String> getTypeFilter() {
+        ComboBox<String> typeFilter = new ComboBox<>();
+        typeFilter.setItems(Arrays.asList("Water", "Electric", "Gas"));
+        typeFilter.setPlaceholder("Filter");
+        typeFilter.setClearButtonVisible(true);
+        typeFilter.setWidth("100%");
+        typeFilter.addValueChangeListener(
+                event -> gridListDataView.addFilter(sensor -> areTypesEqual(sensor, typeFilter)));
+        return typeFilter;
     }
 
     private TextField getMonthlyLimitFilter() {

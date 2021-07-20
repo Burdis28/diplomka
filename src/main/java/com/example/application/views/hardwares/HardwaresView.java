@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @CssImport("./views/hardwares/hardwares-view.css")
 @Tag("hardwares-view")
 @ParentLayout(MainView.class)
-@PageTitle("Hardwares")
+@PageTitle("Hardware management")
 public class HardwaresView extends LitTemplate {
 
     private HardwareRepository hardwareRepository;

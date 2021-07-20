@@ -12,6 +12,7 @@ import com.example.application.views.sensors.ElectricSensorView;
 import com.example.application.views.sensors.GasSensorView;
 import com.example.application.views.sensors.SensorsView;
 import com.example.application.views.sensors.WaterSensorView;
+import com.example.application.views.user.UserManagementView;
 import com.example.application.views.user.UserView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -39,7 +40,9 @@ public class AuthService {
 
         if (user != null && user.checkPassword(password)) {
             VaadinSession.getCurrent().setAttribute(User.class, user);
-            createRoutes(user.getAdmin());
+            if(RouteConfiguration.forSessionScope().getAvailableRoutes().size() < 3) {
+                createRoutes(user.getAdmin());
+            }
         } else {
             throw new AuthException();
         }
@@ -64,11 +67,12 @@ public class AuthService {
 
         if (admin) {
             routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
-            routes.add(new AuthorizedRoute("sensors", "Sensors", SensorsView.class, VaadinIcon.LIST));
-            routes.add(new AuthorizedRoute("sensorcreate", "Sensor Create", CreatesensorView.class, VaadinIcon.FORM));
-            routes.add(new AuthorizedRoute("hardwares", "Hardwares", HardwaresView.class, VaadinIcon.SERVER));
+            routes.add(new AuthorizedRoute("sensors", "Sensors management", SensorsView.class, VaadinIcon.LIST));
+            routes.add(new AuthorizedRoute("sensorcreate", "Create sensor", CreatesensorView.class, VaadinIcon.FORM));
+            routes.add(new AuthorizedRoute("hardwares", "Hardware management", HardwaresView.class, VaadinIcon.SERVER));
             routes.add(new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
             routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
+            routes.add(new AuthorizedRoute("user-management", "Users management", UserManagementView.class, VaadinIcon.USERS));
             routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
         } else {
             routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));

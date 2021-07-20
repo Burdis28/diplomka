@@ -1,0 +1,17 @@
+user-management-view {
+    background-color: var(--lumo-contrast-10pct);
+    display: block;
+    height: 100%;
+    overflow: auto;
+    padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+}
+
+user-management-view .overallDiv{
+    background-color: var(--lumo-base-color);
+    display: block;
+    margin: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s);
+    box-shadow: var(--lumo-box-shadow-l);
+    padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+    width: 1350px;
+    max-height: min-content;
+}
