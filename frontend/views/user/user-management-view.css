@@ -6,12 +6,12 @@ user-management-view {
     padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
 }
 
-user-management-view .overallDiv{
+user-management-view .overallDiv {
     background-color: var(--lumo-base-color);
     display: block;
     margin: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s);
     box-shadow: var(--lumo-box-shadow-l);
     padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
-    width: 1350px;
+    width: 1450px;
     max-height: min-content;
 }

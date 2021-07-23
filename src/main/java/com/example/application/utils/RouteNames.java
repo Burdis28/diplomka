@@ -2,7 +2,7 @@ package com.example.application.utils;
 
 public enum RouteNames {
     SENSORS ("sensors"),
-    SENSOR_CREATE("sensorcreate"),
+    CREATE_SENSOR("createsensor"),
     DASHBOARD ("dashboard"),
     LOGS ("logs"),
     USER ("user"),

@@ -2,10 +2,7 @@ package com.example.application.views.hardwares;
 
 import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.HardwareLive;
-import com.example.application.data.service.HardwareLiveRepository;
-import com.example.application.data.service.HardwareRepository;
-import com.example.application.data.service.SensorRepository;
-import com.example.application.data.service.UserRepository;
+import com.example.application.data.service.*;
 import com.example.application.views.hardwares.components.HardwareTile;
 import com.example.application.views.main.MainView;
 import com.vaadin.flow.component.Tag;
@@ -16,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,22 +31,22 @@ public class HardwaresView extends LitTemplate {
     private HardwareRepository hardwareRepository;
     private HardwareLiveRepository hardwareLiveRepository;
     private SensorRepository sensorRepository;
-    private UserRepository userRepository;
+    private UserService userService;
     @Id("verticalBaseLayout")
     private VerticalLayout verticalBaseLayout;
 
-    public HardwaresView(HardwareRepository hardwareRepository, HardwareLiveRepository hardwareLiveRepository,
-                         SensorRepository sensorRepository, UserRepository userRepository) {
+    public HardwaresView(@Autowired HardwareRepository hardwareRepository,@Autowired HardwareLiveRepository hardwareLiveRepository,
+                         @Autowired SensorRepository sensorRepository,@Autowired UserService userService) {
         this.hardwareRepository = hardwareRepository;
         this.hardwareLiveRepository = hardwareLiveRepository;
         this.sensorRepository = sensorRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
 
-        createTiles(hardwareRepository, hardwareLiveRepository, sensorRepository, userRepository);
+        createTiles(hardwareRepository, hardwareLiveRepository, sensorRepository, userService);
     }
 
     private void createTiles(HardwareRepository hardwareRepository, HardwareLiveRepository hardwareLiveRepository,
-                             SensorRepository sensorRepository, UserRepository userRepository) {
+                             SensorRepository sensorRepository, UserService userService) {
 
         List<Hardware> hardwareList = hardwareRepository.findAll();
         List<HardwareLive> hardwareLiveList = hardwareLiveRepository.findAll();
@@ -62,8 +60,9 @@ public class HardwaresView extends LitTemplate {
         for (Hardware hardware : hardwareList ) {
             attachedSensorsNames = sensorRepository.findSensorByIdHw(hardware.getSerial_HW()).stream().map(sensor ->
                     "[" + sensor.getId() + "] " + sensor.getName()).collect(Collectors.toList());
+            //System.out.println(hardware.getSerial_HW());
             HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensorsNames,
-                    userRepository.getHardwareOwner(hardware.getSerial_HW()).getFullName());
+                    userService.getHardwareOwner(hardware.getSerial_HW()).getFullName());
             tile.addClassName("tile");
             verticalBaseLayout.add(tile);
         }

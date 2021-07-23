@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
+import com.example.application.data.entity.User;
 import com.example.application.data.service.SensorRepository;
 import com.vaadin.flow.component.UI;
 
@@ -64,10 +65,12 @@ public class SensorsView extends LitTemplate {
     private Grid.Column<Sensor> toolsColumn;
 
     private final SensorRepository sensorRepository;
+    private final User loggedUser;
 
     public SensorsView(@Autowired SensorRepository sensorRepository) {
         this.sensorRepository = sensorRepository;
         grid.setSelectionMode(SelectionMode.NONE);
+        loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
         createGrid();
     }
 
@@ -88,10 +91,12 @@ public class SensorsView extends LitTemplate {
         });
 
         gridListDataView = grid.setItems(sensors);
-        GridContextMenu<Sensor> contextMenu = grid.addContextMenu();
-        createContextEditMenu(contextMenu);
-        contextMenu.add(new Hr());
-        createDeleteContextMenu(contextMenu);
+        if (loggedUser.getAdmin()) {
+            GridContextMenu<Sensor> contextMenu = grid.addContextMenu();
+            createContextEditMenu(contextMenu);
+            contextMenu.add(new Hr());
+            createDeleteContextMenu(contextMenu);
+        }
     }
 
     private void createDeleteContextMenu(GridContextMenu<Sensor> contextMenu) {
@@ -155,7 +160,9 @@ public class SensorsView extends LitTemplate {
         createDateColumn();
         createConsumptionActualColumn();
         createConsumptionCorrelationColumn();
-        createToolsColumn();
+        if (loggedUser.getAdmin()) {
+            createToolsColumn();
+        }
     }
 
     private void createIdColumn() {

@@ -4,6 +4,7 @@ import com.example.application.data.entity.User;
 import com.example.application.data.exceptions.AuthException;
 import com.example.application.views.createsensor.CreatesensorView;
 import com.example.application.views.dashboard.DashboardView;
+import com.example.application.views.hardwares.CreateHardwareView;
 import com.example.application.views.hardwares.HardwaresView;
 import com.example.application.views.login.LogoutView;
 import com.example.application.views.logs.LogsView;
@@ -68,16 +69,19 @@ public class AuthService {
         if (admin) {
             routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
             routes.add(new AuthorizedRoute("sensors", "Sensors management", SensorsView.class, VaadinIcon.LIST));
-            routes.add(new AuthorizedRoute("sensorcreate", "Create sensor", CreatesensorView.class, VaadinIcon.FORM));
+            routes.add(new AuthorizedRoute("create-sensor", "Create sensor", CreatesensorView.class, VaadinIcon.FORM));
             routes.add(new AuthorizedRoute("hardwares", "Hardware management", HardwaresView.class, VaadinIcon.SERVER));
+            routes.add(new AuthorizedRoute("create-hardware", "Create hardware", CreateHardwareView.class, VaadinIcon.FORM));
             routes.add(new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
             routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
             routes.add(new AuthorizedRoute("user-management", "Users management", UserManagementView.class, VaadinIcon.USERS));
-            routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+            routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.OUT));
         } else {
             routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
+            routes.add(new AuthorizedRoute("sensors", "Sensors management", SensorsView.class, VaadinIcon.LIST));
+            routes.add(new AuthorizedRoute("hardwares", "Hardware management", HardwaresView.class, VaadinIcon.SERVER));
             routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
-            routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+            routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.OUT));
         }
         return routes;
     }

@@ -1,26 +1,34 @@
 package com.example.application.views.user;
 
 import com.example.application.data.entity.User;
-import com.example.application.data.service.UserRepository;
+import com.example.application.data.service.UserService;
+import com.example.application.views.user.components.CreateUserForm;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.server.VaadinSession;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +47,7 @@ import java.util.Objects;
 public class UserManagementView extends LitTemplate {
 
     private GridListDataView<User> gridListDataView;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     private Grid.Column<User> idColumn;
     private Grid.Column<User> nameColumn;
@@ -47,7 +55,7 @@ public class UserManagementView extends LitTemplate {
     private Grid.Column<User> phoneColumn;
     private Grid.Column<User> emailColumn;
     private Grid.Column<User> activeColumn;
-
+    private Grid.Column<User> toolsColumn;
 
     @Id("gridLayout")
     private Element gridLayout;
@@ -58,13 +66,20 @@ public class UserManagementView extends LitTemplate {
     @Id("createUserBtn")
     private Button createUserBtn;
 
+    @Value("${adminLogin}")
+    private String adminLogin;
+
     /**
      * Creates a new UserManagementView.
      */
-    public UserManagementView(@Autowired UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserManagementView(@Autowired UserService userService) {
+        this.userService = userService;
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         createGrid();
+
+        createUserBtn.addClickListener(event -> {
+            createUser();
+        });
     }
 
     private void createGrid() {
@@ -75,7 +90,6 @@ public class UserManagementView extends LitTemplate {
 
     private void createGridComponent() {
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
-        //grid.setHeight("100%");
 
         List<User> sensors = getUsers();
         grid.addItemClickListener(event -> {
@@ -83,12 +97,10 @@ public class UserManagementView extends LitTemplate {
         });
 
         gridListDataView = grid.setItems(sensors);
-        GridContextMenu<User> contextMenu = grid.addContextMenu();
-
     }
 
     private List<User> getUsers() {
-        return userRepository.findAll();
+        return userService.findAll();
     }
 
     private void addColumnsToGrid() {
@@ -98,27 +110,27 @@ public class UserManagementView extends LitTemplate {
         createPhoneColumn();
         createEmailColumn();
         createActiveColumn();
+        createToolsColumn();
     }
 
     private void createIdColumn() {
         idColumn = grid.addColumn(User::getId, "id").setHeader("ID").setWidth("100px").setFlexGrow(0);
     }
 
-
     private void createNameColumn() {
         nameColumn = grid.addColumn(User::getFullName, "name").setHeader("Full name")
-                .setComparator(User::getFullName).setWidth("300px").setFlexGrow(0);
+                .setComparator(User::getFullName).setWidth("280px").setFlexGrow(0);
     }
-
 
     private void createAdminColumn() {
         adminColumn = grid.addComponentColumn(user -> {
             Span span = new Span();
             span.setText(user.getAdmin() ? "Admin" : "User");
             span.getElement().setAttribute("theme", user.getAdmin() ? "badge primary" : "badge success primary");
-            span.setWidth("115px");
+            span.setWidth("80px");
             return span;
-        }).setHeader("Type").setWidth("150px").setFlexGrow(0);;
+        }).setHeader("Type").setWidth("130px").setFlexGrow(0);
+        ;
     }
 
     private void createPhoneColumn() {
@@ -128,7 +140,7 @@ public class UserManagementView extends LitTemplate {
 
     private void createEmailColumn() {
         emailColumn = grid.addColumn(User::getEmail, "email").setHeader("Email")
-                .setComparator(User::getEmail).setWidth("300px").setFlexGrow(0);
+                .setComparator(User::getEmail).setWidth("280px").setFlexGrow(0);
     }
 
     private void createActiveColumn() {
@@ -136,9 +148,134 @@ public class UserManagementView extends LitTemplate {
             Span span = new Span();
             span.setText(user.getActive() ? "Active" : "Inactive");
             span.getElement().setAttribute("theme", user.getActive() ? "badge success secondary" : "badge error secondary");
-            span.setWidth("115px");
+            span.setWidth("80px");
             return span;
-        }).setHeader("Active").setWidth("150px").setFlexGrow(0);;
+        }).setHeader("Active").setWidth("130px").setFlexGrow(0);
+        ;
+    }
+
+    private void createToolsColumn() {
+        toolsColumn = grid.addComponentColumn(user -> {
+            Icon permissionsBtn;
+            if (!user.getAdmin()) {
+                permissionsBtn = VaadinIcon.ANGLE_DOUBLE_UP.create();
+                permissionsBtn.getElement().setAttribute("theme", "badge primary");
+                permissionsBtn.addClickListener(event -> {
+                    createConfirmationPromoteDialog(user);
+                });
+            } else {
+                permissionsBtn = VaadinIcon.ANGLE_DOUBLE_DOWN.create();
+                permissionsBtn.getElement().setAttribute("theme", "badge secondary");
+                permissionsBtn.addClickListener(event -> {
+                    createConfirmationDemoteDialog(user);
+                });
+            }
+
+            Icon deleteBtn = VaadinIcon.CLOSE_SMALL.create();
+            deleteBtn.getElement().setAttribute("theme", "badge error primary");
+            deleteBtn.addClickListener(event -> {
+                if (userService.userOwnsAnyHW(user.getId())) {
+                    openModalWindow("User can't be deleted, because he owns a hardware. " +
+                            "You need to change the ownership and then you'll be able to delete this user.");
+                } else {
+                    createConfirmationDeleteDialog(user);
+                }
+            });
+
+            return new HorizontalLayout() {
+                {
+                    addComponentAsFirst(permissionsBtn);
+                    setSpacing(true);
+                    addComponentAtIndex(1, deleteBtn);
+                }
+            };
+        }).setHeader("Promote / delete").setWidth("100px");
+    }
+
+    private void createConfirmationPromoteDialog(User user) {
+        ConfirmDialog confirmDialog = new ConfirmDialog();
+        confirmDialog.setText("Are you sure you want to PROMOTE user [" + user.getFullName() + "] to admin?");
+        confirmDialog.setCancelText("Cancel");
+        confirmDialog.setCancelButtonTheme("secondary error");
+        confirmDialog.setCancelable(true);
+        confirmDialog.setConfirmText("Promote to admin");
+        confirmDialog.addConfirmListener(event -> {
+            user.setAdmin(true);
+            userService.update(user);
+            gridListDataView.refreshAll();
+        });
+        confirmDialog.open();
+    }
+
+    private void createConfirmationDemoteDialog(User user) {
+        ConfirmDialog confirmDialog = new ConfirmDialog();
+        confirmDialog.setText("Are you sure you want to DEMOTE user [" + user.getFullName() + "] to user?");
+        confirmDialog.setCancelText("Cancel");
+        confirmDialog.setCancelButtonTheme("secondary error");
+        confirmDialog.setCancelable(true);
+        confirmDialog.setConfirmText("Demote to user");
+        confirmDialog.addConfirmListener(event -> {
+            user.setAdmin(false);
+            userService.update(user);
+            gridListDataView.refreshAll();
+        });
+        confirmDialog.open();
+    }
+
+    private void createConfirmationDeleteDialog(User user) {
+        ConfirmDialog confirmDialog = new ConfirmDialog();
+        confirmDialog.setText("Are you sure you want to DELETE user [" + user.getFullName() + "]?");
+        confirmDialog.setCancelText("Cancel");
+        confirmDialog.setCancelButtonTheme("primary");
+        confirmDialog.setCancelable(true);
+        confirmDialog.setConfirmText("Delete");
+        confirmDialog.setConfirmButtonTheme("primary error");
+        confirmDialog.addConfirmListener(event -> {
+            User loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
+            if (!loggedUser.getLogin().equals(adminLogin) && user.getAdmin()) {
+                openModalWindow("You're not allowed to delete another admin account.");
+            } else {
+                userService.delete(user.getId());
+                gridListDataView.removeItem(user);
+                gridListDataView.refreshAll();
+            }
+        });
+        confirmDialog.open();
+    }
+
+    private void createUser() {
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setCancelable(true);
+        dialog.setCancelText("Cancel");
+        dialog.setCancelButtonTheme("primary error");
+        CreateUserForm createUserForm = new CreateUserForm();
+        dialog.add(createUserForm);
+        Button btn = new Button();
+        btn.setThemeName("primary");
+        btn.setText("Create user");
+        btn.addClickListener(event -> {
+            if (createUserForm.areFieldsValid() && createUserForm.arePasswordsValid()) {
+                userService.update(createUserForm.createUser());
+                Notification.show("New user created.");
+                dialog.close();
+            } else {
+                if (!createUserForm.arePasswordsValid()) {
+                    openModalWindow("New passwords do not match. Try again.");
+                }
+                if (!createUserForm.areFieldsValid()) {
+                    openModalWindow("You need to fill all required fields.");
+                }
+            }
+        });
+        dialog.setConfirmButton(btn);
+        dialog.open();
+    }
+
+    private void openModalWindow(String s) {
+        Dialog dialog1 = new Dialog();
+        dialog1.setModal(true);
+        dialog1.add(s);
+        dialog1.open();
     }
 
     private void addFiltersToGrid() {

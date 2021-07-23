@@ -1,13 +1,20 @@
 package com.example.application.data.entity;
 
-import com.example.application.data.AbstractEntity;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 @Entity
-public class User extends AbstractEntity {
+public class User {
 
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO, generator="native")
+    @GenericGenerator(name = "native", strategy = "native")
+    private Integer id;
     private String login, fullName, firstName, surname, phone, email, passwordHash, pushToken;
     private boolean isAdmin, isActive;
 
@@ -109,5 +116,9 @@ public class User extends AbstractEntity {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public Integer getId() {
+        return id;
     }
 }
