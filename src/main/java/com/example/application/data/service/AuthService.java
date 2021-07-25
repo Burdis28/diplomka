@@ -2,7 +2,7 @@ package com.example.application.data.service;
 
 import com.example.application.data.entity.User;
 import com.example.application.data.exceptions.AuthException;
-import com.example.application.views.createsensor.CreatesensorView;
+import com.example.application.views.sensors.CreatesensorView;
 import com.example.application.views.dashboard.DashboardView;
 import com.example.application.views.hardwares.CreateHardwareView;
 import com.example.application.views.hardwares.HardwaresView;
@@ -71,7 +71,7 @@ public class AuthService {
             routes.add(new AuthorizedRoute("sensors", "Sensors management", SensorsView.class, VaadinIcon.LIST));
             routes.add(new AuthorizedRoute("create-sensor", "Create sensor", CreatesensorView.class, VaadinIcon.FORM));
             routes.add(new AuthorizedRoute("hardwares", "Hardware management", HardwaresView.class, VaadinIcon.SERVER));
-            routes.add(new AuthorizedRoute("create-hardware", "Create hardware", CreateHardwareView.class, VaadinIcon.FORM));
+            routes.add(new AuthorizedRoute("create-hardware", "Create hardware", CreateHardwareView.class, VaadinIcon.HARDDRIVE_O));
             routes.add(new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
             routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
             routes.add(new AuthorizedRoute("user-management", "Users management", UserManagementView.class, VaadinIcon.USERS));
