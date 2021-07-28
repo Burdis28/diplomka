@@ -31,4 +31,12 @@ public class HardwareService extends CrudService<Hardware, Integer> {
     public List<String> listHardwareSerials() {
         return hardwareRepository.listHardwareSerials();
     }
+
+    public List<Hardware> findByOwner(Integer id) {
+        return this.hardwareRepository.findByOwner(id);
+    }
+
+    public List<Hardware> findAll() {
+        return this.hardwareRepository.findAll();
+    }
 }

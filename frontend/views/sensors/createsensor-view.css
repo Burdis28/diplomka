@@ -13,9 +13,13 @@ createsensor-view div{
   display: block;
   margin: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
   box-shadow: var(--lumo-box-shadow-l);
-  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-xl) var(--lumo-space-l);
   max-width: 1024px;
-  max-height: min-content;
+  height: max-content;
+}
+
+createsensor-view .validation-error-dialog-style {
+  color: red;
 }
 
 createsensor-view .button-layout {

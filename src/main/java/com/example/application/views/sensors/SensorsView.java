@@ -1,49 +1,44 @@
 package com.example.application.views.sensors;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
 import com.example.application.data.entity.User;
-import com.example.application.data.service.SensorRepository;
-import com.vaadin.flow.component.UI;
-
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.ParentLayout;
-import com.vaadin.flow.server.VaadinSession;
-import org.apache.commons.lang3.StringUtils;
-
+import com.example.application.data.service.SensorService;
+import com.example.application.views.main.MainView;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.gridpro.GridPro;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
-import com.example.application.views.main.MainView;
+import com.vaadin.flow.router.ParentLayout;
+import com.vaadin.flow.server.VaadinSession;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
+import java.util.List;
 
 @JsModule("./views/sensors/sensors-view.ts")
 @CssImport("./views/sensors/sensors-view.css")
+@CssImport(value = "./views/sensors/my-grid-styles.css", themeFor = "vaadin-grid-pro")
 @Tag("sensors-view")
 @ParentLayout(MainView.class)
 @PageTitle("Sensors management")
@@ -59,18 +54,20 @@ public class SensorsView extends LitTemplate {
     private Grid.Column<Sensor> limitDay;
     private Grid.Column<Sensor> limitMonth;
     private Grid.Column<Sensor> typeColumn;
-    private Grid.Column<Sensor> dateColumn;
     private Grid.Column<Sensor> consumptionActualColumn;
     private Grid.Column<Sensor> consumptionCorrelationColumn;
     private Grid.Column<Sensor> toolsColumn;
 
-    private final SensorRepository sensorRepository;
+    private final SensorService sensorService;
     private final User loggedUser;
 
-    public SensorsView(@Autowired SensorRepository sensorRepository) {
-        this.sensorRepository = sensorRepository;
+    public SensorsView(@Autowired SensorService sensorService) {
+        this.sensorService = sensorService;
         grid.setSelectionMode(SelectionMode.NONE);
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
+        grid.setClassName("my-grid");
+        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+        grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
         createGrid();
     }
 
@@ -91,12 +88,10 @@ public class SensorsView extends LitTemplate {
         });
 
         gridListDataView = grid.setItems(sensors);
-        if (loggedUser.getAdmin()) {
-            GridContextMenu<Sensor> contextMenu = grid.addContextMenu();
-            createContextEditMenu(contextMenu);
-            contextMenu.add(new Hr());
-            createDeleteContextMenu(contextMenu);
-        }
+        GridContextMenu<Sensor> contextMenu = grid.addContextMenu();
+        createContextMenu(contextMenu);
+        contextMenu.add(new Hr());
+        createDeleteContextMenu(contextMenu);
     }
 
     private void createDeleteContextMenu(GridContextMenu<Sensor> contextMenu) {
@@ -109,7 +104,6 @@ public class SensorsView extends LitTemplate {
     }
 
     private void createDeleteSensorDialog(Sensor sensor) {
-        Notification.show(sensor.getId().toString());
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setHeader("Confirm delete");
         dialog.setText("Are you sure you want to delete \"" + sensor.getName() + "\" sensor?");
@@ -118,24 +112,29 @@ public class SensorsView extends LitTemplate {
         dialog.setConfirmText("Delete");
         dialog.addCancelListener(event1 -> {});
         dialog.addConfirmListener(event1 -> {
-            sensorRepository.delete(sensor);
+            sensorService.delete(sensor.getId());
         });
         dialog.setConfirmButtonTheme("error primary");
         dialog.open();
         gridListDataView.refreshAll();
     }
 
-    private void createContextEditMenu(GridContextMenu<Sensor> contextMenu) {
+    private void createContextMenu(GridContextMenu<Sensor> contextMenu) {
         contextMenu.addItem("View & edit", event -> {
             Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
             if(sensor != null) {
                 navigateToSensorDetail(sensor);
             }
         });
+        contextMenu.addItem("Go to dashboard", event -> {
+            Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
+            if(sensor != null) {
+                navigateToSensorDashboard(sensor);
+            }
+        });
     }
 
     private void navigateToSensorDetail(Sensor sensor) {
-        Notification.show(sensor.getId().toString());
         VaadinSession.getCurrent().setAttribute("sensorId", sensor.getId());
         switch (sensor.getType()) {
             case "e":
@@ -151,18 +150,31 @@ public class SensorsView extends LitTemplate {
         }
     }
 
+    private void navigateToSensorDashboard(Sensor sensor) {
+        VaadinSession.getCurrent().setAttribute("sensorId", sensor.getId());
+        switch (sensor.getType()) {
+            case "e":
+                UI.getCurrent().navigate("sensor-el-dashboard");
+                return;
+            case "w":
+                UI.getCurrent().navigate("sensor-wat-dashboard");
+                return;
+            case "g":
+                UI.getCurrent().navigate("sensor-gas-dashboard");
+                return;
+            default:
+        }
+    }
+
     private void addColumnsToGrid() {
         createIdColumn();
         createNameColumn();
         createLimitDayColumn();
         createLimitMonthColumn();
         createTypeColumn();
-        createDateColumn();
         createConsumptionActualColumn();
         createConsumptionCorrelationColumn();
-        if (loggedUser.getAdmin()) {
-            createToolsColumn();
-        }
+        createToolsColumn();
     }
 
     private void createIdColumn() {
@@ -171,17 +183,17 @@ public class SensorsView extends LitTemplate {
 
     private void createNameColumn() {
         nameColumn = grid.addColumn(Sensor::getName, "name").setHeader("Name")
-                .setComparator(Sensor::getName).setWidth("200px").setFlexGrow(0);;
+                .setComparator(Sensor::getName).setWidth("350px").setFlexGrow(0);
     }
 
     private void createLimitDayColumn() {
         limitDay = grid.addColumn(Sensor::getLimit_day, "limit_day").setHeader("Daily limit")
-                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_day).setFlexGrow(0);;
+                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_day).setFlexGrow(0);
     }
 
     private void createLimitMonthColumn() {
         limitMonth = grid.addColumn(Sensor::getLimit_month, "limit_month").setHeader("Monthly limit")
-                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_month).setFlexGrow(0);;
+                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_month).setFlexGrow(0);
     }
 
     private void createTypeColumn() {
@@ -191,7 +203,7 @@ public class SensorsView extends LitTemplate {
             span.getElement().setAttribute("theme", getBadgeType(sensor));
             span.setWidth("115px");
             return span;
-        }).setHeader("Type").setWidth("150px").setComparator(Sensor::getType).setFlexGrow(0);;
+        }).setHeader("Type").setWidth("150px").setComparator(Sensor::getType).setFlexGrow(0);
     }
 
     private String getBadgeType(Sensor sensor) {
@@ -202,13 +214,6 @@ public class SensorsView extends LitTemplate {
             default -> "";
         };
     }
-
-    private void createDateColumn() {
-        dateColumn = grid
-                .addColumn(Sensor::getCreatedDate)
-                .setComparator(Sensor::getCreatedDate).setHeader("Created date").setWidth("200px").setFlexGrow(0);;
-    }
-
 
     private void createConsumptionActualColumn() {
         consumptionActualColumn = grid.addColumn(Sensor::getConsumptionActual).setComparator(Sensor::getConsumptionActual)
@@ -226,6 +231,9 @@ public class SensorsView extends LitTemplate {
             Icon toolboxIcon = new Icon(VaadinIcon.TOOLS);
             toolboxIcon.addClickListener(event -> navigateToSensorDetail(sensor));
             toolboxIcon.getElement().setAttribute("theme", "badge secondary");
+            Icon dasboardIcon = new Icon(VaadinIcon.DASHBOARD);
+            dasboardIcon.addClickListener(event -> navigateToSensorDashboard(sensor));
+            dasboardIcon.getElement().setAttribute("theme", "badge secondary");
             Icon trashCanIcon = new Icon(VaadinIcon.TRASH);
             trashCanIcon.addClickListener(event -> createDeleteSensorDialog(sensor));
             trashCanIcon.getElement().setAttribute("theme", "badge error secondary");
@@ -233,11 +241,12 @@ public class SensorsView extends LitTemplate {
             return new HorizontalLayout(){
                 {
                     addComponentAsFirst(toolboxIcon);
+                    addComponentAtIndex(1, dasboardIcon);
                     setSpacing(true);
-                    addComponentAtIndex(1, trashCanIcon);
+                    addComponentAtIndex(2, trashCanIcon);
                 }
             };
-        }).setHeader("Tools").setWidth("80px");
+        }).setHeader("Tools").setWidth("150px").setFlexGrow(0);
     }
 
     /*
@@ -264,9 +273,6 @@ public class SensorsView extends LitTemplate {
 
         ComboBox<String> typeFilter = getTypeFilter();
         filterRow.getCell(typeColumn).setComponent(typeFilter);
-
-        DatePicker dateFilter = getDateFilter();
-        filterRow.getCell(dateColumn).setComponent(dateFilter);
 
         TextField actualConsumptionFilter = getActualConsumptionFilter();
         filterRow.getCell(consumptionActualColumn).setComponent(actualConsumptionFilter);
@@ -295,16 +301,6 @@ public class SensorsView extends LitTemplate {
         actualConsumptionFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
                 .containsIgnoreCase(Double.toString(sensor.getConsumptionActual()), actualConsumptionFilter.getValue())));
         return actualConsumptionFilter;
-    }
-
-    private DatePicker getDateFilter() {
-        DatePicker dateFilter = new DatePicker();
-        dateFilter.setPlaceholder("Filter");
-        dateFilter.setClearButtonVisible(true);
-        dateFilter.setWidth("100%");
-        dateFilter.addValueChangeListener(
-                event -> gridListDataView.addFilter(sensor -> areDatesEqual(sensor, dateFilter)));
-        return dateFilter;
     }
 
     private ComboBox<String> getTypeFilter() {
@@ -370,16 +366,11 @@ public class SensorsView extends LitTemplate {
         return true;
     }
 
-    private boolean areDatesEqual(Sensor sensor, DatePicker dateFilter) {
-        LocalDate dateFilterValue = dateFilter.getValue();
-        if (dateFilterValue != null) {
-            Timestamp timestamp = Timestamp.valueOf(dateFilterValue.atStartOfDay());
-            return timestamp.equals(sensor.getCreatedDate());
-        }
-        return true;
-    }
-
     private List<Sensor> getSensors() {
-        return sensorRepository.findAll();
+        if(loggedUser.getAdmin()) {
+            return sensorService.findAll();
+        } else {
+            return sensorService.findAllByOwner(loggedUser.getId());
+        }
     }
 }

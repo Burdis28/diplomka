@@ -19,6 +19,8 @@ import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -67,23 +69,21 @@ public class UserView extends LitTemplate {
     @Id("passwordField1")
     private PasswordField passwordField1;
 
+    Binder<User> userBinder = new Binder<>();
+
     /**
      * Creates a new UserView.
      */
     public UserView(@Autowired UserRepository userRepository) {
-        // You can initialise any data required for the connected UI components here.
         User user = VaadinSession.getCurrent().getAttribute(User.class);
         setUserFields(user);
         firstNameField.setMaxLength(20);
+        firstNameField.setRequired(true);
         lastNameField.setMaxLength(25);
-
+        lastNameField.setRequired(true);
         emailField.setClearButtonVisible(true);
-        emailField.setPattern(PatternStringUtils.emailRegex);
-        emailField.setErrorMessage(PatternStringUtils.emailErrorMessage);
 
         phoneField.setClearButtonVisible(true);
-        phoneField.setPattern(PatternStringUtils.phoneRegex);
-        phoneField.setErrorMessage(PatternStringUtils.phoneErrorMessage);
 
         passwordField1.setPattern(PatternStringUtils.passwordRegex);
         passwordField1.setErrorMessage(PatternStringUtils.passwordErrorMessage);
@@ -106,7 +106,6 @@ public class UserView extends LitTemplate {
             setButton(editButton,false);
             setButton(cancelButton, true);
             setButton(changePasswordButton, true);
-
         });
 
         cancelButton.addClickListener(buttonClickEvent -> {
@@ -130,11 +129,8 @@ public class UserView extends LitTemplate {
         saveButton.addClickListener(buttonClickEvent -> {
             if (isEverythingValid()) {
                 try {
-                    user.setEmail(emailField.getValue());
-                    user.setFirstName(firstNameField.getValue());
-                    user.setSurname(lastNameField.getValue());
+                    userBinder.writeBean(user);
                     user.setFullName(user.getFirstName() + " " + user.getSurname());
-                    user.setPhone(phoneField.getValue());
 
                     if(passwordChangeForm1.isVisible()) {
                         String pw1 = passwordField1.getValue();
@@ -187,10 +183,14 @@ public class UserView extends LitTemplate {
     }
 
     private void setUserFields(User user) {
-        firstNameField.setValue(user.getFirstName());
-        lastNameField.setValue(user.getSurname());
-        emailField.setValue(user.getEmail());
-        phoneField.setValue(user.getPhone());
+        userBinder.forField(firstNameField).asRequired("Required field.").bind(User::getFirstName, User::setFirstName);
+        userBinder.forField(lastNameField).asRequired("Required field.").bind(User::getSurname, User::setSurname);
+        userBinder.forField(phoneField).withValidator(s -> s.matches(PatternStringUtils.phoneRegex),
+                PatternStringUtils.phoneErrorMessage).bind(User::getPhone, User::setPhone);
+        userBinder.forField(emailField).withValidator(new EmailValidator(
+                PatternStringUtils.emailErrorMessage)).bind(User::getEmail, User::setEmail);
+
+        userBinder.readBean(user);
     }
 
     private void setButton(Button button, boolean b) {

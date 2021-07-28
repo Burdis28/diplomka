@@ -1,17 +1,15 @@
 package com.example.application;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.PWA;
-
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.vaadin.artur.helpers.LaunchUtil;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 
 /**
  * The entry point of the Spring Boot application.
@@ -22,6 +20,8 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @SpringBootApplication
 @Theme(value = Lumo.class, variant = Lumo.LIGHT)
 @PWA(name = "Diplomka", shortName = "Diplomka", offlineResources = {"images/logo.png"})
+@EnableScheduling
+@Push
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
     public static void main(String[] args) {

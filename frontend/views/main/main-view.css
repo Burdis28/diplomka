@@ -37,6 +37,7 @@ vaadin-app-layout #themeSwitcherButton {
   margin: 0;
 }
 #logo {
+  align-self: center;
   box-sizing: border-box;
   box-shadow: inset 0 -1px var(--lumo-contrast-10pct);
   padding: var(--lumo-space-s) var(--lumo-space-m);

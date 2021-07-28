@@ -1,14 +1,20 @@
 package com.example.application.data.entity;
 
-
-import com.example.application.data.AbstractEntity;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import java.sql.Timestamp;
 
 @Entity
-public class Sensor extends AbstractEntity {
+public class Sensor {
 
+    @Id
+    @GeneratedValue(strategy= GenerationType.AUTO, generator="native")
+    @GenericGenerator(name = "native", strategy = "native")
+    private int id;
     private String idHw;
     private String name;
     private String type;
@@ -18,6 +24,7 @@ public class Sensor extends AbstractEntity {
     private Double consumptionActual;
     private Double consumptionCorrelation;
     private String currencyString;
+    private int pinId;
 
     public String getIdHw() {
         return idHw;
@@ -89,5 +96,21 @@ public class Sensor extends AbstractEntity {
 
     public void setConsumptionCorrelation(Double consumptionCorrelation) {
         this.consumptionCorrelation = consumptionCorrelation;
+    }
+
+    public int getPinId() {
+        return pinId;
+    }
+
+    public void setPinId(int pinId) {
+        this.pinId = pinId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

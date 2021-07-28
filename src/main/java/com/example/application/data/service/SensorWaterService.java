@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+import java.util.List;
+
 @Service
 public class SensorWaterService extends CrudService<SensorWater, Integer> {
 
@@ -19,4 +21,5 @@ public class SensorWaterService extends CrudService<SensorWater, Integer> {
     protected JpaRepository<SensorWater, Integer> getRepository() {
         return sensorWaterRepository;
     }
+
 }

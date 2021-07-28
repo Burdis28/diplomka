@@ -2,12 +2,15 @@ package com.example.application.views.sensors;
 
 import com.example.application.components.notifications.ErrorNotification;
 import com.example.application.data.entity.Sensor;
+import com.example.application.data.entity.SensorElectric;
 import com.example.application.data.entity.SensorWater;
+import com.example.application.data.entity.StateValve;
 import com.example.application.data.service.SensorService;
 import com.example.application.data.service.SensorWaterService;
 import com.example.application.views.main.MainView;
 import com.example.application.views.sensors.components.SensorInfoComponent;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -17,8 +20,13 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -50,24 +58,35 @@ public class WaterSensorView extends LitTemplate {
     private HorizontalLayout vaadinHorizontalLayout;
     @Id("firstLayout")
     private HorizontalLayout firstLayout;
-    @Id("pricePerM3Field")
-    private BigDecimalField pricePerM3;
     @Id("countStopField")
-    private BigDecimalField countStopField;
-    @Id("implPerLiterField")
-    private BigDecimalField implPerLiterField;
+    private TextField countStopField;
     @Id("countStopNightField")
-    private BigDecimalField countStopNightField;
-    @Id("nightStartHourField")
-    private BigDecimalField nightStartHourField;
-    @Id("pricePerM3FieldSuffix")
-    private Div pricePerM3FieldSuffix;
+    private TextField countStopNightField;
 
     private final SensorService sensorService;
     private final SensorWaterService sensorWaterService;
     private SensorWater sensorWater;
     private Sensor sensor;
     private SensorInfoComponent sensorInfo;
+    @Id("implPerLitField")
+    private TextField implPerLitField;
+    @Id("stateSelect")
+    private Select<StateValve> stateSelect;
+    @Id("stateModifiedDateField")
+    private TextField stateModifiedDateField;
+    @Id("stateModifiedBy")
+    private TextField stateModifiedBy;
+    @Id("nightStartTimeField")
+    private TimePicker nightStartTimeField;
+    @Id("nightEndTimeField")
+    private TimePicker nightEndTimeField;
+    @Id("pricePerM3Field")
+    private TextField pricePerM3Field;
+
+    private Binder<Sensor> sensorBinder = new Binder<>();
+    private Binder<SensorWater> sensorWaterBinder = new Binder<>();
+    @Id("timeBetweenImplField")
+    private TextField timeBetweenImplField;
 
     /**
      * Creates a new WaterSensorView.
@@ -102,7 +121,6 @@ public class WaterSensorView extends LitTemplate {
             setButton(returnButton, false);
             setButton(editButton, false);
             setButton(cancelButton, true);
-
         });
 
         cancelButton.addClickListener(buttonClickEvent -> {
@@ -114,20 +132,13 @@ public class WaterSensorView extends LitTemplate {
 
             setReadOnlyFields(true);
 
-            setSensorFields(sensorWater);
+            //setSensorFields(sensorWater);
         });
 
         saveButton.addClickListener(buttonClickEvent -> {
             try {
-                //TODO finish all attributes
-                sensorWater.setPrice_per_m3(pricePerM3.getValue().floatValue());
-
-                sensor.setName(sensorInfo.getSensorName().getValue());
-                sensor.setLimit_day(sensorInfo.getLimitDay().getValue().doubleValue());
-                sensor.setLimit_month(sensorInfo.getLimitMonth().getValue().doubleValue());
-                sensor.setConsumptionActual(sensorInfo.getConsumptionActual().getValue().doubleValue());
-                sensor.setConsumptionCorrelation(sensorInfo.getConsumptionCorrelation().getValue().doubleValue());
-                sensor.setCurrencyString(sensorInfo.getCurrency().getValue());
+                sensorWaterBinder.writeBean(sensorWater);
+                sensorBinder.writeBean(sensor);
 
                 sensorWaterService.update(sensorWater);
                 sensorService.update(sensor);
@@ -139,7 +150,7 @@ public class WaterSensorView extends LitTemplate {
 
                 setReadOnlyFields(true);
 
-                setSensorFields(sensorWater);
+                //setSensorFields(sensorWater);
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
                 error.setErrorText("Špatně zadaná vstupní data formuláře.");
@@ -159,27 +170,47 @@ public class WaterSensorView extends LitTemplate {
             this.sensorWaterService.get(sensorId).ifPresent(water -> sensorWater = water);
             this.sensorService.get(sensorId).ifPresent(sensor -> this.sensor = sensor);
         }
-        String currency = sensor.getCurrencyString();
-        pricePerM3FieldSuffix.setText(currency);
-
         sensorInfo = new SensorInfoComponent(sensor);
         sensorInfo.setId("sensorInfoLayout");
         sensorInfo.setVisible(true);
         firstLayout.addComponentAsFirst(sensorInfo);
-        //vaadinHorizontalLayout.addComponentAtIndex(0, sensorInfo);
+
+        sensorInfo.getConsumptionActual().setReadOnly(true);
+        sensorInfo.getConsumptionCorrelation().setReadOnly(true);
         setSensorFields(sensorWater);
+
+        String currency = sensor.getCurrencyString();
+        //pricePerM3Field.(new Text(currency));
     }
 
     private void setSensorFields(SensorWater sensorWater) {
-        //TODO finish all attributes
-        pricePerM3.setValue(BigDecimal.valueOf(sensorWater.getPrice_per_m3()));
+        sensorWaterBinder.forField(pricePerM3Field).asRequired("Required field.").withConverter(Double::valueOf, String::valueOf)
+                .bind(SensorWater::getPrice_per_m3, SensorWater::setPrice_per_m3);
+        sensorWaterBinder.forField(implPerLitField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
+                .bind(SensorWater::getImplPerLit, SensorWater::setImplPerLit);
+        // state field
 
-        sensorInfo.getSensorName().setValue(sensor.getName());
-        sensorInfo.getLimitDay().setValue(BigDecimal.valueOf(sensor.getLimit_day()));
-        sensorInfo.getLimitMonth().setValue(BigDecimal.valueOf(sensor.getLimit_month()));
-        sensorInfo.getConsumptionActual().setValue(BigDecimal.valueOf(sensor.getConsumptionActual()));
-        sensorInfo.getConsumptionCorrelation().setValue(BigDecimal.valueOf(sensor.getConsumptionCorrelation()));
-        sensorInfo.getCurrency().setValue(sensor.getCurrencyString());
+        sensorWaterBinder.forField(timeBetweenImplField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
+                .bind(SensorWater::getTimeBtwImpl, SensorWater::setTimeBtwImpl);
+        sensorWaterBinder.forField(countStopField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
+                .bind(SensorWater::getCountStop, SensorWater::setCountStop);
+        sensorWaterBinder.forField(countStopNightField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
+                .bind(SensorWater::getCountStopNight, SensorWater::setCountStopNight);
+
+        sensorWaterBinder.readBean(sensorWater);
+
+        sensorBinder.forField(sensorInfo.getSensorName()).asRequired("Required field.").bind(Sensor::getName, Sensor::setName);
+        sensorBinder.forField(sensorInfo.getLimitDay()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+                .bind(Sensor::getLimit_day, Sensor::setLimit_day);
+        sensorBinder.forField(sensorInfo.getLimitMonth()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+                .bind(Sensor::getLimit_month, Sensor::setLimit_month);
+        sensorBinder.forField(sensorInfo.getConsumptionActual()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+                .bind(Sensor::getConsumptionActual, Sensor::setConsumptionActual);
+        sensorBinder.forField(sensorInfo.getConsumptionCorrelation()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+                .bind(Sensor::getConsumptionCorrelation, Sensor::setConsumptionCorrelation);
+        sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.").bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
+
+        sensorBinder.readBean(sensor);
     }
 
     private void setButton(Button button, boolean b) {
@@ -188,18 +219,18 @@ public class WaterSensorView extends LitTemplate {
     }
 
     private void setReadOnlyFields(boolean b) {
-        //TODO finish all attributes
-        pricePerM3.setReadOnly(b);
+        pricePerM3Field.setReadOnly(b);
         countStopField.setReadOnly(b);
-        implPerLiterField.setReadOnly(b);
+        implPerLitField.setReadOnly(b);
+        stateSelect.setReadOnly(b);
         countStopNightField.setReadOnly(b);
-        nightStartHourField.setReadOnly(b);
+        countStopField.setReadOnly(b);
+        nightStartTimeField.setReadOnly(b);
+        nightEndTimeField.setReadOnly(b);
 
         sensorInfo.getSensorName().setReadOnly(b);
         sensorInfo.getLimitDay().setReadOnly(b);
         sensorInfo.getLimitMonth().setReadOnly(b);
-        sensorInfo.getConsumptionActual().setReadOnly(b);
-        sensorInfo.getConsumptionCorrelation().setReadOnly(b);
         sensorInfo.getCurrency().setReadOnly(b);
     }
 }

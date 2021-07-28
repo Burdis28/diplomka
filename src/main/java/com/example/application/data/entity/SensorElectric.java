@@ -8,10 +8,10 @@ public class SensorElectric {
 
     @Id
     private int sensor_id;
-    private float pricePerKwHigh;
-    private float pricePerKwLow;
-    private float priceFix;
-    private float priceService;
+    private Double pricePerKwHigh;
+    private Double pricePerKwLow;
+    private Double priceFix;
+    private Double priceService;
     private int implPerKw;
     private boolean isHighRate;
 
@@ -26,35 +26,35 @@ public class SensorElectric {
         this.sensor_id = sensor_id;
     }
 
-    public float getPricePerKwHigh() {
+    public Double getPricePerKwHigh() {
         return pricePerKwHigh;
     }
 
-    public void setPricePerKwHigh(float pricePerKwHigh) {
+    public void setPricePerKwHigh(Double pricePerKwHigh) {
         this.pricePerKwHigh = pricePerKwHigh;
     }
 
-    public float getPricePerKwLow() {
+    public Double getPricePerKwLow() {
         return pricePerKwLow;
     }
 
-    public void setPricePerKwLow(float pricePerKwLow) {
+    public void setPricePerKwLow(Double pricePerKwLow) {
         this.pricePerKwLow = pricePerKwLow;
     }
 
-    public float getPriceFix() {
+    public Double getPriceFix() {
         return priceFix;
     }
 
-    public void setPriceFix(float priceFix) {
+    public void setPriceFix(Double priceFix) {
         this.priceFix = priceFix;
     }
 
-    public float getPriceService() {
+    public Double getPriceService() {
         return priceService;
     }
 
-    public void setPriceService(float priceService) {
+    public void setPriceService(Double priceService) {
         this.priceService = priceService;
     }
 

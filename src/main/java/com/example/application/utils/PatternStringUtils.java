@@ -9,4 +9,6 @@ public class PatternStringUtils {
     public static final String phoneErrorMessage = "This is not a valid phone number.";
     public static final String emailRegex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
     public static final String emailErrorMessage = "Please enter a valid email address.";
+    public static final String fieldIsRequired = "This field is required.";
+    public static final String onlyNumbersRegex = "^[0-9]+$";
 }

@@ -1,6 +1,5 @@
 package com.example.application.views.main;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +31,7 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.theme.lumo.Lumo;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -39,6 +39,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @CssImport("./views/main/main-view.css")
 @JsModule("./styles/shared-styles.js")
 @JsModule("./js/theme-selector.js")
+@EnableScheduling
 public class MainView extends AppLayout {
 
     private final Tabs menu;
@@ -116,9 +117,7 @@ public class MainView extends AppLayout {
         layout.setAlignItems(FlexComponent.Alignment.STRETCH);
         HorizontalLayout logoLayout = new HorizontalLayout();
         logoLayout.setId("logo");
-        logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        logoLayout.add(new Image("images/logo.png", "Diplomka logo"));
-        logoLayout.add(new H1("Diplomka"));
+        logoLayout.add(new Image("images/smart_home.png", "Diplomka logo"));
         layout.add(logoLayout, menu);
         return layout;
     }
