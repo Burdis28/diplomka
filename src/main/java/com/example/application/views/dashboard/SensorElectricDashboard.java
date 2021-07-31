@@ -27,7 +27,9 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -39,6 +41,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A Designer generated component for the sensor-el-dashboard template.
@@ -55,6 +58,7 @@ import java.util.*;
 public class SensorElectricDashboard extends LitTemplate {
 
     private Chart areaSplineRangeChart;
+    private Chart pieChartHighLowRate;
     private Chart dailyConsumptionChart;
     private SensorElectricService sensorElectricService;
     private DataElectricService dataElectricService;
@@ -68,6 +72,7 @@ public class SensorElectricDashboard extends LitTemplate {
 
     private StyledTextComponent consumptioNText;
     private StyledTextComponent priceText;
+    private StyledTextComponent priceForADayText;
 
     private List<DataElectric> dataElectricList;
     private int signalStrength;
@@ -103,6 +108,18 @@ public class SensorElectricDashboard extends LitTemplate {
     private Chart monthlyChart;
     @Id("monthlyChartDiv")
     private Div monthlyChartDiv;
+    @Id("priceForADayDiv")
+    private Div priceForADayDiv;
+    @Id("priceForDayDatePicker")
+    private DatePicker priceForDayDatePicker;
+    @Id("monthSelecter")
+    private Select monthSelecter;
+    @Id("yearSelecterField")
+    private TextField yearSelecterField;
+    @Id("priceForAMonth")
+    private Div priceForAMonth;
+    @Id("calculateBtn")
+    private Button calculateBtn;
 
     /**
      * Creates a new SensorElDashboard.
@@ -118,6 +135,7 @@ public class SensorElectricDashboard extends LitTemplate {
         this.hardwareLiveService = hardwareLiveService;
         areaSplineRangeChart = new Chart(ChartType.COLUMNRANGE);
         dailyConsumptionChart = new Chart(ChartType.COLUMN);
+        pieChartHighLowRate = new Chart(ChartType.PIE);
 
         int sensorId = -1;
         sensorId = (int) VaadinSession.getCurrent().getAttribute("sensorId");
@@ -128,16 +146,51 @@ public class SensorElectricDashboard extends LitTemplate {
             setInfoData();
             setConsumptionBar();
             setDailyConsumptionChart();
-            setChartData();
+            setPieChartHighLowRate();
+            //setChartData();
             setHwInfoData();
             setMonthlyConsumptionChart();
+            setPriceOfDayPicker();
 
-            areaSplineRangeChartDiv.add(areaSplineRangeChart);
+            areaSplineRangeChartDiv.add(pieChartHighLowRate);
             dailyConsumptionDiv.add(dailyConsumptionChart);
         }
     }
 
+    private void setPieChartHighLowRate(){
+        // TODO this is for testing - in release make it now()
+        LocalDate date = LocalDate.of(2021,02,12);
+        Configuration conf = pieChartHighLowRate.getConfiguration();
+
+        conf.setTitle("Low and High rate difference in the past 30 days.");
+
+        Tooltip tooltip = new Tooltip();
+        tooltip.setValueDecimals(2);
+        tooltip.setValueSuffix(" [W]");
+        conf.setTooltip(tooltip);
+
+        PlotOptionsPie plotOptions = new PlotOptionsPie();
+        plotOptions.setAllowPointSelect(true);
+        plotOptions.setCursor(Cursor.POINTER);
+        plotOptions.setShowInLegend(true);
+        conf.setPlotOptions(plotOptions);
+
+        List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), date, date);
+        List<Number> highRates = new ArrayList<>();
+        List<Number> lowRates = new ArrayList<>();
+        getHighLowRates(dataElectrics, highRates, lowRates);
+
+        DataSeries series = new DataSeries();
+        DataSeriesItem lowRate = new DataSeriesItem("Low rate", lowRates.stream().mapToDouble(Number::doubleValue).sum());
+        lowRate.setSelected(true);
+        series.add(lowRate);
+        series.add(new DataSeriesItem("High rate", highRates.stream().mapToDouble(Number::doubleValue).sum()));
+        conf.setSeries(series);
+        pieChartHighLowRate.setVisibilityTogglingDisabled(true);
+    }
+
     private void setMonthlyConsumptionChart() {
+        // TODO this is for testing - in release make it now()
         LocalDate date = LocalDate.of(2021,02,12);
 
         Configuration configuration = monthlyChart.getConfiguration();
@@ -159,7 +212,7 @@ public class SensorElectricDashboard extends LitTemplate {
         DataSeries ds = new DataSeries();
 
         PlotOptionsColumn plotOpts = new PlotOptionsColumn();
-        plotOpts.setColor(SolidColor.ORANGERED);
+        plotOpts.setColor(SolidColor.GREENYELLOW);
         ds.setPlotOptions(plotOpts);
         ds.setName("Price");
 
@@ -177,7 +230,7 @@ public class SensorElectricDashboard extends LitTemplate {
         }
 
         pricesMap.forEach((localDate, aDouble) -> {
-            configuration.getxAxis().addCategory(localDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+            configuration.getxAxis().addCategory(localDate.format(DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy")));
             dailyPrices.add(new DataSeriesItem("",aDouble));
         });
         configuration.getxAxis().setVisible(false);
@@ -227,7 +280,20 @@ public class SensorElectricDashboard extends LitTemplate {
         consumptionDatePicker.addValueChangeListener(event -> {
             updateDailyConsumptionChartData(event.getValue());
         });
+    }
 
+
+    private void setPriceOfDayPicker() {
+        priceForADayText = new StyledTextComponent("");
+        priceForADayDiv.add(priceForADayText);
+        priceForDayDatePicker.addValueChangeListener(event -> {
+            List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
+                    event.getValue(), event.getValue());
+            priceForADayDiv.setClassName("priceForADayDiv");
+            Double price = dataElectrics.stream().mapToDouble(value -> value.getHighRate() * 0.001 * sensorElectric.getPricePerKwHigh()
+                    + value.getLowRate() * 0.001 * sensorElectric.getPricePerKwLow()).sum();
+            priceForADayText.setText("Price: <b>" + price + " [" + sensor.getCurrencyString() + "]" );
+        });
     }
 
     private void updateDailyConsumptionChartData(LocalDate value) {
