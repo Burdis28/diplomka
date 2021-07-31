@@ -2,6 +2,9 @@ package com.example.application.data.service;
 
 import com.example.application.data.entity.User;
 import com.example.application.data.exceptions.AuthException;
+import com.example.application.views.dashboard.SensorElectricDashboard;
+import com.example.application.views.dashboard.SensorGasDashboard;
+import com.example.application.views.dashboard.SensorWaterDashboard;
 import com.example.application.views.sensors.CreatesensorView;
 import com.example.application.views.dashboard.DashboardView;
 import com.example.application.views.hardwares.CreateHardwareView;
@@ -23,9 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class AuthService {
@@ -59,9 +60,9 @@ public class AuthService {
         RouteConfiguration.forSessionScope().setRoute("sensor-el-detail", ElectricSensorView.class, MainView.class);
         RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainView.class);
         RouteConfiguration.forSessionScope().setRoute("sensor-gas-detail", GasSensorView.class, MainView.class);
-//        RouteConfiguration.forSessionScope().setRoute("sensor-el-dashboard", ElectricSensorDashboardView.class, MainView.class);
-//        RouteConfiguration.forSessionScope().setRoute("sensor-wat-dashboard", WaterSensorDashboardView.class, MainView.class);
-//        RouteConfiguration.forSessionScope().setRoute("sensor-gas-dashboard", GasSensorDashboardView.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-el-dashboard", SensorElectricDashboard.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-wat-dashboard", SensorWaterDashboard.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-gas-dashboard", SensorGasDashboard.class, MainView.class);
     }
 
     public List<AuthorizedRoute> getAuthorizedRoutes(boolean admin) {

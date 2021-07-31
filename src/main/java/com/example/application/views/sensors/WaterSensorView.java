@@ -63,11 +63,6 @@ public class WaterSensorView extends LitTemplate {
     @Id("countStopNightField")
     private TextField countStopNightField;
 
-    private final SensorService sensorService;
-    private final SensorWaterService sensorWaterService;
-    private SensorWater sensorWater;
-    private Sensor sensor;
-    private SensorInfoComponent sensorInfo;
     @Id("implPerLitField")
     private TextField implPerLitField;
     @Id("stateSelect")
@@ -82,11 +77,16 @@ public class WaterSensorView extends LitTemplate {
     private TimePicker nightEndTimeField;
     @Id("pricePerM3Field")
     private TextField pricePerM3Field;
+    @Id("timeBetweenImplField")
+    private TextField timeBetweenImplField;
 
     private Binder<Sensor> sensorBinder = new Binder<>();
     private Binder<SensorWater> sensorWaterBinder = new Binder<>();
-    @Id("timeBetweenImplField")
-    private TextField timeBetweenImplField;
+    private final SensorService sensorService;
+    private final SensorWaterService sensorWaterService;
+    private SensorWater sensorWater;
+    private Sensor sensor;
+    private SensorInfoComponent sensorInfo;
 
     /**
      * Creates a new WaterSensorView.
@@ -95,7 +95,6 @@ public class WaterSensorView extends LitTemplate {
      * @param sensorWaterService
      */
     public WaterSensorView(SensorService sensorService, SensorWaterService sensorWaterService) {
-        // You can initialise any data required for the connected UI components here.
         this.sensorService = sensorService;
         this.sensorWaterService = sensorWaterService;
 
@@ -131,8 +130,6 @@ public class WaterSensorView extends LitTemplate {
             setButton(cancelButton, false);
 
             setReadOnlyFields(true);
-
-            //setSensorFields(sensorWater);
         });
 
         saveButton.addClickListener(buttonClickEvent -> {
@@ -149,8 +146,6 @@ public class WaterSensorView extends LitTemplate {
                 setButton(editButton, true);
 
                 setReadOnlyFields(true);
-
-                //setSensorFields(sensorWater);
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
                 error.setErrorText("Špatně zadaná vstupní data formuláře.");
@@ -188,7 +183,7 @@ public class WaterSensorView extends LitTemplate {
                 .bind(SensorWater::getPrice_per_m3, SensorWater::setPrice_per_m3);
         sensorWaterBinder.forField(implPerLitField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getImplPerLit, SensorWater::setImplPerLit);
-        // state field
+        // TODO state field
 
         sensorWaterBinder.forField(timeBetweenImplField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getTimeBtwImpl, SensorWater::setTimeBtwImpl);
@@ -227,6 +222,7 @@ public class WaterSensorView extends LitTemplate {
         countStopField.setReadOnly(b);
         nightStartTimeField.setReadOnly(b);
         nightEndTimeField.setReadOnly(b);
+        timeBetweenImplField.setReadOnly(b);
 
         sensorInfo.getSensorName().setReadOnly(b);
         sensorInfo.getLimitDay().setReadOnly(b);

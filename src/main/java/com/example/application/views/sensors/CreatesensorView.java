@@ -60,10 +60,14 @@ public class CreatesensorView extends LitTemplate {
     private TextField currencyField;
     @Id("typeSelect")
     private Select<String> typeSelect;
-    @Id("limitDayField")
-    private BigDecimalField limitDayField;
     @Id("limitMonthField")
-    private BigDecimalField limitMonthField;
+    private TextField limitMonthField;
+    @Id("limitDayField")
+    private TextField limitDayField;
+    @Id("pinIdField")
+    private TextField pinIdField;
+    @Id("attachToHardware")
+    private Select<String> attachToHardwareSelect;
 
     @Id("save")
     private Button save;
@@ -76,19 +80,7 @@ public class CreatesensorView extends LitTemplate {
     @Id("highRateCheckBox")
     private Checkbox highRateCheckBox;
     @Id("pricePerKwHighField")
-    private BigDecimalField pricePerKwHighField;
-    @Id("pricePerKwLowField")
-    private BigDecimalField pricePerKwLowField;
-    @Id("fixedPriceField")
-    private BigDecimalField fixedPriceField;
-    @Id("servicePriceField")
-    private BigDecimalField servicePriceField;
-    @Id("implPerKwField")
-    private BigDecimalField implPerKwField;
-    @Id("attachToHardware")
-    private Select<String> attachToHardwareSelect;
-    @Id("pinIdField")
-    private TextField pinIdField;
+    private TextField pricePerKwHighField;
 
     //Water components
     @Id("waterLayout")
@@ -99,10 +91,19 @@ public class CreatesensorView extends LitTemplate {
     private Select<StateValve> waterStateSelect;
     @Id("implPerLitField")
     private NumberField implPerLitField;
-    @Id("nightStartTimePicker")
-    private TimePicker nightStartTimePicker;
-    @Id("nightEndTimePicker")
-    private TimePicker nightEndTimePicker;
+    @Id("nightStartStepField")
+    private NumberField nightStartStepField;
+    @Id("nightEndStepField")
+    private NumberField nightEndStepField;
+    @Id("pricePerKwLowField")
+    private TextField pricePerKwLowField;
+    @Id("fixedPriceField")
+    private TextField fixedPriceField;
+    @Id("servicePriceField")
+    private TextField servicePriceField;
+    @Id("implPerKwField")
+    private TextField implPerKwField;
+
 
     public CreatesensorView(SensorService sensorService, HardwareService hardwareService,
                             SensorElectricService sensorElectricService, SensorWaterService sensorWaterService,
@@ -117,6 +118,7 @@ public class CreatesensorView extends LitTemplate {
 
         setFormFieldsPatterns();
         setSelectFields();
+        setRequiredFields();
         clearForm();
 
         typeSelect.addValueChangeListener(event -> {
@@ -128,19 +130,24 @@ public class CreatesensorView extends LitTemplate {
         cancel.addClickListener(e -> clearForm());
         save.addClickListener(e -> {
             if (validateFields()) {
-                Sensor sensor = setNewSensorFromFields();
-                Sensor createdSensor = sensorService.update(sensor);
+                try {
+                    Sensor sensor = setNewSensorFromFields();
+                    Sensor createdSensor = sensorService.update(sensor);
+                    if (typeSelect.getValue().equals(SensorTypes.e.toString())) {
+                        SensorElectric electric = setNewElectricSensorFromFields(createdSensor);
+                        sensorElectricService.update(electric);
+                    } else if (typeSelect.getValue().equals(SensorTypes.w.toString())) {
+                        SensorWater water = setNewWaterSensorFromFields(createdSensor);
+                        sensorWaterService.update(water);
+                    } else {
 
-                if (typeSelect.getValue().equals(SensorTypes.e.toString())) {
-                    SensorElectric electric = setNewElectricSensorFromFields(createdSensor);
-                    sensorElectricService.update(electric);
-                } else if (typeSelect.getValue().equals(SensorTypes.w.toString())) {
-                    SensorWater water = setNewWaterSensorFromFields(createdSensor);
-                    sensorWaterService.update(water);
+                    }
+
+                    Notification.show("Sensor created");
+                    clearForm();
+                } catch (Exception exception) {
+                    createErrorDialog("Error: Sensor creation has failed, try again.");
                 }
-
-                Notification.show("Sensor created");
-                clearForm();
             }
         });
     }
@@ -151,22 +158,41 @@ public class CreatesensorView extends LitTemplate {
         water.setPrice_per_m3(pricePerM3Field.getValue().doubleValue());
         water.setState(waterStateSelect.getValue().getId());
         water.setImplPerLit(implPerLitField.getValue().intValue());
-        water.setNightStartHour(nightStartTimePicker.getValue().getHour());
-        water.setNightStartMinute(nightStartTimePicker.getValue().getMinute());
-        water.setNightEndHour(nightEndTimePicker.getValue().getHour());
-        water.setNightEndMinute(nightEndTimePicker.getValue().getMinute());
+
+        setNightTimeFields(water);
         return water;
+    }
+
+    private void setNightTimeFields(SensorWater water) {
+        double doubleNumber = nightStartStepField.getValue();
+        String doubleAsString = String.valueOf(doubleNumber);
+        int indexOfDecimal = doubleAsString.indexOf(".");
+        String hour = doubleAsString.substring(0, indexOfDecimal);
+        String minute = doubleAsString.substring(indexOfDecimal);
+        minute = minute.substring(1);
+
+        double doubleNumber2 = nightEndStepField.getValue();
+        String doubleAsString2 = String.valueOf(doubleNumber2);
+        int indexOfDecimal2 = doubleAsString2.indexOf(".");
+        String hour2 = doubleAsString2.substring(0, indexOfDecimal2);
+        String minute2 = doubleAsString2.substring(indexOfDecimal2);
+        minute2 = minute2.substring(1);
+
+        water.setNightStartHour(Integer.parseInt(hour));
+        water.setNightStartMinute(Integer.parseInt(minute));
+        water.setNightEndHour(Integer.parseInt(hour2));
+        water.setNightEndMinute(Integer.parseInt(minute2));
     }
 
     private SensorElectric setNewElectricSensorFromFields(Sensor createdSensor) {
         SensorElectric electric = new SensorElectric();
         electric.setSensor_id(createdSensor.getId());
         electric.setHighRate(highRateCheckBox.getValue());
-        electric.setImplPerKw(implPerKwField.getValue().intValue());
-        electric.setPriceService(servicePriceField.getValue().doubleValue());
-        electric.setPriceFix(fixedPriceField.getValue().doubleValue());
-        electric.setPricePerKwLow(pricePerKwLowField.getValue().doubleValue());
-        electric.setPricePerKwHigh(pricePerKwHighField.getValue().doubleValue());
+        electric.setImplPerKw(Integer.parseInt(implPerKwField.getValue()));
+        electric.setPriceService(Double.parseDouble(servicePriceField.getValue()));
+        electric.setPriceFix(Double.parseDouble(fixedPriceField.getValue()));
+        electric.setPricePerKwLow(Double.parseDouble(pricePerKwLowField.getValue()));
+        electric.setPricePerKwHigh(Double.parseDouble(pricePerKwHighField.getValue()));
         return electric;
     }
 
@@ -177,8 +203,8 @@ public class CreatesensorView extends LitTemplate {
         sensor.setIdHw(attachToHardwareSelect.getValue());
         sensor.setType(SensorTypes.fromCode(typeSelect.getValue()).name());
         sensor.setPinId(Integer.parseInt(pinIdField.getValue()));
-        sensor.setLimit_day(limitDayField.getValue().doubleValue());
-        sensor.setLimit_month(limitMonthField.getValue().doubleValue());
+        sensor.setLimit_day(Double.parseDouble(limitDayField.getValue()));
+        sensor.setLimit_month(Double.parseDouble(limitMonthField.getValue()));
         sensor.setConsumptionActual(BigDecimal.ZERO.doubleValue());
         sensor.setConsumptionCorrelation(BigDecimal.ZERO.doubleValue());
         sensor.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
@@ -237,6 +263,11 @@ public class CreatesensorView extends LitTemplate {
     }
 
     private void validateDialog(String errorMessage) throws Exception{
+        createErrorDialog(errorMessage);
+        throw new Exception();
+    }
+
+    private void createErrorDialog(String errorMessage) {
         Dialog popUpDialog = new Dialog();
         popUpDialog.setCloseOnEsc(true);
         popUpDialog.setModal(true);
@@ -245,25 +276,45 @@ public class CreatesensorView extends LitTemplate {
         content.setText(errorMessage);
         popUpDialog.add(content);
         popUpDialog.open();
-        throw new Exception();
     }
 
     private void setFormFieldsPatterns() {
         nameField.setMaxLength(45);
-        nameField.setRequired(true);
         nameField.setErrorMessage(PatternStringUtils.fieldIsRequired);
         currencyField.setMaxLength(45);
-        currencyField.setRequired(true);
         currencyField.setErrorMessage(PatternStringUtils.fieldIsRequired);
-        pinIdField.setRequired(true);
         pinIdField.setPattern(PatternStringUtils.onlyNumbersRegex);
         pinIdField.setErrorMessage(PatternStringUtils.fieldIsRequired);
-        nameField.setRequired(true);
         nameField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        limitDayField.setPattern(PatternStringUtils.doubleNumberRegex63);
         limitDayField.setErrorMessage(PatternStringUtils.fieldIsRequired);
-        limitDayField.setRequiredIndicatorVisible(true);
+        limitMonthField.setPattern(PatternStringUtils.doubleNumberRegex103);
         limitMonthField.setErrorMessage(PatternStringUtils.fieldIsRequired);
-        limitMonthField.setRequiredIndicatorVisible(true);
+        pricePerKwLowField.setPattern(PatternStringUtils.doubleNumberRegex62);
+        pricePerKwLowField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        pricePerKwHighField.setPattern(PatternStringUtils.doubleNumberRegex62);
+        pricePerKwHighField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        servicePriceField.setPattern(PatternStringUtils.doubleNumberRegex62);
+        servicePriceField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        fixedPriceField.setPattern(PatternStringUtils.doubleNumberRegex62);
+        fixedPriceField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        implPerKwField.setPattern(PatternStringUtils.onlyNumbersRegex);
+        implPerKwField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+    }
+
+    private void setRequiredFields() {
+        nameField.setRequired(true);
+        currencyField.setRequired(true);
+        pinIdField.setRequired(true);
+        limitDayField.setRequired(true);
+//        limitDayField.setRequiredIndicatorVisible(true);
+//        limitMonthField.setRequiredIndicatorVisible(true);
+//        pricePerKwHighField.setRequiredIndicatorVisible(true);
+//        pricePerKwLowField.setRequired(true);
+//        pricePerM3Field.setRequired(true);
+//        fixedPriceField.setRequired(true);
+//        servicePriceField.setRequired(true);
+
     }
 
     private void setSelectFields() {
@@ -278,5 +329,8 @@ public class CreatesensorView extends LitTemplate {
 
     private void clearForm() {
         nameField.clear();
+        currencyField.clear();
+        pinIdField.clear();
+        limitDayField.clear();
     }
 }

@@ -4,6 +4,8 @@ import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
 import com.example.application.data.entity.User;
 import com.example.application.data.service.SensorService;
+import com.example.application.data.service.data.DataElectricService;
+import com.example.application.utils.DevelopmentDataCreator;
 import com.example.application.views.main.MainView;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -32,6 +34,8 @@ import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +50,6 @@ public class SensorsView extends LitTemplate {
 
     @Id("grid")
     private GridPro<Sensor> grid;
-
     private GridListDataView<Sensor> gridListDataView;
 
     private Grid.Column<Sensor> idColumn;
@@ -59,16 +62,27 @@ public class SensorsView extends LitTemplate {
     private Grid.Column<Sensor> toolsColumn;
 
     private final SensorService sensorService;
+    private final DataElectricService dataElectricService;
     private final User loggedUser;
 
-    public SensorsView(@Autowired SensorService sensorService) {
+    //TEST DATA
+    @Value( "${generateTestData}" )
+    private boolean generateTestData;
+
+    public SensorsView(@Autowired SensorService sensorService, DataElectricService dataElectricService) {
         this.sensorService = sensorService;
+        this.dataElectricService = dataElectricService;
         grid.setSelectionMode(SelectionMode.NONE);
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
         grid.setClassName("my-grid");
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
         createGrid();
+
+        if(false) {
+            DevelopmentDataCreator testData = new DevelopmentDataCreator(dataElectricService, sensorService);
+            testData.createElectricData();
+        }
     }
 
     private void createGrid() {
@@ -94,6 +108,24 @@ public class SensorsView extends LitTemplate {
         createDeleteContextMenu(contextMenu);
     }
 
+
+    private List<Sensor> getSensors() {
+        if(loggedUser.getAdmin()) {
+            return sensorService.findAll();
+        } else {
+            return sensorService.findAllByOwner(loggedUser.getId());
+        }
+    }
+
+    @Scheduled(fixedDelay = 10000)
+    public void refreshGrid(){
+        getUI().ifPresent(ui -> ui.access(() -> {
+            grid.setItems(getSensors());
+            gridListDataView.refreshAll();
+            ui.push();
+        }));
+    }
+
     private void createDeleteContextMenu(GridContextMenu<Sensor> contextMenu) {
         contextMenu.addItem("Delete", event -> {
             Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
@@ -112,7 +144,8 @@ public class SensorsView extends LitTemplate {
         dialog.setConfirmText("Delete");
         dialog.addCancelListener(event1 -> {});
         dialog.addConfirmListener(event1 -> {
-            sensorService.delete(sensor.getId());
+            sensorService.delete(sensor.getId(), SensorTypes.valueOf(sensor.getType()));
+            gridListDataView.removeItem(sensor);
         });
         dialog.setConfirmButtonTheme("error primary");
         dialog.open();
@@ -364,13 +397,5 @@ public class SensorsView extends LitTemplate {
             return StringUtils.equals(SensorTypes.valueOf(sensor.getType()).toString(), statusFilterValue);
         }
         return true;
-    }
-
-    private List<Sensor> getSensors() {
-        if(loggedUser.getAdmin()) {
-            return sensorService.findAll();
-        } else {
-            return sensorService.findAllByOwner(loggedUser.getId());
-        }
     }
 }

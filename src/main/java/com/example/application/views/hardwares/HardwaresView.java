@@ -2,6 +2,7 @@ package com.example.application.views.hardwares;
 
 import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.HardwareLive;
+import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.User;
 import com.example.application.data.service.*;
 import com.example.application.views.hardwares.components.HardwareTile;
@@ -64,7 +65,7 @@ public class HardwaresView extends LitTemplate {
                     .map(Hardware::getSerial_HW).collect(Collectors.toList()));
         }
 
-        List<String> attachedSensorsNames = new ArrayList<>();
+        List<Sensor> attachedSensors;
 
         Map<String, HardwareLive> hardwareLiveMap = new HashMap<>();
         for (HardwareLive live : hardwareLiveList) {
@@ -72,10 +73,9 @@ public class HardwaresView extends LitTemplate {
         }
 
         for (Hardware hardware : hardwareList ) {
-            attachedSensorsNames = sensorService.findSensorByIdHw(hardware.getSerial_HW()).stream().map(sensor ->
-                    "[" + sensor.getId() + "] " + sensor.getName()).collect(Collectors.toList());
+            attachedSensors = new ArrayList<>(sensorService.findSensorByIdHw(hardware.getSerial_HW()));
 
-            HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensorsNames,
+            HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensors,
                     userService.getHardwareOwner(hardware.getSerial_HW()).getFullName());
             tile.addClassName("tile");
             verticalBaseLayout.add(tile);

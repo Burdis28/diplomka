@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HardwareLiveService extends CrudService<HardwareLive, Integer> {
@@ -33,5 +34,9 @@ public class HardwareLiveService extends CrudService<HardwareLive, Integer> {
 
     public List<HardwareLive> findAll() {
         return this.hardwareLiveRepository.findAll();
+    }
+
+    public HardwareLive findByHardwareId(String hwId) {
+        return hardwareLiveRepository.findByHwId(hwId).get();
     }
 }

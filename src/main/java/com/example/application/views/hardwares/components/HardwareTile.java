@@ -2,9 +2,11 @@ package com.example.application.views.hardwares.components;
 
 import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.HardwareLive;
+import com.example.application.data.entity.Sensor;
 import com.example.application.utils.Colors;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
@@ -16,6 +18,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.server.VaadinSession;
 
 
 import java.time.LocalDateTime;
@@ -33,9 +36,9 @@ public class HardwareTile extends VerticalLayout {
 
     private final DateTimePicker dateTimePicker = new DateTimePicker();
     private final TextField versionField = new TextField();
-    private final Select<String> sensorsList = new Select();
+    private final Select<Sensor> sensorsList = new Select<>();
 
-    public HardwareTile(Hardware hardware, HardwareLive hardwareLive, List<String> attachedSensorsNames, String ownerName) {
+    public HardwareTile(Hardware hardware, HardwareLive hardwareLive, List<Sensor> attachedSensors, String ownerName) {
         idTitle.setText("Hardware [ " + hardware.getId_HW() + " ]");
         idTitle.setId("idTitle");
 
@@ -52,7 +55,7 @@ public class HardwareTile extends VerticalLayout {
         ownerField.setReadOnly(true);
 
         dateTimePicker.setLabel("Time of signal check");
-        dateTimePicker.setValue(LocalDateTime.now());
+        dateTimePicker.setValue(hardwareLive.getDateTime().toLocalDateTime());
         dateTimePicker.setReadOnly(true);
 
         versionField.setReadOnly(true);
@@ -60,13 +63,11 @@ public class HardwareTile extends VerticalLayout {
         versionField.setValue(hardwareLive.getVersion());
 
         sensorsList.setLabel("List of attached sensors");
-        sensorsList.setItems(attachedSensorsNames);
+        sensorsList.setItems(attachedSensors);
+        sensorsList.setTextRenderer(item -> "[" + item.getIdHw() + "] " + item.getName());
         sensorsList.setPlaceholder("Sensors ...");
         sensorsList.setValue(null);
-        sensorsList.addValueChangeListener(event -> {
-            sensorsList.setValue(null);
-
-        });
+        sensorsList.addValueChangeListener(event -> navigateToSensorDetail(event.getValue()));
         sensorsList.addAttachListener(event -> {});
 
         topVerticalLayout.setAlignItems(Alignment.START);
@@ -116,6 +117,22 @@ public class HardwareTile extends VerticalLayout {
             signalIcon.setColor(Colors.ORANGE.getRgb());
         } else if (signal >= 0 && signal < 25) {
             signalIcon.setColor(Colors.RED.getRgb());
+        }
+    }
+
+    private void navigateToSensorDetail(Sensor sensor) {
+        VaadinSession.getCurrent().setAttribute("sensorId", sensor.getId());
+        switch (sensor.getType()) {
+            case "e":
+                UI.getCurrent().navigate("sensor-el-detail");
+                return;
+            case "w":
+                UI.getCurrent().navigate("sensor-wat-detail");
+                return;
+            case "g":
+                UI.getCurrent().navigate("sensor-gas-detail");
+                return;
+            default:
         }
     }
 }

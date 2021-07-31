@@ -1,0 +1,70 @@
+sensor-el-dashboard {
+    background-color: var(--lumo-contrast-10pct);
+    box-sizing: border-box;
+    display: block;
+    font-size: var(--lumo-font-size-m);
+    height: 100%;
+    overflow: auto;
+    padding: var(--lumo-space-m) var(--lumo-space-l);
+}
+
+sensor-el-dashboard vaadin-board {
+    margin: 0 auto;
+    max-width: 1280px;
+}
+
+/* Wrapper */
+sensor-el-dashboard .wrapper {
+    display: flex;
+    padding: var(--lumo-space-s);
+}
+
+/* Card */
+sensor-el-dashboard .card {
+    align-items: baseline;
+    background-color: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius);
+    box-shadow: var(--lumo-box-shadow-xs);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+}
+
+sensor-el-dashboard .card h2 {
+    margin-bottom: 0;
+    margin-top: var(--lumo-space-m);
+}
+
+sensor-el-dashboard .card h3 {
+    margin-bottom: var(--lumo-space-xs);
+    margin-left: var(--lumo-space-m);
+    margin-top: var(--lumo-space-m);
+}
+
+/* Spacing */
+sensor-el-dashboard .space-m {
+    padding: var(--lumo-space-m);
+}
+
+/* Text colors */
+sensor-el-dashboard .error-text {
+    color: var(--lumo-error-text-color);
+}
+
+sensor-el-dashboard .primary-text {
+    color: var(--lumo-primary-text-color);
+}
+
+sensor-el-dashboard .secondary-text {
+    color: var(--lumo-secondary-text-color);
+}
+
+sensor-el-dashboard .success-text {
+    color: var(--lumo-success-text-color);
+}
+
+/* Charts */
+sensor-el-dashboard vaadin-chart {
+    padding-top: var(--lumo-space-s);
+}

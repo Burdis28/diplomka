@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HardwareService extends CrudService<Hardware, Integer> {
@@ -38,5 +39,9 @@ public class HardwareService extends CrudService<Hardware, Integer> {
 
     public List<Hardware> findAll() {
         return this.hardwareRepository.findAll();
+    }
+
+    public Optional<Hardware> getBySerialHW(String serialHw) {
+        return hardwareRepository.getBySerialHW(serialHw);
     }
 }

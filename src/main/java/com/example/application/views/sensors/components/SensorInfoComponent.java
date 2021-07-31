@@ -36,18 +36,12 @@ public class SensorInfoComponent extends VerticalLayout {
     private BigDecimalField consumptionCorrelation = new BigDecimalField();
     private Chart consumptionChart = new Chart(ChartType.SOLIDGAUGE);
     private TextField currency = new TextField();
-    private String unit;
-    private Double consumptionActualNumber;
-    private DataSeries series;
-    private DataSeriesItem item;
 
     public SensorInfoComponent(Sensor sensor) {
         layout = getLayout();
         if(layout == null) {
             layout = new VerticalLayout();
         }
-        unit = sensor.getType().equals("e") ? "kWh": "m³";
-        consumptionActualNumber = sensor.getConsumptionActual();
         consumptionChart.drawChart(true);
 
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -82,55 +76,8 @@ public class SensorInfoComponent extends VerticalLayout {
     }
 
     private Component setConsumptionChart(Sensor sensor) {
-        Configuration configuration = consumptionChart.getConfiguration();
-        configuration.setTitle("Today's consumption");
-        consumptionChart.setClassName("solidGaugeConsumption");
-        consumptionChart.setHeight("350px");
-        consumptionChart.setWidth("400px");
-
-        Pane pane = configuration.getPane();
-        pane.setSize("125%");
-        pane.setCenter(new String[] {"50%", "70%"});
-        pane.setStartAngle(-90);
-        pane.setEndAngle(90);
-
-        Background paneBackground = new Background();
-        paneBackground.setInnerRadius("60%");
-        paneBackground.setOuterRadius("100%");
-        paneBackground.setShape(BackgroundShape.ARC);
-        pane.setBackground(paneBackground);
-
-        YAxis yAxis = configuration.getyAxis();
-        yAxis.getTitle().setY(-50);
-        yAxis.getLabels().setY(20);
-        yAxis.setMin(0);
-        yAxis.setMax(sensor.getLimit_day().intValue());
-
-        PlotOptionsSolidgauge plotOptionsSolidgauge = new PlotOptionsSolidgauge();
-
-        DataLabels dataLabels = plotOptionsSolidgauge.getDataLabels();
-        dataLabels.setY(5);
-        dataLabels.setUseHTML(true);
-
-        configuration.setPlotOptions(plotOptionsSolidgauge);
-
-        series = new DataSeries("Consumption");
-
-        item = new DataSeriesItem();
-        item.setY(consumptionActualNumber);
-        item.setClassName("myConsumptionGauge");
-        DataLabels dataLabelsSeries = new DataLabels();
-        dataLabelsSeries.setFormat("<div style=\"text-align:center\"><span style=\"font-size:25px;"
-                + "color:black' + '\">{y}</span><br/>"
-                + "<span style=\"font-size:12px;color:silver\">" + unit +"</span></div>");
-
-        item.setDataLabels(dataLabelsSeries);
-
-        series.add(item);
-
-        configuration.addSeries(series);
-
-        return consumptionChart;
+        return ChartCreatorUtil.createConsumptionChart(sensor, consumptionChart,
+                "350px", "400px", "Today's consumption", "125%");
     }
 
     private Span getTypeBadge(Sensor sensor) {
@@ -220,6 +167,8 @@ public class SensorInfoComponent extends VerticalLayout {
 
     public void actualizeConsumptionChart(Double consumption) {
         getUI().ifPresent(ui -> ui.access(() -> {
+            DataSeries series = (DataSeries)consumptionChart.getConfiguration().getSeries().get(0);
+            DataSeriesItem item = series.get(0);
             item.setY(consumption);
             series.update(item);
             ui.push();
