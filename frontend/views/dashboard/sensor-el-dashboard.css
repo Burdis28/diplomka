@@ -69,8 +69,7 @@ sensor-el-dashboard vaadin-chart {
     padding-top: var(--lumo-space-s);
 }
 
-sensor-el-dashboard .priceForADayDiv{
-    color: #1d1d2b;
+sensor-el-dashboard .priceForADayOrMonthDiv {
     font-size: larger;
     align-items: center;
     align-content: center;

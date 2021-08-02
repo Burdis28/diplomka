@@ -8,8 +8,6 @@ import '@vaadin/vaadin-button/src/vaadin-button.js';
 import '@vaadin/vaadin-date-picker/src/vaadin-date-picker.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
 import '@vaadin/vaadin-select/src/vaadin-select.js';
-import '@vaadin/vaadin-list-box/src/vaadin-list-box.js';
-import '@vaadin/vaadin-item/src/vaadin-item.js';
 
 @customElement('sensor-el-dashboard')
 export class SensorElDashboard extends LitElement {
@@ -76,43 +74,31 @@ export class SensorElDashboard extends LitElement {
   <div class="wrapper">
    <div class="card">
     <div id="monthlyChartDiv" style="margin: var(--lumo-space-l);"></div>
-    <div class="wrapper">
-     <div class="wrapper">
-      <div class="card">
-       <h4 style="margin: var(--lumo-space-s); margin-top: var(--lumo-space-l); margin-left: var(--lumo-space-l); margin-right: var(--lumo-space-l); margin-bottom: var(--lumo-space-m);">Price of electricity consumed for a certain day </h4>
-       <vaadin-date-picker label="Date" placeholder="Pick a date" id="priceForDayDatePicker" style="margin-left: var(--lumo-space-l);"></vaadin-date-picker>
-       <div id="priceForADayDiv" style="margin: var(--lumo-space-l);"></div>
-      </div>
-     </div>
-     <div class="wrapper">
-      <div class="card" style="padding: var(--lumo-space-l); padding-top: var(--lumo-space-xs);">
-       <h4>Price of electricity consumed during a certain month and year</h4>
-       <vaadin-horizontal-layout theme="spacing">
-        <vaadin-text-field label="Choose a year" id="yearSelecterField" minlength="4" value="2021" maxlength="4"></vaadin-text-field>
-        <vaadin-select value="None" id="monthSelecter" label="Choose a month">
-         <template>
-          <vaadin-list-box>
-           <vaadin-item>
-             Item one 
-           </vaadin-item>
-           <vaadin-item>
-             Item two 
-           </vaadin-item>
-           <vaadin-item>
-             Item three 
-           </vaadin-item>
-          </vaadin-list-box>
-         </template>
-        </vaadin-select>
-        <vaadin-button id="calculateBtn" style="margin-top: var(--lumo-space-xl); align-self: center;">
-         Calculate
-        </vaadin-button>
-       </vaadin-horizontal-layout>
-       <div id="priceForAMonth"></div>
-      </div>
-     </div>
-    </div>
     <vaadin-chart title="Consumption prices for past 30 days" id="monthlyChart" style="margin-top: var(--lumo-space-l);"></vaadin-chart>
+   </div>
+  </div>
+ </vaadin-board-row>
+ <vaadin-board-row>
+  <div class="wrapper">
+   <div class="wrapper">
+    <div class="card">
+     <h4 style="margin: var(--lumo-space-s); margin-top: var(--lumo-space-l); margin-left: var(--lumo-space-l); margin-right: var(--lumo-space-l); margin-bottom: var(--lumo-space-m);">Price of electricity consumed for a certain day </h4>
+     <vaadin-date-picker label="Date" placeholder="Pick a date" id="priceForDayDatePicker" style="margin-left: var(--lumo-space-l);"></vaadin-date-picker>
+     <div id="priceForADayDiv" style="margin: var(--lumo-space-l);"></div>
+    </div>
+   </div>
+   <div class="wrapper">
+    <div class="card" style="padding: var(--lumo-space-l); padding-top: var(--lumo-space-xs);">
+     <h4>Price of electricity consumed during a certain month and year</h4>
+     <vaadin-horizontal-layout theme="spacing">
+      <vaadin-text-field label="Choose a year" id="yearSelecterField" maxlength="4" required has-value></vaadin-text-field>
+      <vaadin-select id="monthSelecter" label="Choose a month"></vaadin-select>
+      <vaadin-button id="calculateBtn" style="margin-top: var(--lumo-space-xl); align-self: flex-start;">
+        Calculate 
+      </vaadin-button>
+     </vaadin-horizontal-layout>
+     <div id="priceForAMonth" style="margin: var(--lumo-space-l);"></div>
+    </div>
    </div>
   </div>
  </vaadin-board-row>

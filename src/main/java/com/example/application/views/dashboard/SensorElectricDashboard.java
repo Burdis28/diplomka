@@ -20,12 +20,14 @@ import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
@@ -36,12 +38,14 @@ import com.vaadin.flow.server.VaadinSession;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.sql.Date;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
+import static java.time.temporal.TemporalAdjusters.*;
 
 /**
  * A Designer generated component for the sensor-el-dashboard template.
@@ -73,6 +77,7 @@ public class SensorElectricDashboard extends LitTemplate {
     private StyledTextComponent consumptioNText;
     private StyledTextComponent priceText;
     private StyledTextComponent priceForADayText;
+    private StyledTextComponent priceForAMonthText;
 
     private List<DataElectric> dataElectricList;
     private int signalStrength;
@@ -113,7 +118,7 @@ public class SensorElectricDashboard extends LitTemplate {
     @Id("priceForDayDatePicker")
     private DatePicker priceForDayDatePicker;
     @Id("monthSelecter")
-    private Select monthSelecter;
+    private Select<Month> monthSelecter;
     @Id("yearSelecterField")
     private TextField yearSelecterField;
     @Id("priceForAMonth")
@@ -151,10 +156,59 @@ public class SensorElectricDashboard extends LitTemplate {
             setHwInfoData();
             setMonthlyConsumptionChart();
             setPriceOfDayPicker();
+            setPriceCalculationCards();
 
             areaSplineRangeChartDiv.add(pieChartHighLowRate);
             dailyConsumptionDiv.add(dailyConsumptionChart);
         }
+    }
+
+    private void setPriceCalculationCards() {
+        yearSelecterField.setPattern(PatternStringUtils.yearRegex);
+        yearSelecterField.setErrorMessage(PatternStringUtils.yearErrorMessage);
+        yearSelecterField.setPlaceholder("Type in a year.");
+        yearSelecterField.setRequired(true);
+
+        monthSelecter.removeAll();
+        monthSelecter.setItems(PatternStringUtils.months);
+        monthSelecter.setTextRenderer(Enum::name);
+        monthSelecter.setValue(LocalDate.now().getMonth());
+
+        priceForAMonthText = new StyledTextComponent("");
+        priceForAMonth.add(priceForAMonthText);
+        priceForAMonth.setClassName("priceForADayOrMonthDiv");
+
+        calculateBtn.addClickListener(event -> {
+            if (!monthSelecter.isInvalid() && !yearSelecterField.isInvalid()) {
+                LocalDate date = getDateFromSelecterFields();
+
+                List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
+                        date.with(firstDayOfMonth()), date.with(lastDayOfMonth()));
+                Double price = dataElectrics.stream().mapToDouble(value -> value.getHighRate() * 0.001 * sensorElectric.getPricePerKwHigh()
+                        + value.getLowRate() * 0.001 * sensorElectric.getPricePerKwLow()).sum();
+                priceForAMonthText.setText("Price: <b>" + getNumberOfDecimalPrecision(price, 3) + " [" + sensor.getCurrencyString() + "]");
+                Notification.show("Prica succsefully calculated.");
+            }
+        });
+    }
+
+    private LocalDate getDateFromSelecterFields() {
+        Month month = monthSelecter.getValue();
+        if (month == null) {
+            month = LocalDate.now().getMonth();
+        }
+        int year;
+        try {
+            year = Integer.parseInt(yearSelecterField.getValue());
+        } catch (NumberFormatException e) {
+            year = LocalDate.now().getYear();
+            Dialog dialog = new Dialog();
+            dialog.setModal(true);
+            dialog.add("Wrong year input. This year chosen by default.");
+            dialog.open();
+            yearSelecterField.setValue(LocalDate.now().getYear()+"");
+        }
+        return LocalDate.of(year, month, 1);
     }
 
     private void setPieChartHighLowRate(){
@@ -289,11 +343,18 @@ public class SensorElectricDashboard extends LitTemplate {
         priceForDayDatePicker.addValueChangeListener(event -> {
             List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
                     event.getValue(), event.getValue());
-            priceForADayDiv.setClassName("priceForADayDiv");
+            priceForADayDiv.setClassName("priceForADayOrMonthDiv");
             Double price = dataElectrics.stream().mapToDouble(value -> value.getHighRate() * 0.001 * sensorElectric.getPricePerKwHigh()
                     + value.getLowRate() * 0.001 * sensorElectric.getPricePerKwLow()).sum();
-            priceForADayText.setText("Price: <b>" + price + " [" + sensor.getCurrencyString() + "]" );
+            priceForADayText.setText("Price: <b>" + getNumberOfDecimalPrecision(price, 3) + " [" + sensor.getCurrencyString() + "]" );
+            Notification.show("Price successfully calculated.");
         });
+    }
+
+    private double getNumberOfDecimalPrecision(Double number, int numberOfDecimalPlaces) {
+        return BigDecimal.valueOf(number)
+                .setScale(numberOfDecimalPlaces, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     private void updateDailyConsumptionChartData(LocalDate value) {
@@ -307,6 +368,7 @@ public class SensorElectricDashboard extends LitTemplate {
             getUI().ifPresent(ui -> ui.access(() -> {
                 configuration.setSubTitle("Date: " + value.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
                 dailyConsumptionChart.setConfiguration(configuration);
+                Notification.show("Daily consumption updated.");
                 ui.push();
             }));
         } catch (UIDetachedException exception) {
@@ -392,8 +454,8 @@ public class SensorElectricDashboard extends LitTemplate {
                         String formatDateTime = now.format(formatter);
                         refreshPriceDiv(refreshedSensor.get());
                         refreshConsumptionText(refreshedSensor.get());
-                        actualizedDivField.setText("Actualized: " + formatDateTime);
-                        hardwareStatusActualizedField.setText("Actualized: " + formatDateTime);
+                        actualizedDivField.setText("Updated: " + formatDateTime);
+                        hardwareStatusActualizedField.setText("Updated: " + formatDateTime);
                         ui.push();
                     }
             ));
