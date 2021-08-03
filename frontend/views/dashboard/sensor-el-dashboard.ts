@@ -3,11 +3,11 @@ import '@vaadin/vaadin-board/src/vaadin-board.js';
 import '@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js';
 import '@vaadin/vaadin-board/src/vaadin-board-row.js';
 import '@vaadin/vaadin-charts/src/vaadin-chart.js';
-import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
-import '@vaadin/vaadin-button/src/vaadin-button.js';
 import '@vaadin/vaadin-date-picker/src/vaadin-date-picker.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
 import '@vaadin/vaadin-select/src/vaadin-select.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vaadin-button/src/vaadin-button.js';
 
 @customElement('sensor-el-dashboard')
 export class SensorElDashboard extends LitElement {
@@ -59,6 +59,18 @@ export class SensorElDashboard extends LitElement {
     <div id="hardwareStatusActualizedField"></div>
    </div>
   </div>
+  <div class="wrapper">
+   <div class="card space-m">
+    <span style="width: 100%;" theme="badge success">Monthly consumption limit</span>
+    <div id="consumptionMonthDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
+     This month consumption
+    </div>
+    <vaadin-progress-bar id="monthLimitProgressBar" max="20" value="12"></vaadin-progress-bar>
+    <div id="priceThisMonthDiv">
+     Price: 
+    </div>
+   </div>
+  </div>
  </vaadin-board-row>
  <vaadin-board-row>
   <div class="wrapper" style="flex-grow: 1;">
@@ -84,7 +96,7 @@ export class SensorElDashboard extends LitElement {
     <div class="card">
      <h4 style="margin: var(--lumo-space-s); margin-top: var(--lumo-space-l); margin-left: var(--lumo-space-l); margin-right: var(--lumo-space-l); margin-bottom: var(--lumo-space-m);">Price of electricity consumed for a certain day </h4>
      <vaadin-date-picker label="Date" placeholder="Pick a date" id="priceForDayDatePicker" style="margin-left: var(--lumo-space-l);"></vaadin-date-picker>
-     <div id="priceForADayDiv" style="margin: var(--lumo-space-l);"></div>
+     <div id="priceForADayDiv" style="margin-top: var(--lumo-space-l); margin-left: var(--lumo-space-l); margin-bottom: var(--lumo-space-l);"></div>
     </div>
    </div>
    <div class="wrapper">
@@ -93,11 +105,16 @@ export class SensorElDashboard extends LitElement {
      <vaadin-horizontal-layout theme="spacing">
       <vaadin-text-field label="Choose a year" id="yearSelecterField" maxlength="4" required has-value></vaadin-text-field>
       <vaadin-select id="monthSelecter" label="Choose a month"></vaadin-select>
-      <vaadin-button id="calculateBtn" style="margin-top: var(--lumo-space-xl); align-self: flex-start;">
-        Calculate 
+     </vaadin-horizontal-layout>
+     <vaadin-horizontal-layout>
+      <vaadin-button id="calculateBtn" style="align-self: flex-start; margin-top: var(--lumo-space-xl);" theme="primary first">
+        Calculate month 
+      </vaadin-button>
+      <vaadin-button id="calculateWholeYear" style="margin-top: var(--lumo-space-xl); align-self: flex-start; margin-left: var(--lumo-space-m);" theme="secondary">
+        Calculate whole year 
       </vaadin-button>
      </vaadin-horizontal-layout>
-     <div id="priceForAMonth" style="margin: var(--lumo-space-l);"></div>
+     <div id="priceForAMonth" style="margin-top: var(--lumo-space-l);"></div>
     </div>
    </div>
   </div>

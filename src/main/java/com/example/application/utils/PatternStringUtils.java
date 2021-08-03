@@ -29,7 +29,7 @@ public class PatternStringUtils {
     public static String formatNumberToText(Double number) {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setGroupingSeparator(' ');
-        DecimalFormat df = new DecimalFormat("###,###.00", symbols);
+        DecimalFormat df = new DecimalFormat("###,###,###,###,###.000", symbols);
         return df.format(number);
     }
 

@@ -74,3 +74,7 @@ sensor-el-dashboard .priceForADayOrMonthDiv {
     align-items: center;
     align-content: center;
 }
+
+sensor-el-dashboard .highcharts-yaxis-grid .highcharts-grid-line {
+    display: none;
+}

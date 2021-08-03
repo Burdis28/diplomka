@@ -5,6 +5,7 @@ import com.example.application.data.entity.SensorTypes;
 import com.example.application.data.entity.User;
 import com.example.application.data.service.SensorService;
 import com.example.application.data.service.data.DataElectricService;
+import com.example.application.data.service.data.DataWaterService;
 import com.example.application.utils.DevelopmentDataCreator;
 import com.example.application.views.main.MainView;
 import com.vaadin.flow.component.Tag;
@@ -63,15 +64,15 @@ public class SensorsView extends LitTemplate {
 
     private final SensorService sensorService;
     private final DataElectricService dataElectricService;
+    private final DataWaterService dataWaterService;
     private final User loggedUser;
 
-    //TEST DATA
-    @Value( "${generateTestData}" )
-    private boolean generateTestData;
-
-    public SensorsView(@Autowired SensorService sensorService, DataElectricService dataElectricService) {
+    public SensorsView(@Autowired SensorService sensorService, DataElectricService dataElectricService,
+                       DataWaterService dataWaterService, @Value("${generateTestData}") boolean generateTestData) {
         this.sensorService = sensorService;
         this.dataElectricService = dataElectricService;
+        this.dataWaterService = dataWaterService;
+        //TEST DATA
         grid.setSelectionMode(SelectionMode.NONE);
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
         grid.setClassName("my-grid");
@@ -79,9 +80,10 @@ public class SensorsView extends LitTemplate {
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
         createGrid();
 
-        if(false) {
-            DevelopmentDataCreator testData = new DevelopmentDataCreator(dataElectricService, sensorService);
+        if(generateTestData) {
+            DevelopmentDataCreator testData = new DevelopmentDataCreator(dataElectricService, sensorService, dataWaterService);
             testData.createElectricData();
+            testData.createWaterData();
         }
     }
 
