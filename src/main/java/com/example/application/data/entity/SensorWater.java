@@ -1,14 +1,15 @@
 package com.example.application.data.entity;
 
-import com.example.application.data.AbstractEntity;
-
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.sql.Timestamp;
 
 @Entity
-public class SensorWater extends AbstractEntity {
+public class SensorWater {
 
-    private float pricerPerM3;
+    @Id
+    private int sensor_id;
+    private float price_per_m3;
     private int implPerLit;
     private int state;
     private int stateModifierUserId;
@@ -25,12 +26,20 @@ public class SensorWater extends AbstractEntity {
     public SensorWater() {
     }
 
-    public float getPricerPerM3() {
-        return pricerPerM3;
+    public int getSensor_id() {
+        return sensor_id;
     }
 
-    public void setPricerPerM3(float pricerPerM3) {
-        this.pricerPerM3 = pricerPerM3;
+    public void setSensor_id(int sensor_id) {
+        this.sensor_id = sensor_id;
+    }
+
+    public float getPrice_per_m3() {
+        return price_per_m3;
+    }
+
+    public void setPrice_per_m3(float pricePerM3) {
+        this.price_per_m3 = pricePerM3;
     }
 
     public int getImplPerLit() {

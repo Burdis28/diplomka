@@ -1,4 +1,4 @@
-electric-sensor-view {
+water-sensor-view {
     background-color: var(--lumo-contrast-10pct);
     box-sizing: border-box;
     display: block;
@@ -8,7 +8,7 @@ electric-sensor-view {
     padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
 }
 
-electric-sensor-view #wrapperDiv {
+water-sensor-view #wrapperDiv {
     display: block;
     background-color: var(--lumo-base-color);
     margin: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
@@ -17,7 +17,7 @@ electric-sensor-view #wrapperDiv {
     max-width: 1024px;
 }
 
-electric-sensor-view #verticalLayoutElectric {
+water-sensor-view #verticalLayoutElectric {
     background-color: var(--lumo-contrast-5pct);
     margin-left: var(--lumo-space-l);
     margin-right: var(--lumo-space-l);
@@ -26,18 +26,18 @@ electric-sensor-view #verticalLayoutElectric {
     padding-bottom: var(--lumo-space-l);
 }
 
-electric-sensor-view #sensorInfoLayout {
+water-sensor-view #sensorInfoLayout {
     margin-top: 4px;
     margin-left: var(--lumo-space-xl);
     margin-right: var(--lumo-space-s);
 }
 
-electric-sensor-view #sensorAttributesH3 {
+water-sensor-view #sensorAttributesH3 {
     margin-top: var(--lumo-space-m);
     margin-bottom: var(--lumo-space-xs);
     align-self: flex-start;
 }
 
-electric-sensor-view #typeSpan {
+water-sensor-view #typeSpan {
     margin-top: var(--lumo-space-xl);
 }

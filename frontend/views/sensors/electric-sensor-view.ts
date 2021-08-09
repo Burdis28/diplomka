@@ -1,9 +1,9 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
 import '@polymer/iron-icon/iron-icon.js';
+import '@vaadin/vaadin-checkbox/src/vaadin-checkbox.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
-import '@vaadin/vaadin-checkbox/src/vaadin-checkbox.js';
 
 @customElement('electric-sensor-view')
 export class ElectricSensorView extends LitElement {
@@ -21,9 +21,11 @@ export class ElectricSensorView extends LitElement {
 <vaadin-vertical-layout theme="spacing" style="width: 100%; height: 100%; justify-content: flex-start; align-items: center;">
  <div style="align-self: center;" id="wrapperDiv">
   <vaadin-horizontal-layout theme="spacing" id="vaadinHorizontalLayout">
-   <vaadin-vertical-layout style="width: 100%; height: 100%; padding: var(--lumo-space-xl); padding-right: var(--lumo-space-xl); padding-left: var(--lumo-space-xl); align-items: center; justify-content: center;" theme="spacing-s">
+   <vaadin-horizontal-layout theme="spacing" id="firstLayout"></vaadin-horizontal-layout>
+   <vaadin-vertical-layout style="width: 100%; height: 100%; align-items: center; justify-content: center;" theme="spacing-s" id="verticalLayoutElectric">
+    <h3 id="electricAttributesTitle" style="align-self: flex-start;">Electric attributes</h3>
     <vaadin-big-decimal-field label="Price per KW - low" id="pricePerKwLowField" style="align-self: center; padding: var(--lumo-space-m);" tag="vaadin-big-decimal-field">
-     <div id="pricePerKwLowFieldSuffix" slot="suffix">
+     <div id="pricePerKwLowSuffix" slot="suffix">
        Kč 
      </div>
     </vaadin-big-decimal-field>
