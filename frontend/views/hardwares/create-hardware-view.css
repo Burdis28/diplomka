@@ -1,0 +1,24 @@
+create-hardware-view {
+  background-color: var(--lumo-contrast-10pct);
+  box-sizing: border-box;
+  display: block;
+  font-size: var(--lumo-font-size-m);
+  height: 100%;
+  overflow: auto;
+  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+}
+
+create-hardware-view div{
+  background-color: var(--lumo-base-color);
+  display: block;
+  margin: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s);
+  box-shadow: var(--lumo-box-shadow-l);
+  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+  max-width: 1200px;
+  max-height: min-content;
+}
+
+create-hardware-view .button-layout {
+  margin-bottom: var(--lumo-space-l);
+  margin-top: var(--lumo-space-m);
+}

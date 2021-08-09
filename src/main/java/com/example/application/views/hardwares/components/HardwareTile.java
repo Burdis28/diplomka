@@ -23,17 +23,17 @@ import java.util.List;
 
 public class HardwareTile extends VerticalLayout {
 
-    private HorizontalLayout topVerticalLayout = new HorizontalLayout();
-    private HorizontalLayout bottomVerticalLayout = new HorizontalLayout();
+    private final HorizontalLayout topVerticalLayout = new HorizontalLayout();
+    private final HorizontalLayout bottomVerticalLayout = new HorizontalLayout();
 
-    private H3 idTitle = new H3();
-    private TextField serialHwField = new TextField();
-    private TextField nameField = new TextField();
-    private TextField ownerField = new TextField();
+    private final H3 idTitle = new H3();
+    private final TextField serialHwField = new TextField();
+    private final TextField nameField = new TextField();
+    private final TextField ownerField = new TextField();
 
-    private DateTimePicker dateTimePicker = new DateTimePicker();
-    private TextField versionField = new TextField();
-    private Select<String> sensorsList = new Select();
+    private final DateTimePicker dateTimePicker = new DateTimePicker();
+    private final TextField versionField = new TextField();
+    private final Select<String> sensorsList = new Select();
 
     public HardwareTile(Hardware hardware, HardwareLive hardwareLive, List<String> attachedSensorsNames, String ownerName) {
         idTitle.setText("Hardware [ " + hardware.getId_HW() + " ]");

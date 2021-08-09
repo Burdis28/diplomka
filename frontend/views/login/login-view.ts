@@ -2,8 +2,9 @@ import {LitElement, html, customElement} from 'lit-element';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-form-layout/src/vaadin-form-layout.js';
 import '@vaadin/vaadin-text-field/src/vaadin-password-field.js';
-import '@vaadin/vaadin-button/src/vaadin-button.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vaadin-button/src/vaadin-button.js';
 
 @customElement('login-view')
 export class LoginView extends LitElement {
@@ -21,9 +22,14 @@ export class LoginView extends LitElement {
    <h3 id="loginTitleH3" style="align-self: flex-start; margin-top: var(--lumo-space-l); margin-bottom: var(--lumo-space-xs);">Log in</h3>
    <vaadin-text-field label="Username" placeholder="username" id="username" style="align-self: center; margin-top: var(--lumo-space-xs);" required invalid></vaadin-text-field>
    <vaadin-password-field label="Password" id="password" style="align-self: center;" required has-value invalid></vaadin-password-field>
-   <vaadin-button id="loginButton" style="align-self: flex-start;">
-     Log in 
-   </vaadin-button>
+   <vaadin-horizontal-layout theme="spacing">
+    <vaadin-button id="loginButton" style="align-self: flex-start;">
+      Log in 
+    </vaadin-button>
+    <vaadin-button id="registerButton">
+     Register
+    </vaadin-button>
+   </vaadin-horizontal-layout>
   </vaadin-vertical-layout>
  </vaadin-form-layout>
 </vaadin-vertical-layout>
