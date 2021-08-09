@@ -2,6 +2,8 @@ package com.example.application.views.hardwares;
 
 import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.HardwareLive;
+import com.example.application.data.entity.Sensor;
+import com.example.application.data.entity.User;
 import com.example.application.data.service.*;
 import com.example.application.views.hardwares.components.HardwareTile;
 import com.example.application.views.main.MainView;
@@ -13,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
+import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -28,29 +31,41 @@ import java.util.stream.Collectors;
 @PageTitle("Hardware management")
 public class HardwaresView extends LitTemplate {
 
-    private HardwareRepository hardwareRepository;
-    private HardwareLiveRepository hardwareLiveRepository;
-    private SensorRepository sensorRepository;
+    private HardwareService hardwareService;
+    private HardwareLiveService hardwareLiveService;
+    private SensorService sensorService;
     private UserService userService;
     @Id("verticalBaseLayout")
     private VerticalLayout verticalBaseLayout;
+    private User loggedUser;
 
-    public HardwaresView(@Autowired HardwareRepository hardwareRepository,@Autowired HardwareLiveRepository hardwareLiveRepository,
-                         @Autowired SensorRepository sensorRepository,@Autowired UserService userService) {
-        this.hardwareRepository = hardwareRepository;
-        this.hardwareLiveRepository = hardwareLiveRepository;
-        this.sensorRepository = sensorRepository;
+    public HardwaresView(@Autowired HardwareService hardwareService,@Autowired HardwareLiveService hardwareLiveService,
+                         @Autowired SensorService sensorService,@Autowired UserService userService) {
+        this.hardwareService = hardwareService;
+        this.hardwareLiveService = hardwareLiveService;
+        this.sensorService = sensorService;
         this.userService = userService;
+        loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
 
-        createTiles(hardwareRepository, hardwareLiveRepository, sensorRepository, userService);
+        createTiles(hardwareService, hardwareLiveService, sensorService, userService);
     }
 
-    private void createTiles(HardwareRepository hardwareRepository, HardwareLiveRepository hardwareLiveRepository,
-                             SensorRepository sensorRepository, UserService userService) {
+    private void createTiles(HardwareService hardwareService, HardwareLiveService hardwareLiveService,
+                             SensorService sensorService, UserService userService) {
 
-        List<Hardware> hardwareList = hardwareRepository.findAll();
-        List<HardwareLive> hardwareLiveList = hardwareLiveRepository.findAll();
-        List<String> attachedSensorsNames = new ArrayList<>();
+        List<Hardware> hardwareList;
+        List<HardwareLive> hardwareLiveList;
+        if (loggedUser.getAdmin()) {
+            hardwareList = hardwareService.findAll();
+            hardwareLiveList = hardwareLiveService.findByHardwareId(hardwareList.stream()
+                    .map(Hardware::getSerial_HW).collect(Collectors.toList()));
+        } else {
+            hardwareList = hardwareService.findByOwner(loggedUser.getId());
+            hardwareLiveList = hardwareLiveService.findByHardwareId(hardwareList.stream()
+                    .map(Hardware::getSerial_HW).collect(Collectors.toList()));
+        }
+
+        List<Sensor> attachedSensors;
 
         Map<String, HardwareLive> hardwareLiveMap = new HashMap<>();
         for (HardwareLive live : hardwareLiveList) {
@@ -58,13 +73,16 @@ public class HardwaresView extends LitTemplate {
         }
 
         for (Hardware hardware : hardwareList ) {
-            attachedSensorsNames = sensorRepository.findSensorByIdHw(hardware.getSerial_HW()).stream().map(sensor ->
-                    "[" + sensor.getId() + "] " + sensor.getName()).collect(Collectors.toList());
-            //System.out.println(hardware.getSerial_HW());
-            HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensorsNames,
-                    userService.getHardwareOwner(hardware.getSerial_HW()).getFullName());
-            tile.addClassName("tile");
-            verticalBaseLayout.add(tile);
+            attachedSensors = new ArrayList<>(sensorService.findSensorByIdHw(hardware.getSerial_HW()));
+
+            //try {
+                HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensors,
+                        userService.getHardwareOwner(hardware.getSerial_HW()).getFullName(), hardwareService, hardwareLiveService);
+                tile.addClassName("tile");
+                verticalBaseLayout.add(tile);
+//            } catch (Exception e) {
+//                System.out.println(e.getMessage());
+//            }
         }
     }
 }

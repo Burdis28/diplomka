@@ -1,0 +1,76 @@
+sensor-wat-dashboard {
+    background-color: var(--lumo-contrast-10pct);
+    box-sizing: border-box;
+    display: block;
+    font-size: var(--lumo-font-size-m);
+    height: 100%;
+    overflow: auto;
+    padding: var(--lumo-space-m) var(--lumo-space-l);
+}
+
+sensor-wat-dashboard vaadin-board {
+    margin: 0 auto;
+    max-width: 1280px;
+}
+
+/* Wrapper */
+sensor-wat-dashboard .wrapper {
+    display: flex;
+    padding: var(--lumo-space-s);
+}
+
+/* Card */
+sensor-wat-dashboard .card {
+    align-items: baseline;
+    background-color: var(--lumo-base-color);
+    border-radius: var(--lumo-border-radius);
+    box-shadow: var(--lumo-box-shadow-xs);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: 100%;
+}
+
+sensor-wat-dashboard .card h2 {
+    margin-bottom: 0;
+    margin-top: var(--lumo-space-m);
+}
+
+sensor-wat-dashboard .card h3 {
+    margin-bottom: var(--lumo-space-xs);
+    margin-left: var(--lumo-space-m);
+    margin-top: var(--lumo-space-m);
+}
+
+/* Spacing */
+sensor-wat-dashboard .space-m {
+    padding: var(--lumo-space-m);
+}
+
+/* Text colors */
+sensor-wat-dashboard .error-text {
+    color: var(--lumo-error-text-color);
+}
+
+sensor-wat-dashboard .primary-text {
+    color: var(--lumo-primary-text-color);
+}
+
+sensor-wat-dashboard .secondary-text {
+    color: var(--lumo-secondary-text-color);
+}
+
+sensor-wat-dashboard .success-text {
+    color: var(--lumo-success-text-color);
+}
+
+/* Charts */
+sensor-wat-dashboard vaadin-chart {
+    padding-top: var(--lumo-space-s);
+}
+
+sensor-wat-dashboard .priceForADayOrMonthDiv {
+    font-size: larger;
+    align-items: center;
+    align-content: center;
+}

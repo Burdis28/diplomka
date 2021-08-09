@@ -2,12 +2,14 @@ package com.example.application.data.service;
 
 import com.example.application.data.entity.User;
 import com.example.application.data.exceptions.AuthException;
+import com.example.application.views.dashboard.SensorElectricDashboard;
+import com.example.application.views.dashboard.SensorGasDashboard;
+import com.example.application.views.dashboard.SensorWaterDashboard;
+import com.example.application.views.login.LoginView;
 import com.example.application.views.sensors.CreatesensorView;
-import com.example.application.views.dashboard.DashboardView;
 import com.example.application.views.hardwares.CreateHardwareView;
 import com.example.application.views.hardwares.HardwaresView;
 import com.example.application.views.login.LogoutView;
-import com.example.application.views.logs.LogsView;
 import com.example.application.views.main.MainView;
 import com.example.application.views.sensors.ElectricSensorView;
 import com.example.application.views.sensors.GasSensorView;
@@ -23,9 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class AuthService {
@@ -41,7 +41,7 @@ public class AuthService {
 
         if (user != null && user.checkPassword(password)) {
             VaadinSession.getCurrent().setAttribute(User.class, user);
-            if(RouteConfiguration.forSessionScope().getAvailableRoutes().size() < 3) {
+            if (RouteConfiguration.forSessionScope().getAvailableRoutes().size() < 3) {
                 createRoutes(user.getAdmin());
             }
         } else {
@@ -56,53 +56,58 @@ public class AuthService {
                 .forEach(route -> {
                     RouteConfiguration.forSessionScope().setRoute(route.route, route.view, MainView.class);
                 });
-        if (admin) {
-            RouteConfiguration.forSessionScope().setRoute("sensor-el-detail", ElectricSensorView.class, MainView.class);
-            RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainView.class);
-            RouteConfiguration.forSessionScope().setRoute("sensor-gas-detail", GasSensorView.class, MainView.class);
-        }
+        RouteConfiguration.forSessionScope().setRoute("sensor-el-detail", ElectricSensorView.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-gas-detail", GasSensorView.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-el-dashboard", SensorElectricDashboard.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-wat-dashboard", SensorWaterDashboard.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-gas-dashboard", SensorGasDashboard.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("login", LoginView.class);
+
     }
 
     public List<AuthorizedRoute> getAuthorizedRoutes(boolean admin) {
         List<AuthorizedRoute> routes = new ArrayList<>();
 
         if (admin) {
-            routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
+            //routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
             routes.add(new AuthorizedRoute("sensors", "Sensors management", SensorsView.class, VaadinIcon.LIST));
             routes.add(new AuthorizedRoute("create-sensor", "Create sensor", CreatesensorView.class, VaadinIcon.FORM));
             routes.add(new AuthorizedRoute("hardwares", "Hardware management", HardwaresView.class, VaadinIcon.SERVER));
             routes.add(new AuthorizedRoute("create-hardware", "Create hardware", CreateHardwareView.class, VaadinIcon.HARDDRIVE_O));
-            routes.add(new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
+            //routes.add(new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
             routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
             routes.add(new AuthorizedRoute("user-management", "Users management", UserManagementView.class, VaadinIcon.USERS));
             routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.OUT));
         } else {
-            routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
+            //routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
             routes.add(new AuthorizedRoute("sensors", "Sensors management", SensorsView.class, VaadinIcon.LIST));
+            routes.add(new AuthorizedRoute("create-sensor", "Create sensor", CreatesensorView.class, VaadinIcon.FORM));
             routes.add(new AuthorizedRoute("hardwares", "Hardware management", HardwaresView.class, VaadinIcon.SERVER));
+            routes.add(new AuthorizedRoute("create-hardware", "Create hardware", CreateHardwareView.class, VaadinIcon.HARDDRIVE_O));
             routes.add(new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
             routes.add(new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.OUT));
         }
         return routes;
     }
 
-    public Map<String, AuthorizedRoute> getAuthorizedRoutesMap(boolean admin) {
-        Map<String, AuthorizedRoute> routes = new HashMap<>();
-
-        if (admin) {
-            routes.put("dashboard", new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
-            routes.put("sensors", new AuthorizedRoute("sensors", "Sensors", SensorsView.class, VaadinIcon.LIST));
-            routes.put("sensorcreate", new AuthorizedRoute("sensorcreate", "Sensor Create", CreatesensorView.class, VaadinIcon.FORM));
-            routes.put("logs", new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
-            routes.put("user", new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
-            routes.put("logout", new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
-        } else {
-            routes.put("dashboard", new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
-            routes.put("put", new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
-            routes.put("logout", new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
-        }
-        return routes;
-    }
+//    public Map<String, AuthorizedRoute> getAuthorizedRoutesMap(boolean admin) {
+//        Map<String, AuthorizedRoute> routes = new HashMap<>();
+//
+//        if (admin) {
+//            routes.put("dashboard", new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
+//            routes.put("sensors", new AuthorizedRoute("sensors", "Sensors", SensorsView.class, VaadinIcon.LIST));
+//            routes.put("sensorcreate", new AuthorizedRoute("sensorcreate", "Sensor Create", CreatesensorView.class, VaadinIcon.FORM));
+//            routes.put("logs", new AuthorizedRoute("logs", "Logs", LogsView.class, VaadinIcon.CLIPBOARD_TEXT));
+//            routes.put("user", new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
+//            routes.put("logout", new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+//        } else {
+//            routes.put("dashboard", new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
+//            routes.put("put", new AuthorizedRoute("user", "My profile", UserView.class, VaadinIcon.USER));
+//            routes.put("logout", new AuthorizedRoute("logout", "Logout", LogoutView.class, VaadinIcon.CLOSE_CIRCLE));
+//        }
+//        return routes;
+//    }
 
     public record AuthorizedRoute(String route, String name, Class<? extends Component> view, VaadinIcon icon) {
         // record - novinka v java 15

@@ -14,7 +14,7 @@ water-sensor-view #wrapperDiv {
     margin: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
     box-shadow: var(--lumo-box-shadow-l);
     padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
-    max-width: 1024px;
+    max-width: 1524px;
 }
 
 water-sensor-view #verticalLayoutElectric {

@@ -5,14 +5,23 @@ public enum SensorTypes {
     e ("Electric"),
     g ("Gas");
 
-    private final String name;
+    private final String sensorType;
 
-    SensorTypes(String name) {
-        this.name = name;
+    SensorTypes(String sensorType) {
+        this.sensorType = sensorType;
     }
 
     @Override
     public String toString() {
-        return name;
+        return sensorType;
+    }
+
+    public static SensorTypes fromCode(String code) {
+        return switch (code) {
+            case "Water" -> w;
+            case "Electric" -> e;
+            case "Gas" -> g;
+            default -> null;
+        };
     }
 }

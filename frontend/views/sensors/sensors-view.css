@@ -3,6 +3,7 @@ sensors-view {
   height: 100%;
 }
 sensors-view vaadin-grid-pro {
+  font-size: 20px;
   height: 100%;
 }
 sensors-view vaadin-grid-filter,
@@ -18,6 +19,7 @@ sensors-view vaadin-grid-pro img {
   height: var(--lumo-size-m);
   width: var(--lumo-size-m);
 }
+
 sensors-view .name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -30,3 +32,4 @@ sensors-view vaadin-grid-pro span {
   text-align: center;
   width: var(--lumo-size-m);
 }
+

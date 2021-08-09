@@ -1,10 +1,10 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
-import '@vaadin/vaadin-form-layout/src/vaadin-form-item.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
-import '@polymer/iron-icon/iron-icon.js';
+import '@vaadin/vaadin-form-layout/src/vaadin-form-item.js';
+import '@vaadin/vaadin-date-time-picker/src/vaadin-date-time-picker.js';
 
 @customElement('create-hardware-view')
 export class CreateHardwareView extends LitElement {
@@ -24,23 +24,35 @@ export class CreateHardwareView extends LitElement {
   <vaadin-vertical-layout theme="spacing">
    <h3>Create new hardware</h3>
    <vaadin-form-item>
-    <label slot="label">First</label>
-    <vaadin-text-field label="" placeholder=""></vaadin-text-field>
+    <label slot="label">Name</label>
+    <vaadin-text-field label="" placeholder="" id="nameField" maxlength="45"></vaadin-text-field>
    </vaadin-form-item>
    <vaadin-form-item>
-    <label slot="label">Second</label>
-    <vaadin-text-field label="" placeholder=""></vaadin-text-field>
+    <label slot="label">Serial hardware code</label>
+    <vaadin-text-field label="" placeholder="" id="serialHwCodeField" maxlength="45"></vaadin-text-field>
    </vaadin-form-item>
    <vaadin-form-item>
-    <label slot="label">Third</label>
-    <vaadin-text-field label="" placeholder=""></vaadin-text-field>
+    <label slot="label">Smart plug serial code</label>
+    <vaadin-text-field label="" placeholder="" id="smartPlugSerialCodeField" maxlength="45"></vaadin-text-field>
+   </vaadin-form-item>
+   <vaadin-form-item>
+    <label slot="label">Smart plug name</label>
+    <vaadin-text-field id="smartPlugNameField" maxlength="125"></vaadin-text-field>
+   </vaadin-form-item>
+   <vaadin-form-item>
+    <label slot="label">Activation code</label>
+    <vaadin-text-field id="activationCodeField" maxlength="20"></vaadin-text-field>
+   </vaadin-form-item>
+   <vaadin-form-item>
+    <label slot="label">Active till</label>
+    <vaadin-date-time-picker id="dateTimePickerField"></vaadin-date-time-picker>
    </vaadin-form-item>
    <vaadin-horizontal-layout theme="spacing" style="align-self: center;">
-    <vaadin-button theme="primary">
-     <iron-icon icon="lumo:edit" slot="prefix"></iron-icon>Create 
+    <vaadin-button theme="primary" id="createHwButton">
+     Create 
     </vaadin-button>
-    <vaadin-button theme="secondary">
-     <iron-icon icon="lumo:edit" slot="prefix"></iron-icon>Cancel
+    <vaadin-button theme="secondary" id="cancelButton">
+     Cancel 
     </vaadin-button>
    </vaadin-horizontal-layout>
   </vaadin-vertical-layout>

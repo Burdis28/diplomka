@@ -22,7 +22,7 @@ export class GasSensorView extends LitElement {
    <vaadin-horizontal-layout theme="spacing" id="firstLayout"></vaadin-horizontal-layout>
    <vaadin-vertical-layout style="width: 100%; height: 100%; align-items: center; justify-content: center;" theme="spacing-s" id="verticalLayoutGas">
     <h3 id="gasAttributesTitle" style="align-self: flex-start;">Gas attributes</h3>
-    <vaadin-text-area label="Attributes missing" readonly value="There are no Gas attributes - TODO - ask Fikejz"></vaadin-text-area>
+    <vaadin-text-area label="Attributes missing" readonly value="Gas sensors have no attributes in this version of the app. Coming soon..." has-value></vaadin-text-area>
    </vaadin-vertical-layout>
   </vaadin-horizontal-layout>
   <vaadin-horizontal-layout theme="spacing" style="align-self: center; padding: var(--lumo-space-l); justify-content: center;">

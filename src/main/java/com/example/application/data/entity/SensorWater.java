@@ -9,7 +9,7 @@ public class SensorWater {
 
     @Id
     private int sensor_id;
-    private float price_per_m3;
+    private Double price_per_m3;
     private int implPerLit;
     private int state;
     private int stateModifierUserId;
@@ -34,11 +34,11 @@ public class SensorWater {
         this.sensor_id = sensor_id;
     }
 
-    public float getPrice_per_m3() {
+    public Double getPrice_per_m3() {
         return price_per_m3;
     }
 
-    public void setPrice_per_m3(float pricePerM3) {
+    public void setPrice_per_m3(Double pricePerM3) {
         this.price_per_m3 = pricePerM3;
     }
 

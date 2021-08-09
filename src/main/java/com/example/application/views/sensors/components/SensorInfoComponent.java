@@ -4,21 +4,23 @@ import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
 import com.example.application.utils.SensorsUtils;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextField;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 public class SensorInfoComponent extends VerticalLayout {
 
@@ -32,6 +34,7 @@ public class SensorInfoComponent extends VerticalLayout {
     private BigDecimalField limitMonth = new BigDecimalField();
     private BigDecimalField consumptionActual = new BigDecimalField();
     private BigDecimalField consumptionCorrelation = new BigDecimalField();
+    private Chart consumptionChart = new Chart(ChartType.SOLIDGAUGE);
     private TextField currency = new TextField();
 
     public SensorInfoComponent(Sensor sensor) {
@@ -39,10 +42,13 @@ public class SensorInfoComponent extends VerticalLayout {
         if(layout == null) {
             layout = new VerticalLayout();
         }
+        consumptionChart.drawChart(true);
+
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
         layout.setId("sensorInfoLayout");
         sensorName.setLabel("Sensor name");
         sensorName.setValue(sensor.getName());
+        sensorName.setWidthFull();
         type = getTypeBadge(sensor);
         sensorAttributesTitle.setText("Sensor info");
         sensorAttributesTitle.setId("sensorAttributesH3");
@@ -54,21 +60,24 @@ public class SensorInfoComponent extends VerticalLayout {
         createdDatePicker.setValue(sensor.getCreatedDate().toInstant().atZone(ZoneOffset.UTC).toLocalDateTime());
         createdDatePicker.setReadOnly(true);
         add(createdDatePicker);
+        currency.setLabel("Currency");
+        currency.setValue(sensor.getCurrencyString());
+        currency.setWidthFull();
+        add(currency);
         limitDay.setLabel("Limit day");
         limitDay.setValue(BigDecimal.valueOf(sensor.getLimit_day()));
+        limitDay.setWidthFull();
         add(limitDay);
         limitMonth.setLabel("Limit month");
         limitMonth.setValue(BigDecimal.valueOf(sensor.getLimit_month()));
+        limitMonth.setWidthFull();
         add(limitMonth);
-        consumptionActual.setLabel("Consumption actual");
-        consumptionActual.setValue(BigDecimal.valueOf(sensor.getConsumptionActual()));
-        add(consumptionActual);
-        consumptionCorrelation.setLabel("Consumption correlation");
-        consumptionCorrelation.setValue(BigDecimal.valueOf(sensor.getConsumptionCorrelation()));
-        add(consumptionCorrelation);
-        currency.setLabel("Currency");
-        currency.setValue(sensor.getCurrencyString());
-        add(currency);
+        add(setConsumptionChart(sensor));
+    }
+
+    private Component setConsumptionChart(Sensor sensor) {
+        return ChartCreatorUtil.createConsumptionChart(sensor, consumptionChart,
+                "350px", "400px", "Today's consumption", "125%");
     }
 
     private Span getTypeBadge(Sensor sensor) {
@@ -146,5 +155,27 @@ public class SensorInfoComponent extends VerticalLayout {
 
     public void setCurrency(TextField currency) {
         this.currency = currency;
+    }
+
+    public Chart getConsumptionChart() {
+        return consumptionChart;
+    }
+
+    public void setConsumptionChart(Chart consumptionChart) {
+        this.consumptionChart = consumptionChart;
+    }
+
+    public void actualizeConsumptionChart(Double consumption) {
+        getUI().ifPresent(ui -> ui.access(() -> {
+            DataSeries series = (DataSeries) consumptionChart.getConfiguration().getSeries().get(0);
+            DataSeriesItem item = series.get(0);
+            item.setY(consumption);
+            series.update(item);
+            ui.push();
+        }));
+    }
+
+    public void actualizeConsumptionChart(Sensor sensor) {
+        setConsumptionChart(sensor);
     }
 }

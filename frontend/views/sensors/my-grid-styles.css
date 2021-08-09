@@ -1,0 +1,5 @@
+
+:host(.my-grid) [part="row"] {
+    min-height: 50px;
+    font-size: 22px;
+}

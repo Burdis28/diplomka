@@ -114,8 +114,6 @@ public class GasSensorView extends LitTemplate {
                 sensor.setName(sensorInfo.getSensorName().getValue());
                 sensor.setLimit_day(sensorInfo.getLimitDay().getValue().doubleValue());
                 sensor.setLimit_month(sensorInfo.getLimitMonth().getValue().doubleValue());
-                sensor.setConsumptionActual(sensorInfo.getConsumptionActual().getValue().doubleValue());
-                sensor.setConsumptionCorrelation(sensorInfo.getConsumptionCorrelation().getValue().doubleValue());
                 sensor.setCurrencyString(sensorInfo.getCurrency().getValue());
 
                 if(sensorGas != null) {
@@ -133,7 +131,7 @@ public class GasSensorView extends LitTemplate {
                 setSensorFields();
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                error.setErrorText("Špatně zadaná vstupní data formuláře.");
+                error.setErrorText("Wrong form data input.");
                 error.open();
             }
         });
@@ -154,6 +152,9 @@ public class GasSensorView extends LitTemplate {
         sensorInfo.setId("sensorInfoLayout");
         sensorInfo.setVisible(true);
         firstLayout.addComponentAsFirst(sensorInfo);
+
+        sensorInfo.getConsumptionActual().setReadOnly(true);
+        sensorInfo.getConsumptionCorrelation().setReadOnly(true);
         setSensorFields();
     }
 
@@ -175,8 +176,6 @@ public class GasSensorView extends LitTemplate {
         sensorInfo.getSensorName().setReadOnly(b);
         sensorInfo.getLimitDay().setReadOnly(b);
         sensorInfo.getLimitMonth().setReadOnly(b);
-        sensorInfo.getConsumptionActual().setReadOnly(b);
-        sensorInfo.getConsumptionCorrelation().setReadOnly(b);
         sensorInfo.getCurrency().setReadOnly(b);
     }
 }

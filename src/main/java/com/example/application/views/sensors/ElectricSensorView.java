@@ -6,6 +6,8 @@ import com.example.application.data.entity.SensorElectric;
 import com.example.application.data.service.SensorElectricService;
 import com.example.application.data.service.SensorService;
 import com.example.application.helpers.validators.ElectricSensorValidator;
+import com.example.application.utils.PatternStringUtils;
+import com.example.application.utils.RegexDoubleStringValidator;
 import com.example.application.views.main.MainView;
 import com.example.application.views.sensors.components.SensorInfoComponent;
 import com.vaadin.flow.component.Tag;
@@ -22,11 +24,17 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.validator.RegexpValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Optional;
 
 /**
  * A Designer generated component for the water-sensor template.
@@ -39,6 +47,7 @@ import java.math.BigDecimal;
 @CssImport("./views/sensors/electric-sensor-view.css")
 @ParentLayout(MainView.class)
 @PageTitle("Electric sensor detail")
+@EnableScheduling
 public class ElectricSensorView extends LitTemplate {
 
     @Id("priceFixedField")
@@ -84,6 +93,10 @@ public class ElectricSensorView extends LitTemplate {
     private Sensor sensor;
     private SensorInfoComponent sensorInfo;
 
+    private Binder<Sensor> sensorBinder = new Binder<>();
+    private Binder<SensorElectric> sensorElectricBinder = new Binder<>();
+
+
     public ElectricSensorView(SensorElectricService sensorElectricService,
                               SensorService sensorService) {
         this.sensorElectricService = sensorElectricService;
@@ -123,38 +136,28 @@ public class ElectricSensorView extends LitTemplate {
 
             setReadOnlyFields(true);
 
-            setSensorFields(sensorElectric);
+            //setSensorFields(sensorElectric);
         });
 
         saveButton.addClickListener(buttonClickEvent -> {
             try {
-                sensorElectric.setPricePerKwHigh(pricePerKwHighField.getValue().floatValue());
-                sensorElectric.setPricePerKwLow(pricePerKwLowField.getValue().floatValue());
-                sensorElectric.setPriceFix(priceFixedField.getValue().floatValue());
-                sensorElectric.setPriceService(priceServiceField.getValue().floatValue());
-                sensorElectric.setImplPerKw(implPerKWField.getValue().intValue());
-                sensorElectric.setHighRate(highRateCheckbox.getValue());
-
-                sensor.setName(sensorInfo.getSensorName().getValue());
-                sensor.setLimit_day(sensorInfo.getLimitDay().getValue().doubleValue());
-                sensor.setLimit_month(sensorInfo.getLimitMonth().getValue().doubleValue());
-                sensor.setConsumptionActual(sensorInfo.getConsumptionActual().getValue().doubleValue());
-                sensor.setConsumptionCorrelation(sensorInfo.getConsumptionCorrelation().getValue().doubleValue());
-                sensor.setCurrencyString(sensorInfo.getCurrency().getValue());
-
                 if (!ElectricSensorValidator.validateLowHigh(
-                        pricePerKwLowField.getValue().floatValue(),
-                        pricePerKwHighField.getValue().floatValue())) {
+                        pricePerKwLowField.getValue().doubleValue(),
+                        pricePerKwHighField.getValue().doubleValue())) {
                     ErrorNotification error = new ErrorNotification();
                     error.setErrorText("[Price per KW - low] musí být menší, než [Price per KW - high]");
                     error.open();
                     pricePerKwLowField.setInvalid(true);
                     pricePerKwHighField.setInvalid(true);
                 } else {
+                    sensorElectricBinder.writeBean(sensorElectric);
+                    sensorBinder.writeBean(sensor);
+
                     sensorElectricService.update(sensorElectric);
                     sensorService.update(sensor);
                     pricePerKwLowField.setInvalid(false);
                     pricePerKwHighField.setInvalid(false);
+                    sensorInfo.actualizeConsumptionChart(sensor);
 
                     setButton(saveButton, false);
                     setButton(returnButton, true);
@@ -163,11 +166,11 @@ public class ElectricSensorView extends LitTemplate {
 
                     setReadOnlyFields(true);
 
-                    setSensorFields(sensorElectric);
+                    //setSensorFields(sensorElectric);
                 }
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                error.setErrorText("Špatně zadaná vstupní data formuláře.");
+                error.setErrorText("Wrong form data input.");
                 error.open();
             }
         });
@@ -184,35 +187,67 @@ public class ElectricSensorView extends LitTemplate {
             this.sensorElectricService.get(sensorId).ifPresent(electric -> sensorElectric = electric);
             this.sensorService.get(sensorId).ifPresent(sensor -> this.sensor = sensor);
         }
+        setCurrencySuffixes();
+
+        sensorInfo = new SensorInfoComponent(sensor);
+        sensorInfo.setId("sensorInfoLayout");
+        sensorInfo.setVisible(true);
+        firstLayout.addComponentAsFirst(sensorInfo);
+
+        sensorInfo.getConsumptionActual().setReadOnly(true);
+        sensorInfo.getConsumptionCorrelation().setReadOnly(true);
+        setSensorFields();
+    }
+
+    private void setCurrencySuffixes() {
         String currency = sensor.getCurrencyString();
         priceFixedSuffix.setText(currency);
         pricePerKwHighSuffix.setText(currency);
         pricePerKwLowFieldSuffix.setText(currency);
         priceServiceSuffix.setText(currency);
         implPerKwSuffix.setText(currency);
-
-        sensorInfo = new SensorInfoComponent(sensor);
-        sensorInfo.setId("sensorInfoLayout");
-        sensorInfo.setVisible(true);
-        firstLayout.addComponentAsFirst(sensorInfo);
-        //vaadinHorizontalLayout.addComponentAtIndex(0, sensorInfo);
-        setSensorFields(sensorElectric);
     }
 
-    private void setSensorFields(SensorElectric sensorElectric) {
-        pricePerKwLowField.setValue(BigDecimal.valueOf(sensorElectric.getPricePerKwLow()));
-        pricePerKwHighField.setValue(BigDecimal.valueOf(sensorElectric.getPricePerKwHigh()));
-        priceFixedField.setValue(BigDecimal.valueOf(sensorElectric.getPriceFix()));
-        priceServiceField.setValue(BigDecimal.valueOf(sensorElectric.getPriceService()));
-        implPerKWField.setValue(BigDecimal.valueOf(sensorElectric.getImplPerKw()));
-        highRateCheckbox.setValue(sensorElectric.isHighRate());
+    private void setSensorFields() {
+        sensorElectricBinder.forField(pricePerKwLowField).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex62))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
+                .bind(SensorElectric::getPricePerKwLow, SensorElectric::setPricePerKwLow);
+        sensorElectricBinder.forField(pricePerKwHighField).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex62))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
+                .bind(SensorElectric::getPricePerKwHigh, SensorElectric::setPricePerKwHigh);
+        sensorElectricBinder.forField(priceFixedField).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex62))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
+                .bind(SensorElectric::getPriceFix, SensorElectric::setPriceFix);
+        sensorElectricBinder.forField(priceServiceField).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex62))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
+                .bind(SensorElectric::getPriceService, SensorElectric::setPriceService);
+        sensorElectricBinder.forField(implPerKWField).asRequired("Required field.").withConverter(BigDecimal::intValue, BigDecimal::valueOf)
+                .bind(SensorElectric::getImplPerKw, SensorElectric::setImplPerKw);
+        sensorElectricBinder.forField(highRateCheckbox).bind(SensorElectric::isHighRate, SensorElectric::setHighRate);
 
-        sensorInfo.getSensorName().setValue(sensor.getName());
-        sensorInfo.getLimitDay().setValue(BigDecimal.valueOf(sensor.getLimit_day()));
-        sensorInfo.getLimitMonth().setValue(BigDecimal.valueOf(sensor.getLimit_month()));
-        sensorInfo.getConsumptionActual().setValue(BigDecimal.valueOf(sensor.getConsumptionActual()));
-        sensorInfo.getConsumptionCorrelation().setValue(BigDecimal.valueOf(sensor.getConsumptionCorrelation()));
-        sensorInfo.getCurrency().setValue(sensor.getCurrencyString());
+        sensorElectricBinder.readBean(sensorElectric);
+
+        sensorBinder.forField(sensorInfo.getSensorName()).asRequired("Required field.").bind(Sensor::getName, Sensor::setName);
+        sensorBinder.forField(sensorInfo.getLimitDay()).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex63))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
+                .bind(Sensor::getLimit_day, Sensor::setLimit_day);
+        sensorBinder.forField(sensorInfo.getLimitMonth()).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex103))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
+                .withValidator(aDouble -> aDouble >= sensorInfo.getLimitDay().getValue().doubleValue(), "Monthly limit has to be bigger than daily limit.")
+                .bind(Sensor::getLimit_month, Sensor::setLimit_month);
+        sensorBinder.forField(sensorInfo.getConsumptionActual()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
+                .bind(Sensor::getConsumptionActual, Sensor::setConsumptionActual);
+        sensorBinder.forField(sensorInfo.getConsumptionCorrelation()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
+                .bind(Sensor::getConsumptionCorrelation, Sensor::setConsumptionCorrelation);
+        sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.").bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
+
+        sensorBinder.readBean(sensor);
     }
 
     private void setButton(Button button, boolean b) {
@@ -231,8 +266,13 @@ public class ElectricSensorView extends LitTemplate {
         sensorInfo.getSensorName().setReadOnly(b);
         sensorInfo.getLimitDay().setReadOnly(b);
         sensorInfo.getLimitMonth().setReadOnly(b);
-        sensorInfo.getConsumptionActual().setReadOnly(b);
-        sensorInfo.getConsumptionCorrelation().setReadOnly(b);
         sensorInfo.getCurrency().setReadOnly(b);
+    }
+
+    // every 30 seconds refresh data for gauge chart
+    @Scheduled(fixedDelay=30000)
+    public void refreshSensorConsumption() {
+        Optional<Sensor> refreshedSensor = sensorService.get(sensor.getId());
+        refreshedSensor.ifPresent(value -> sensorInfo.actualizeConsumptionChart(value.getConsumptionActual()));
     }
 }

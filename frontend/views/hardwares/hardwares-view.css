@@ -39,3 +39,7 @@ hardwares-view .signalDiv {
 hardwares-view .signalIcon {
   margin-top:auto;
 }
+
+hardwares-view .button {
+  margin-top: 36px
+}
