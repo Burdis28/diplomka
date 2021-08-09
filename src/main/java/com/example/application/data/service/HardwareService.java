@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+import java.util.List;
+
 @Service
 public class HardwareService extends CrudService<Hardware, Integer> {
 
@@ -24,5 +26,9 @@ public class HardwareService extends CrudService<Hardware, Integer> {
     public void delete(Integer integer) {
         // TODO smazat ostatní záznamy z tabulek, které se týkají tohohle HW
         super.delete(integer);
+    }
+
+    public List<String> listHardwareSerials() {
+        return hardwareRepository.listHardwareSerials();
     }
 }
