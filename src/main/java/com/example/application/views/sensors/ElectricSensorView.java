@@ -6,6 +6,8 @@ import com.example.application.data.entity.SensorElectric;
 import com.example.application.data.service.SensorElectricService;
 import com.example.application.data.service.SensorService;
 import com.example.application.helpers.validators.ElectricSensorValidator;
+import com.example.application.utils.PatternStringUtils;
+import com.example.application.utils.RegexDoubleStringValidator;
 import com.example.application.views.main.MainView;
 import com.example.application.views.sensors.components.SensorInfoComponent;
 import com.vaadin.flow.component.Tag;
@@ -23,6 +25,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.validator.RegexpValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -30,6 +33,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 /**
@@ -153,6 +157,7 @@ public class ElectricSensorView extends LitTemplate {
                     sensorService.update(sensor);
                     pricePerKwLowField.setInvalid(false);
                     pricePerKwHighField.setInvalid(false);
+                    sensorInfo.actualizeConsumptionChart(sensor);
 
                     setButton(saveButton, false);
                     setButton(returnButton, true);
@@ -165,7 +170,7 @@ public class ElectricSensorView extends LitTemplate {
                 }
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                error.setErrorText("Špatně zadaná vstupní data formuláře.");
+                error.setErrorText("Wrong form data input.");
                 error.open();
             }
         });
@@ -204,29 +209,41 @@ public class ElectricSensorView extends LitTemplate {
     }
 
     private void setSensorFields() {
-        sensorElectricBinder.forField(pricePerKwLowField).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorElectricBinder.forField(pricePerKwLowField).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex62))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(SensorElectric::getPricePerKwLow, SensorElectric::setPricePerKwLow);
-        sensorElectricBinder.forField(pricePerKwHighField).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorElectricBinder.forField(pricePerKwHighField).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex62))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(SensorElectric::getPricePerKwHigh, SensorElectric::setPricePerKwHigh);
-        sensorElectricBinder.forField(priceFixedField).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorElectricBinder.forField(priceFixedField).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex62))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(SensorElectric::getPriceFix, SensorElectric::setPriceFix);
-        sensorElectricBinder.forField(priceServiceField).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorElectricBinder.forField(priceServiceField).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex62))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(SensorElectric::getPriceService, SensorElectric::setPriceService);
-        sensorElectricBinder.forField(implPerKWField).asRequired("Required field.").withConverter(BigDecimal::intValue, BigDecimal::new)
+        sensorElectricBinder.forField(implPerKWField).asRequired("Required field.").withConverter(BigDecimal::intValue, BigDecimal::valueOf)
                 .bind(SensorElectric::getImplPerKw, SensorElectric::setImplPerKw);
         sensorElectricBinder.forField(highRateCheckbox).bind(SensorElectric::isHighRate, SensorElectric::setHighRate);
 
         sensorElectricBinder.readBean(sensorElectric);
 
         sensorBinder.forField(sensorInfo.getSensorName()).asRequired("Required field.").bind(Sensor::getName, Sensor::setName);
-        sensorBinder.forField(sensorInfo.getLimitDay()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorBinder.forField(sensorInfo.getLimitDay()).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex63))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getLimit_day, Sensor::setLimit_day);
-        sensorBinder.forField(sensorInfo.getLimitMonth()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorBinder.forField(sensorInfo.getLimitMonth()).asRequired("Required field.")
+                .withValidator(new RegexDoubleStringValidator(PatternStringUtils.fieldIsRequired, PatternStringUtils.doubleNumberRegex103))
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .withValidator(aDouble -> aDouble >= sensorInfo.getLimitDay().getValue().doubleValue(), "Monthly limit has to be bigger than daily limit.")
                 .bind(Sensor::getLimit_month, Sensor::setLimit_month);
-        sensorBinder.forField(sensorInfo.getConsumptionActual()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorBinder.forField(sensorInfo.getConsumptionActual()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getConsumptionActual, Sensor::setConsumptionActual);
-        sensorBinder.forField(sensorInfo.getConsumptionCorrelation()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorBinder.forField(sensorInfo.getConsumptionCorrelation()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getConsumptionCorrelation, Sensor::setConsumptionCorrelation);
         sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.").bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
 
@@ -252,8 +269,8 @@ public class ElectricSensorView extends LitTemplate {
         sensorInfo.getCurrency().setReadOnly(b);
     }
 
-    // every 10 seconds refresh data for gauge chart
-    @Scheduled(fixedDelay=10000)
+    // every 30 seconds refresh data for gauge chart
+    @Scheduled(fixedDelay=30000)
     public void refreshSensorConsumption() {
         Optional<Sensor> refreshedSensor = sensorService.get(sensor.getId());
         refreshedSensor.ifPresent(value -> sensorInfo.actualizeConsumptionChart(value.getConsumptionActual()));

@@ -7,6 +7,7 @@ import com.example.application.data.service.SensorService;
 import com.example.application.data.service.data.DataElectricService;
 import com.example.application.data.service.data.DataWaterService;
 import com.example.application.utils.DevelopmentDataCreator;
+import com.example.application.utils.SensorsUtils;
 import com.example.application.views.main.MainView;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -14,6 +15,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -72,7 +74,6 @@ public class SensorsView extends LitTemplate {
         this.sensorService = sensorService;
         this.dataElectricService = dataElectricService;
         this.dataWaterService = dataWaterService;
-        //TEST DATA
         grid.setSelectionMode(SelectionMode.NONE);
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
         grid.setClassName("my-grid");
@@ -80,6 +81,7 @@ public class SensorsView extends LitTemplate {
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
         createGrid();
 
+        //TEST DATA
         if(generateTestData) {
             DevelopmentDataCreator testData = new DevelopmentDataCreator(dataElectricService, sensorService, dataWaterService);
             testData.createElectricData();
@@ -164,7 +166,13 @@ public class SensorsView extends LitTemplate {
         contextMenu.addItem("Go to dashboard", event -> {
             Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
             if(sensor != null) {
-                navigateToSensorDashboard(sensor);
+                if (sensor.getType().equals(SensorTypes.g.name())) {
+                    Dialog dialog = new Dialog();
+                    dialog.add("Dashboard for Gas type sensors are not yet available in this version of the application.");
+                    dialog.open();
+                } else {
+                    navigateToSensorDashboard(sensor);
+                }
             }
         });
     }
@@ -235,19 +243,10 @@ public class SensorsView extends LitTemplate {
         typeColumn = grid.addComponentColumn(sensor -> {
             Span span = new Span();
             span.setText(SensorTypes.valueOf(sensor.getType()).toString());
-            span.getElement().setAttribute("theme", getBadgeType(sensor));
+            span.getElement().setAttribute("theme", SensorsUtils.getBadgeType(sensor));
             span.setWidth("115px");
             return span;
         }).setHeader("Type").setWidth("150px").setComparator(Sensor::getType).setFlexGrow(0);
-    }
-
-    private String getBadgeType(Sensor sensor) {
-        return switch (sensor.getType()) {
-            case "w" -> "badge primary";
-            case "e" -> "badge error primary";
-            case "g" -> "badge success primary";
-            default -> "";
-        };
     }
 
     private void createConsumptionActualColumn() {
@@ -262,12 +261,20 @@ public class SensorsView extends LitTemplate {
 
     private void createToolsColumn() {
         toolsColumn = grid.addComponentColumn(sensor -> {
-
             Icon toolboxIcon = new Icon(VaadinIcon.TOOLS);
             toolboxIcon.addClickListener(event -> navigateToSensorDetail(sensor));
             toolboxIcon.getElement().setAttribute("theme", "badge secondary");
             Icon dasboardIcon = new Icon(VaadinIcon.DASHBOARD);
-            dasboardIcon.addClickListener(event -> navigateToSensorDashboard(sensor));
+            dasboardIcon.addClickListener(event ->
+                {
+                    if (sensor.getType().equals(SensorTypes.g.name())) {
+                        Dialog dialog = new Dialog();
+                        dialog.add("Dashboard for Gas type sensors are not yet available in this version of the application.");
+                        dialog.open();
+                    } else {
+                        navigateToSensorDashboard(sensor);
+                    }
+                });
             dasboardIcon.getElement().setAttribute("theme", "badge secondary");
             Icon trashCanIcon = new Icon(VaadinIcon.TRASH);
             trashCanIcon.addClickListener(event -> createDeleteSensorDialog(sensor));
@@ -283,13 +290,6 @@ public class SensorsView extends LitTemplate {
             };
         }).setHeader("Tools").setWidth("150px").setFlexGrow(0);
     }
-
-    /*
-    TODO
-    private String parseDate(Timestamp date) {
-        return date.get
-    }
-    */
 
     private void addFiltersToGrid() {
         HeaderRow filterRow = grid.appendHeaderRow();

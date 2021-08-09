@@ -187,9 +187,11 @@ public class UserView extends LitTemplate {
         userBinder.forField(lastNameField).asRequired("Required field.").bind(User::getSurname, User::setSurname);
         userBinder.forField(phoneField).withValidator(s -> s.matches(PatternStringUtils.phoneRegex),
                 PatternStringUtils.phoneErrorMessage).bind(User::getPhone, User::setPhone);
-        userBinder.forField(emailField).withValidator(new EmailValidator(
-                PatternStringUtils.emailErrorMessage)).bind(User::getEmail, User::setEmail);
-
+        userBinder.forField(emailField)
+                .asRequired("Required field.")
+                .withValidator(new EmailValidator(
+                        PatternStringUtils.emailErrorMessage))
+                .bind(User::getEmail, User::setEmail);
         userBinder.readBean(user);
     }
 

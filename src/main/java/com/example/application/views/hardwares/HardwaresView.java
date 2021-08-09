@@ -75,10 +75,14 @@ public class HardwaresView extends LitTemplate {
         for (Hardware hardware : hardwareList ) {
             attachedSensors = new ArrayList<>(sensorService.findSensorByIdHw(hardware.getSerial_HW()));
 
-            HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensors,
-                    userService.getHardwareOwner(hardware.getSerial_HW()).getFullName());
-            tile.addClassName("tile");
-            verticalBaseLayout.add(tile);
+            //try {
+                HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensors,
+                        userService.getHardwareOwner(hardware.getSerial_HW()).getFullName(), hardwareService, hardwareLiveService);
+                tile.addClassName("tile");
+                verticalBaseLayout.add(tile);
+//            } catch (Exception e) {
+//                System.out.println(e.getMessage());
+//            }
         }
     }
 }

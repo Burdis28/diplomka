@@ -21,6 +21,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -95,7 +96,7 @@ public class LoginView extends LitTemplate {
             try {
                 authService.authenticate(username.getValue(), password.getValue());
                 Notification.show("Hello");
-                UI.getCurrent().navigate("dashboard");
+                UI.getCurrent().navigate("sensors");
             } catch (AuthException e) {
                 Notification notification = new Notification();
                 notification.setThemeName(NotificationVariant.LUMO_ERROR.getVariantName());
@@ -103,7 +104,6 @@ public class LoginView extends LitTemplate {
                 notification.setDuration(3000);
                 notification.setPosition(Notification.Position.MIDDLE);
                 notification.open();
-
             }
         }
     }

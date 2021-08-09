@@ -1,12 +1,12 @@
 package com.example.application.views.sensors;
 
 import com.example.application.components.notifications.ErrorNotification;
-import com.example.application.data.entity.Sensor;
-import com.example.application.data.entity.SensorElectric;
-import com.example.application.data.entity.SensorWater;
-import com.example.application.data.entity.StateValve;
+import com.example.application.data.entity.*;
 import com.example.application.data.service.SensorService;
 import com.example.application.data.service.SensorWaterService;
+import com.example.application.data.service.StateValveService;
+import com.example.application.data.service.UserService;
+import com.example.application.utils.PatternStringUtils;
 import com.example.application.views.main.MainView;
 import com.example.application.views.sensors.components.SensorInfoComponent;
 import com.vaadin.flow.component.Tag;
@@ -32,6 +32,11 @@ import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * A Designer generated component for the water-sensor-view template.
@@ -65,28 +70,33 @@ public class WaterSensorView extends LitTemplate {
 
     @Id("implPerLitField")
     private TextField implPerLitField;
-    @Id("stateSelect")
-    private Select<StateValve> stateSelect;
     @Id("stateModifiedDateField")
     private TextField stateModifiedDateField;
     @Id("stateModifiedBy")
     private TextField stateModifiedBy;
-    @Id("nightStartTimeField")
-    private TimePicker nightStartTimeField;
-    @Id("nightEndTimeField")
-    private TimePicker nightEndTimeField;
     @Id("pricePerM3Field")
     private TextField pricePerM3Field;
     @Id("timeBetweenImplField")
     private TextField timeBetweenImplField;
+    @Id("startNightField")
+    private TextField startNightField;
+    @Id("endNightField")
+    private TextField endNightField;
+    @Id("stateSelect")
+    private Select<StateValve> stateSelect;
 
     private Binder<Sensor> sensorBinder = new Binder<>();
     private Binder<SensorWater> sensorWaterBinder = new Binder<>();
     private final SensorService sensorService;
     private final SensorWaterService sensorWaterService;
+    private final StateValveService stateValveService;
+    private final UserService userService;
     private SensorWater sensorWater;
     private Sensor sensor;
     private SensorInfoComponent sensorInfo;
+    private List<StateValve> states;
+    private User loggedUser;
+    private int initialStateId;
 
     /**
      * Creates a new WaterSensorView.
@@ -94,14 +104,21 @@ public class WaterSensorView extends LitTemplate {
      * @param sensorService
      * @param sensorWaterService
      */
-    public WaterSensorView(SensorService sensorService, SensorWaterService sensorWaterService) {
+    public WaterSensorView(SensorService sensorService,
+                           SensorWaterService sensorWaterService,
+                           StateValveService stateValveService,
+                           UserService userService) {
         this.sensorService = sensorService;
         this.sensorWaterService = sensorWaterService;
+        this.stateValveService = stateValveService;
+        this.userService = userService;
 
         cancelButton.setIcon(new Icon(VaadinIcon.CLOSE_CIRCLE_O));
         saveButton.setIcon(new Icon(VaadinIcon.CHECK_CIRCLE));
         returnButton.setIcon(new Icon(VaadinIcon.REPLY));
+        loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
 
+        fillStateSelect();
         setSensor();
         setReadOnlyFields(true);
         attachListeners();
@@ -136,9 +153,14 @@ public class WaterSensorView extends LitTemplate {
             try {
                 sensorWaterBinder.writeBean(sensorWater);
                 sensorBinder.writeBean(sensor);
+                updateNightTimeFields(sensorWater);
+                //updateModifiedByUserFields(sensorWater);
 
                 sensorWaterService.update(sensorWater);
                 sensorService.update(sensor);
+                setStateValveFields(sensorWater);
+                setNightTimesFields(sensorWater);
+                //sensorInfo.actualizeConsumptionChart(sensor.getConsumptionActual(), sensor.getLimit_day());
 
                 setButton(saveButton, false);
                 setButton(returnButton, true);
@@ -148,7 +170,7 @@ public class WaterSensorView extends LitTemplate {
                 setReadOnlyFields(true);
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                error.setErrorText("Špatně zadaná vstupní data formuláře.");
+                error.setErrorText("Wrong form data input.");
                 error.open();
             }
         });
@@ -165,6 +187,7 @@ public class WaterSensorView extends LitTemplate {
             this.sensorWaterService.get(sensorId).ifPresent(water -> sensorWater = water);
             this.sensorService.get(sensorId).ifPresent(sensor -> this.sensor = sensor);
         }
+        initialStateId = sensorWater.getState();
         sensorInfo = new SensorInfoComponent(sensor);
         sensorInfo.setId("sensorInfoLayout");
         sensorInfo.setVisible(true);
@@ -174,43 +197,120 @@ public class WaterSensorView extends LitTemplate {
         sensorInfo.getConsumptionCorrelation().setReadOnly(true);
         setSensorFields(sensorWater);
 
-        String currency = sensor.getCurrencyString();
-        //pricePerM3Field.(new Text(currency));
+    }
+
+    private void fillStateSelect() {
+        states = stateValveService.listAll();
+        stateSelect.removeAll();
+        stateSelect.setItems(states);
+        stateSelect.setTextRenderer(StateValve::getState);
+        //stateSelect.setDataProvider(StateValve::getId);
     }
 
     private void setSensorFields(SensorWater sensorWater) {
-        sensorWaterBinder.forField(pricePerM3Field).asRequired("Required field.").withConverter(Double::valueOf, String::valueOf)
+        sensorWaterBinder.forField(pricePerM3Field).asRequired("Required field.")
+                .withConverter(Double::valueOf, String::valueOf)
                 .bind(SensorWater::getPrice_per_m3, SensorWater::setPrice_per_m3);
-        sensorWaterBinder.forField(implPerLitField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
+        sensorWaterBinder.forField(implPerLitField).asRequired("Required field.")
+                .withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getImplPerLit, SensorWater::setImplPerLit);
-        // TODO state field
+        sensorWaterBinder.forField(stateSelect).asRequired("Required field.")
+                .bind(sensorWater1 -> {
+                    Optional<StateValve> state = states.stream().filter(stateValve -> stateValve.getId() == sensorWater1.getState()).findFirst();
+                            return state.orElse(null);
+                        },
+                (sensorWater1, stateValve) -> {
+                    if (initialStateId != stateSelect.getValue().getId()) {
+                        sensorWater1.setStateModifiedDate(Timestamp.valueOf(LocalDateTime.now()));
+                        sensorWater1.setStateModifierUserId(loggedUser.getId());
+                        sensorWater1.setState(stateValve.getId());
+                    }
+                });
 
-        sensorWaterBinder.forField(timeBetweenImplField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
+        setStateValveFields(sensorWater);
+
+//        sensorWaterBinder.forField(stateModifiedDateField)
+//                .withConverter(s -> {
+//                   sensorWater.getStateModifiedDate().toString();
+//                })
+//                .bind(SensorWater::getStateModifiedDate, SensorWater::setStateModifiedDate);
+        sensorWaterBinder.forField(timeBetweenImplField).asRequired("Required field.")
+                .withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getTimeBtwImpl, SensorWater::setTimeBtwImpl);
-        sensorWaterBinder.forField(countStopField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
+        sensorWaterBinder.forField(countStopField).asRequired("Required field.")
+                .withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getCountStop, SensorWater::setCountStop);
-        sensorWaterBinder.forField(countStopNightField).asRequired("Required field.").withConverter(Integer::valueOf, String::valueOf)
+        sensorWaterBinder.forField(countStopNightField).asRequired("Required field.")
+                .withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getCountStopNight, SensorWater::setCountStopNight);
+
+        setNightTimesFields(sensorWater);
 
         sensorWaterBinder.readBean(sensorWater);
 
-        sensorBinder.forField(sensorInfo.getSensorName()).asRequired("Required field.").bind(Sensor::getName, Sensor::setName);
-        sensorBinder.forField(sensorInfo.getLimitDay()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorBinder.forField(sensorInfo.getSensorName()).asRequired("Required field.")
+                .bind(Sensor::getName, Sensor::setName);
+        sensorBinder.forField(sensorInfo.getLimitDay()).asRequired("Required field.")
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getLimit_day, Sensor::setLimit_day);
-        sensorBinder.forField(sensorInfo.getLimitMonth()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorBinder.forField(sensorInfo.getLimitMonth()).asRequired("Required field.")
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getLimit_month, Sensor::setLimit_month);
-        sensorBinder.forField(sensorInfo.getConsumptionActual()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorBinder.forField(sensorInfo.getConsumptionActual()).asRequired("Required field.")
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getConsumptionActual, Sensor::setConsumptionActual);
-        sensorBinder.forField(sensorInfo.getConsumptionCorrelation()).asRequired("Required field.").withConverter(BigDecimal::doubleValue, BigDecimal::new)
+        sensorBinder.forField(sensorInfo.getConsumptionCorrelation()).asRequired("Required field.")
+                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getConsumptionCorrelation, Sensor::setConsumptionCorrelation);
-        sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.").bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
+        sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.")
+                .bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
 
         sensorBinder.readBean(sensor);
+    }
+
+    private void setStateValveFields(SensorWater sensorWater) {
+        stateModifiedDateField.setReadOnly(true);
+        stateModifiedDateField.setValue(sensorWater.getStateModifiedDate() == null ? "" : sensorWater.getStateModifiedDate()
+                        .toLocalDateTime().format(DateTimeFormatter.ofPattern("HH:mm:ss yyyy-MM-dd")));
+
+        Optional<User> user = userService.get(sensorWater.getStateModifierUserId());
+        user.ifPresent(value -> stateModifiedBy.setValue(value.getFullName()));
+    }
+
+    private void setNightTimesFields(SensorWater sensorWater) {
+        startNightField.setPattern(PatternStringUtils.nightHoursRegex);
+        startNightField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        startNightField.setValue((sensorWater.getNightStartHour() == 0 ? "00" : sensorWater.getNightStartHour())
+                + ":" + (sensorWater.getNightStartMinute() == 0 ? "00" : sensorWater.getNightStartMinute()));
+        endNightField.setPattern(PatternStringUtils.nightHoursRegex);
+        endNightField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        endNightField.setValue((sensorWater.getNightEndHour() == 0 ? "00" : sensorWater.getNightEndHour())
+                + ":" + (sensorWater.getNightEndMinute() == 0 ? "00" : sensorWater.getNightEndMinute()));
     }
 
     private void setButton(Button button, boolean b) {
         button.setEnabled(b);
         button.setVisible(b);
+    }
+
+
+    private void updateNightTimeFields(SensorWater sensorWater) {
+        String hoursStart = startNightField.getValue();
+        int indexOfDecimal = hoursStart.indexOf(":");
+        String hour = hoursStart.substring(0, indexOfDecimal);
+        String minute = hoursStart.substring(indexOfDecimal);
+        minute = minute.substring(1);
+
+        String hoursEnd = endNightField.getValue();
+        int indexOfDecimal2 = hoursEnd.indexOf(":");
+        String hour2 = hoursEnd.substring(0, indexOfDecimal2);
+        String minute2 = hoursEnd.substring(indexOfDecimal2);
+        minute2 = minute2.substring(1);
+
+        sensorWater.setNightStartHour(Integer.parseInt(hour));
+        sensorWater.setNightStartMinute(Integer.parseInt(minute));
+        sensorWater.setNightEndHour(Integer.parseInt(hour2));
+        sensorWater.setNightEndMinute(Integer.parseInt(minute2));
     }
 
     private void setReadOnlyFields(boolean b) {
@@ -220,8 +320,8 @@ public class WaterSensorView extends LitTemplate {
         stateSelect.setReadOnly(b);
         countStopNightField.setReadOnly(b);
         countStopField.setReadOnly(b);
-        nightStartTimeField.setReadOnly(b);
-        nightEndTimeField.setReadOnly(b);
+        startNightField.setReadOnly(b);
+        endNightField.setReadOnly(b);
         timeBetweenImplField.setReadOnly(b);
 
         sensorInfo.getSensorName().setReadOnly(b);

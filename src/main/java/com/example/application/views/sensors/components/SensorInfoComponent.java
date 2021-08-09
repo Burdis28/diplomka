@@ -167,11 +167,15 @@ public class SensorInfoComponent extends VerticalLayout {
 
     public void actualizeConsumptionChart(Double consumption) {
         getUI().ifPresent(ui -> ui.access(() -> {
-            DataSeries series = (DataSeries)consumptionChart.getConfiguration().getSeries().get(0);
+            DataSeries series = (DataSeries) consumptionChart.getConfiguration().getSeries().get(0);
             DataSeriesItem item = series.get(0);
             item.setY(consumption);
             series.update(item);
             ui.push();
         }));
+    }
+
+    public void actualizeConsumptionChart(Sensor sensor) {
+        setConsumptionChart(sensor);
     }
 }

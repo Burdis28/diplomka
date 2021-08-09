@@ -131,7 +131,7 @@ public class GasSensorView extends LitTemplate {
                 setSensorFields();
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                error.setErrorText("Špatně zadaná vstupní data formuláře.");
+                error.setErrorText("Wrong form data input.");
                 error.open();
             }
         });

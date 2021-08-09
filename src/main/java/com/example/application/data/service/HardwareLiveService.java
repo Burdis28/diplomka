@@ -24,8 +24,11 @@ public class HardwareLiveService extends CrudService<HardwareLive, Integer> {
 
     @Override
     public void delete(Integer integer) {
-        // TODO smazat ostatní záznamy z tabulek, které se týkají tohohle HW
         super.delete(integer);
+    }
+
+    public void deleteBySerialHw(String serialHw) {
+        hardwareLiveRepository.deleteByHwId(serialHw);
     }
 
     public List<HardwareLive> findByHardwareId(List<String> serialHwList) {
@@ -37,6 +40,10 @@ public class HardwareLiveService extends CrudService<HardwareLive, Integer> {
     }
 
     public HardwareLive findByHardwareId(String hwId) {
-        return hardwareLiveRepository.findByHwId(hwId).get();
+        if (hardwareLiveRepository.findByHwId(hwId).isPresent()) {
+            return hardwareLiveRepository.findByHwId(hwId).get();
+        } else {
+            return null;
+        }
     }
 }

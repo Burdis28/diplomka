@@ -1,11 +1,8 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
-import '@vaadin/vaadin-select/src/vaadin-select.js';
-import '@vaadin/vaadin-list-box/src/vaadin-list-box.js';
-import '@vaadin/vaadin-item/src/vaadin-item.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
-import '@vaadin/vaadin-time-picker/src/vaadin-time-picker.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vaadin-select/src/vaadin-select.js';
 
 @customElement('water-sensor-view')
 export class WaterSensorView extends LitElement {
@@ -31,21 +28,7 @@ export class WaterSensorView extends LitElement {
      <vaadin-text-field label="Impl per liter" id="implPerLitField" required clear-button-visible></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
-     <vaadin-select id="stateSelect" label="State" required>
-      <template>
-       <vaadin-list-box>
-        <vaadin-item>
-          Item one 
-        </vaadin-item>
-        <vaadin-item>
-          Item two 
-        </vaadin-item>
-        <vaadin-item>
-          Item three 
-        </vaadin-item>
-       </vaadin-list-box>
-      </template>
-     </vaadin-select>
+     <vaadin-select id="stateSelect" label="State"></vaadin-select>
      <vaadin-text-field label="Time between impl" id="timeBetweenImplField" required></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
@@ -53,12 +36,12 @@ export class WaterSensorView extends LitElement {
      <vaadin-text-field label="State modified date" id="stateModifiedDateField" readonly></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
-     <vaadin-text-field label="Count stop" id="countStopField" required></vaadin-text-field>
-     <vaadin-text-field label="Count stop at night" id="countStopNightField" required></vaadin-text-field>
+     <vaadin-text-field label="Count stop" id="countStopField" required invalid></vaadin-text-field>
+     <vaadin-text-field label="Count stop at night" id="countStopNightField" required invalid></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
-     <vaadin-time-picker id="nightStartTimeField" max="06:00" label="Night start time" required min="21:00"></vaadin-time-picker>
-     <vaadin-time-picker id="nightEndTimeField" max="21:00" label="Night end time" required min="06:00"></vaadin-time-picker>
+     <vaadin-text-field id="startNightField" required label="Time of start at night" helper-text="Valid input format: HH:MM"></vaadin-text-field>
+     <vaadin-text-field id="endNightField" required label="Time of end at night" helper-text="Valid input format: HH:MM"></vaadin-text-field>
     </vaadin-horizontal-layout>
    </vaadin-vertical-layout>
   </vaadin-horizontal-layout>

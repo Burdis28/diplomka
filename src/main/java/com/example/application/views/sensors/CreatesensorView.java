@@ -21,6 +21,9 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.validator.EmailValidator;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 
@@ -86,15 +89,11 @@ public class CreatesensorView extends LitTemplate {
     @Id("waterLayout")
     private FormLayout waterLayout;
     @Id("pricePerM3Field")
-    private BigDecimalField pricePerM3Field;
+    private TextField pricePerM3Field;
     @Id("waterStateSelect")
     private Select<StateValve> waterStateSelect;
     @Id("implPerLitField")
     private NumberField implPerLitField;
-    @Id("nightStartStepField")
-    private NumberField nightStartStepField;
-    @Id("nightEndStepField")
-    private NumberField nightEndStepField;
     @Id("pricePerKwLowField")
     private TextField pricePerKwLowField;
     @Id("fixedPriceField")
@@ -103,7 +102,12 @@ public class CreatesensorView extends LitTemplate {
     private TextField servicePriceField;
     @Id("implPerKwField")
     private TextField implPerKwField;
-
+    @Id("overallLayout")
+    private Element overallLayout;
+    @Id("nightEndField")
+    private TextField nightEndField;
+    @Id("nightStartField")
+    private TextField nightStartField;
 
     public CreatesensorView(SensorService sensorService, HardwareService hardwareService,
                             SensorElectricService sensorElectricService, SensorWaterService sensorWaterService,
@@ -125,6 +129,7 @@ public class CreatesensorView extends LitTemplate {
             electricLayout.setVisible(typeSelect.getValue().equals(SensorTypes.e.toString()));
             waterLayout.setVisible(typeSelect.getValue().equals(SensorTypes.w.toString()));
             //gasLayout.setVisible(typeSelect.getValue().equals(SensorTypes.g.toString()));
+            div.setHeight("1500px");
         });
 
         cancel.addClickListener(e -> clearForm());
@@ -140,10 +145,11 @@ public class CreatesensorView extends LitTemplate {
                         SensorWater water = setNewWaterSensorFromFields(createdSensor);
                         sensorWaterService.update(water);
                     } else {
-
+                        // Gas sensor is not supported yet
                     }
-
-                    Notification.show("Sensor created");
+                    Dialog dialog = new Dialog();
+                    dialog.add("Sensor successfully created.");
+                    dialog.open();
                     clearForm();
                 } catch (Exception exception) {
                     createErrorDialog("Error: Sensor creation has failed, try again.");
@@ -155,7 +161,7 @@ public class CreatesensorView extends LitTemplate {
     private SensorWater setNewWaterSensorFromFields(Sensor createdSensor) {
         SensorWater water = new SensorWater();
         water.setSensor_id(createdSensor.getId());
-        water.setPrice_per_m3(pricePerM3Field.getValue().doubleValue());
+        water.setPrice_per_m3(Double.parseDouble(pricePerM3Field.getValue()));
         water.setState(waterStateSelect.getValue().getId());
         water.setImplPerLit(implPerLitField.getValue().intValue());
 
@@ -164,18 +170,16 @@ public class CreatesensorView extends LitTemplate {
     }
 
     private void setNightTimeFields(SensorWater water) {
-        double doubleNumber = nightStartStepField.getValue();
-        String doubleAsString = String.valueOf(doubleNumber);
-        int indexOfDecimal = doubleAsString.indexOf(".");
-        String hour = doubleAsString.substring(0, indexOfDecimal);
-        String minute = doubleAsString.substring(indexOfDecimal);
+        String hoursStart = nightStartField.getValue();
+        int indexOfDecimal = hoursStart.indexOf(":");
+        String hour = hoursStart.substring(0, indexOfDecimal);
+        String minute = hoursStart.substring(indexOfDecimal);
         minute = minute.substring(1);
 
-        double doubleNumber2 = nightEndStepField.getValue();
-        String doubleAsString2 = String.valueOf(doubleNumber2);
-        int indexOfDecimal2 = doubleAsString2.indexOf(".");
-        String hour2 = doubleAsString2.substring(0, indexOfDecimal2);
-        String minute2 = doubleAsString2.substring(indexOfDecimal2);
+        String hoursEnd = nightEndField.getValue();
+        int indexOfDecimal2 = hoursEnd.indexOf(":");
+        String hour2 = hoursEnd.substring(0, indexOfDecimal2);
+        String minute2 = hoursEnd.substring(indexOfDecimal2);
         minute2 = minute2.substring(1);
 
         water.setNightStartHour(Integer.parseInt(hour));
@@ -198,6 +202,8 @@ public class CreatesensorView extends LitTemplate {
 
     private Sensor setNewSensorFromFields() {
         Sensor sensor = new Sensor();
+
+
         sensor.setName(nameField.getValue());
         sensor.setCurrencyString(currencyField.getValue());
         sensor.setIdHw(attachToHardwareSelect.getValue());
@@ -220,17 +226,6 @@ public class CreatesensorView extends LitTemplate {
             // logic validations of fields.
             valid = limitDayField.getValue().compareTo(limitMonthField.getValue()) <= 0;
             if (!valid) validateDialog("Validation error: Monthly limit must be bigger than daily limit.");
-
-            // TODO tuhle časovou validaci ještě dodělat - půlnoc dělá problémy - a validovat podle toho jaký type jsem vybral
-//            if (nightEndTimePicker.getValue().isBefore(LocalTime.MIDNIGHT) && nightStartTimePicker.getValue().isAfter(LocalTime.MIDNIGHT)) {
-//            } else {
-//                valid = nightEndTimePicker.getValue().isAfter(nightStartTimePicker.getValue());
-//                if (!valid) validateDialog("Validation error: Night end time must be after night start time.");
-//            }
-//            if (nightStartTimePicker.getValue().isBefore(LocalTime.MIDNIGHT) && nightEndTimePicker.getValue().isAfter(LocalTime.MIDNIGHT)) {
-//                valid = false;
-//                validateDialog("Validation error: Night end time must be after night start time.");
-//            }
         } catch (Exception e) {
             valid = false;
         }
@@ -300,6 +295,13 @@ public class CreatesensorView extends LitTemplate {
         fixedPriceField.setErrorMessage(PatternStringUtils.fieldIsRequired);
         implPerKwField.setPattern(PatternStringUtils.onlyNumbersRegex);
         implPerKwField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+
+        pricePerM3Field.setPattern(PatternStringUtils.doubleNumberRegex62);
+        pricePerM3Field.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        nightStartField.setPattern(PatternStringUtils.nightHoursRegex);
+        nightStartField.setErrorMessage(PatternStringUtils.fieldIsRequired);
+        nightEndField.setPattern(PatternStringUtils.nightHoursRegex);
+        nightEndField.setErrorMessage(PatternStringUtils.fieldIsRequired);
     }
 
     private void setRequiredFields() {
@@ -307,14 +309,6 @@ public class CreatesensorView extends LitTemplate {
         currencyField.setRequired(true);
         pinIdField.setRequired(true);
         limitDayField.setRequired(true);
-//        limitDayField.setRequiredIndicatorVisible(true);
-//        limitMonthField.setRequiredIndicatorVisible(true);
-//        pricePerKwHighField.setRequiredIndicatorVisible(true);
-//        pricePerKwLowField.setRequired(true);
-//        pricePerM3Field.setRequired(true);
-//        fixedPriceField.setRequired(true);
-//        servicePriceField.setRequired(true);
-
     }
 
     private void setSelectFields() {
@@ -332,5 +326,19 @@ public class CreatesensorView extends LitTemplate {
         currencyField.clear();
         pinIdField.clear();
         limitDayField.clear();
+        limitMonthField.clear();
+
+        implPerKwField.clear();
+        pricePerKwHighField.clear();
+        pricePerKwLowField.clear();
+        pricePerM3Field.clear();
+        fixedPriceField.clear();
+        servicePriceField.clear();
+        highRateCheckBox.clear();
+
+        waterStateSelect.clear();
+        implPerLitField.clear();
+        nightStartField.clear();
+        nightEndField.clear();
     }
 }
