@@ -1,6 +1,5 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
-import '@vaadin/vaadin-charts/src/vaadin-chart.js';
 import '@vaadin/vaadin-form-layout/vaadin-form-item.js';
 import '@vaadin/vaadin-text-field/vaadin-text-field.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
@@ -39,7 +38,7 @@ export class UserView extends LitElement {
     <label slot="label" id="label1">Email </label>
     <vaadin-text-field class="full-width" readonly id="emailField"></vaadin-text-field>
    </vaadin-form-item>
-   <vaadin-horizontal-layout theme="spacing">
+   <vaadin-horizontal-layout theme="spacing" style="align-self: center; padding: var(--lumo-space-l); justify-content: center;">
     <vaadin-button id="editButton" theme="primary">
      <iron-icon icon="lumo:edit" slot="prefix"></iron-icon> Edit 
     </vaadin-button>
@@ -52,9 +51,6 @@ export class UserView extends LitElement {
    </vaadin-horizontal-layout>
   </vaadin-vertical-layout>
  </div>
- <vaadin-chart type="pie" title="Browser market shares in January, 2018" tooltip="" id="vaadinChart" chart3d>
-  <vaadin-chart-series title="Brands" values="[[&quot;Chrome&quot;,61.41],[&quot;Internet Explorer&quot;,11.84],[&quot;Firefox&quot;,10.85],[&quot;Edge&quot;,4.67],[&quot;Safari&quot;,4.18],[&quot;Sogou Explorer&quot;,1.64],[&quot;Opera&quot;,1.6],[&quot;QQ&quot;,1.2],[&quot;Other&quot;,2.61]]"></vaadin-chart-series>
- </vaadin-chart>
 </vaadin-vertical-layout>
 `;
   }

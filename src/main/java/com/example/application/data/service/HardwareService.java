@@ -1,0 +1,28 @@
+package com.example.application.data.service;
+
+import com.example.application.data.entity.Hardware;
+import com.example.application.data.entity.Sensor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.vaadin.artur.helpers.CrudService;
+
+@Service
+public class HardwareService extends CrudService<Hardware, Integer> {
+
+    private HardwareRepository hardwareRepository;
+
+    public HardwareService(@Autowired HardwareRepository repository) {
+        this.hardwareRepository = repository;
+    }
+
+    @Override
+    protected HardwareRepository getRepository() {
+        return hardwareRepository;
+    }
+
+    @Override
+    public void delete(Integer integer) {
+        // TODO smazat ostatní záznamy z tabulek, které se týkají tohohle HW
+        super.delete(integer);
+    }
+}

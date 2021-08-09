@@ -18,7 +18,8 @@ export class LoginView extends LitElement {
  <h1 id="Title" style="align-self: center;">Diplomka - Správa chytrého domu</h1>
  <vaadin-form-layout id="vaadinFormLayout" style="align-self: center;">
   <vaadin-vertical-layout theme="spacing" id="vaadinVerticalLayout1">
-   <vaadin-text-field label="Username" placeholder="username" id="username" style="align-self: center;" required invalid></vaadin-text-field>
+   <h3 id="loginTitleH3" style="align-self: flex-start; margin-top: var(--lumo-space-l); margin-bottom: var(--lumo-space-xs);">Log in</h3>
+   <vaadin-text-field label="Username" placeholder="username" id="username" style="align-self: center; margin-top: var(--lumo-space-xs);" required invalid></vaadin-text-field>
    <vaadin-password-field label="Password" id="password" style="align-self: center;" required has-value invalid></vaadin-password-field>
    <vaadin-button id="loginButton" style="align-self: flex-start;">
      Log in 

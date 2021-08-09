@@ -1,24 +1,41 @@
 hardwares-view {
+  background-color: var(--lumo-contrast-10pct);
   display: block;
   height: 100%;
-}
-hardwares-view vaadin-grid-pro {
-  height: 100%;
-}
-hardwares-view vaadin-grid-filter,
-hardwares-view vaadin-grid-filter > * {
   width: 100%;
-}
-hardwares-view vaadin-grid-pro vaadin-horizontal-layout {
-  align-items: center;
-}
-hardwares-view vaadin-grid-pro img {
-  border-radius: 50%;
-  flex-shrink: 0;
-  height: var(--lumo-size-m);
-  width: var(--lumo-size-m);
+  overflow: auto;
 }
 hardwares-view .name {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+hardwares-view .tile {
+  background-color: var(--lumo-base-color);
+  margin: var(--lumo-space-m) var(--lumo-space-m) var(--lumo-space-s) var(--lumo-space-s);
+  padding: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-m) var(--lumo-space-m);
+  box-shadow: var(--lumo-box-shadow-m);
+}
+
+hardwares-view #idTitle {
+  padding-top: var(--lumo-space-m);
+  padding-right: var(--lumo-space-m);
+}
+
+hardwares-view #topVerticalLayout {
+  padding-top: var(--lumo-space-s);
+}
+
+hardwares-view #bottomVerticalLayout {
+  margin-left: 16px;
+}
+
+hardwares-view .signalDiv {
+  align-items: center;
+  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-xs) var(--lumo-space-xl);
+  margin-right: var(--lumo-space-l);
+}
+
+hardwares-view .signalIcon {
+  margin-top:auto;
 }
