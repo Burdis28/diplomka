@@ -7,10 +7,7 @@ import com.example.application.data.entity.User;
 import com.example.application.data.service.AuthService;
 import com.example.application.data.service.AuthorizedRouteData;
 import com.vaadin.componentfactory.ToggleButton;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -37,6 +34,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /**
  * The main view is a top-level placeholder for other views.
  */
+@Tag("MainView")
 @CssImport("./views/main/main-view.css")
 @JsModule("./styles/shared-styles.js")
 @JsModule("./js/theme-selector.js")
