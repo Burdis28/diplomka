@@ -40,7 +40,7 @@
             </snapshots>
         </repository>
     </repositories>
-    
+
     <pluginRepositories>
         <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
         <pluginRepository>
@@ -49,7 +49,7 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </pluginRepository> 
+        </pluginRepository>
     </pluginRepositories>
 
     <dependencyManagement>
@@ -164,7 +164,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <target>11</target>
                     <compilerArgs>--enable-preview</compilerArgs>
                 </configuration>
             </plugin>
@@ -228,7 +227,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <target>11</target>
                             <compilerArgs>--enable-preview</compilerArgs>
                         </configuration>
                     </plugin>
@@ -282,7 +280,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <target>11</target>
                             <compilerArgs>--enable-preview</compilerArgs>
                         </configuration>
                     </plugin>
@@ -317,7 +314,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <configuration>
-                            <target>11</target>
                             <compilerArgs>--enable-preview</compilerArgs>
                         </configuration>
                     </plugin>
