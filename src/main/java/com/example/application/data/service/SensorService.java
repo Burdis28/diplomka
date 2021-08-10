@@ -33,9 +33,9 @@ public class SensorService extends CrudService<Sensor, Integer> {
 
     public void delete(Integer integer, SensorTypes type) {
         switch (type) {
-            case e -> sensorElectricRepository.deleteBySensorId(integer);
-            case w -> sensorWaterRepository.deleteBySensorId(integer);
-            case g -> sensorGasRepository.deleteBySensorId(integer);
+            case e: sensorElectricRepository.deleteBySensorId(integer);
+            case w: sensorWaterRepository.deleteBySensorId(integer);
+            case g: sensorGasRepository.deleteBySensorId(integer);
         }
         super.delete(integer);
     }

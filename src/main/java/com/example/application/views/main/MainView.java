@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.example.application.data.entity.User;
 import com.example.application.data.service.AuthService;
+import com.example.application.data.service.AuthorizedRouteData;
 import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -131,10 +132,10 @@ public class MainView extends AppLayout {
         return tabs;
     }
 
-    private Component createDropDownMenu(List<AuthService.AuthorizedRoute> routesList) {
+    private Component createDropDownMenu(List<AuthorizedRouteData> routesList) {
         User user = VaadinSession.getCurrent().getAttribute(User.class);
         Component[] tabs = authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
-                createTab(route.name(), route.view(), route.icon())).toArray(Component[]::new);
+                createTab(route.getName(), route.getView(), route.getIcon())).toArray(Component[]::new);
         Select<Tab> select = new Select<>();
         select.add(tabs);
         select.addComponentAsFirst(new Text("Management"));
@@ -145,7 +146,7 @@ public class MainView extends AppLayout {
         // Využiju Vaadin session, získám usera a podle jeho role vytvořím jednotlivé taby, které může navštívit
         User user = VaadinSession.getCurrent().getAttribute(User.class);
         return authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
-                createTab(route.name(), route.view(), route.icon())).toArray(Component[]::new);
+                createTab(route.getName(), route.getView(), route.getIcon())).toArray(Component[]::new);
     }
 
     private static Tab createTab(String text, Class<? extends Component> navigationTarget, VaadinIcon icon) {
