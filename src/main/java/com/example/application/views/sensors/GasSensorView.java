@@ -32,11 +32,11 @@ import java.math.BigDecimal;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag("gas-sensor-view")
-@JsModule("./views/sensors/gas-sensor-view.ts")
-@CssImport("./views/sensors/gas-sensor-view.css")
-@ParentLayout(MainView.class)
-@PageTitle("Gas sensor detail")
+@Tag(value="gas-sensor-view")
+@JsModule(value="./views/sensors/gas-sensor-view.ts")
+@CssImport(value="./views/sensors/gas-sensor-view.css")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="Gas sensor detail")
 public class GasSensorView extends LitTemplate {
 
     @Id("editButton")

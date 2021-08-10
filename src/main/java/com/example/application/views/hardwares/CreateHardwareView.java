@@ -33,11 +33,11 @@ import java.time.LocalDateTime;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag("create-hardware-view")
-@JsModule("./views/hardwares/create-hardware-view.ts")
-@CssImport("./views/hardwares/create-hardware-view.css")
-@ParentLayout(MainView.class)
-@PageTitle("Create hardware")
+@Tag(value="create-hardware-view")
+@JsModule(value="./views/hardwares/create-hardware-view.ts")
+@CssImport(value="./views/hardwares/create-hardware-view.css")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="Create hardware")
 public class CreateHardwareView extends LitTemplate {
 
     @Id("nameField")

@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@JsModule("./views/hardwares/hardwares-view.ts")
-@CssImport("./views/hardwares/hardwares-view.css")
-@Tag("hardwares-view")
-@ParentLayout(MainView.class)
-@PageTitle("Hardware management")
+@JsModule(value="./views/hardwares/hardwares-view.ts")
+@CssImport(value="./views/hardwares/hardwares-view.css")
+@Tag(value="hardwares-view")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="Hardware management")
 public class HardwaresView extends LitTemplate {
 
     private HardwareService hardwareService;

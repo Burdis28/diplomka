@@ -54,11 +54,11 @@ import static java.time.temporal.TemporalAdjusters.*;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag("sensor-el-dashboard")
-@JsModule("./views/dashboard/sensor-el-dashboard.ts")
-@CssImport("./views/dashboard/sensor-el-dashboard.css")
-@ParentLayout(MainView.class)
-@PageTitle("Electric sensor dashboard")
+@Tag(value="sensor-el-dashboard")
+@JsModule(value="./views/dashboard/sensor-el-dashboard.ts")
+@CssImport(value="./views/dashboard/sensor-el-dashboard.css")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="Electric sensor dashboard")
 @EnableScheduling
 public class SensorElectricDashboard extends LitTemplate {
 

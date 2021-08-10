@@ -40,10 +40,10 @@ import java.util.Objects;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag("user-management-view")
-@JsModule("./views/user/user-management-view.ts")
-@CssImport("./views/user/user-management-view.css")
-@PageTitle("Users management")
+@Tag(value="user-management-view")
+@JsModule(value="./views/user/user-management-view.ts")
+@CssImport(value="./views/user/user-management-view.css")
+@PageTitle(value="Users management")
 public class UserManagementView extends LitTemplate {
 
     private GridListDataView<User> gridListDataView;

@@ -43,12 +43,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.util.Arrays;
 import java.util.List;
 
-@JsModule("./views/sensors/sensors-view.ts")
-@CssImport("./views/sensors/sensors-view.css")
+@JsModule(value="./views/sensors/sensors-view.ts")
+@CssImport(value="./views/sensors/sensors-view.css")
 @CssImport(value = "./views/sensors/my-grid-styles.css", themeFor = "vaadin-grid-pro")
-@Tag("sensors-view")
-@ParentLayout(MainView.class)
-@PageTitle("Sensors management")
+@Tag(value="sensors-view")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="Sensors management")
 public class SensorsView extends LitTemplate {
 
     @Id("grid")

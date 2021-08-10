@@ -55,11 +55,11 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag("sensor-wat-dashboard")
-@JsModule("./views/dashboard/sensor-wat-dashboard.ts")
-@CssImport("./views/dashboard/sensor-wat-dashboard.css")
-@ParentLayout(MainView.class)
-@PageTitle("Water sensor dashboard")
+@Tag(value="sensor-wat-dashboard")
+@JsModule(value="./views/dashboard/sensor-wat-dashboard.ts")
+@CssImport(value="./views/dashboard/sensor-wat-dashboard.css")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="Water sensor dashboard")
 @EnableScheduling
 public class SensorWaterDashboard extends LitTemplate {
 

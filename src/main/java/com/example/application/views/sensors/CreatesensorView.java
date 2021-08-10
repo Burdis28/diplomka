@@ -40,11 +40,11 @@ import java.util.stream.Collectors;
  * Designer will add and remove fields with @Id mappings but does not overwrite
  * or otherwise change this file.
  */
-@JsModule("./views/sensors/createsensor-view.ts")
-@CssImport("./views/sensors/createsensor-view.css")
-@Tag("createsensor-view")
-@ParentLayout(MainView.class)
-@PageTitle("Create sensor")
+@JsModule(value="./views/sensors/createsensor-view.ts")
+@CssImport(value="./views/sensors/createsensor-view.css")
+@Tag(value="createsensor-view")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="Create sensor")
 public class CreatesensorView extends LitTemplate {
 
     private final SensorService sensorService;

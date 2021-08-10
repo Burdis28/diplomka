@@ -34,10 +34,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /**
  * The main view is a top-level placeholder for other views.
  */
-@Tag("MainView")
-@CssImport("./views/main/main-view.css")
-@JsModule("./styles/shared-styles.js")
-@JsModule("./js/theme-selector.js")
+@Tag(value="MainView")
+@CssImport(value="./views/main/main-view.css")
+@JsModule(value="./styles/shared-styles.js")
+@JsModule(value="./js/theme-selector.js")
 @EnableScheduling
 public class MainView extends AppLayout {
 

@@ -33,11 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag("user-view")
-@JsModule("./views/user/user-view.ts")
-@ParentLayout(MainView.class)
-@PageTitle("User administration")
-@CssImport("./views/user/user-view.css")
+@Tag(value="user-view")
+@JsModule(value="./views/user/user-view.ts")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="User administration")
+@CssImport(value="./views/user/user-view.css")
 public class UserView extends LitTemplate {
 
     @Id("firstNameField")

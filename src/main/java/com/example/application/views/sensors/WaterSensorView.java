@@ -44,11 +44,11 @@ import java.util.Optional;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag("water-sensor-view")
-@JsModule("./views/sensors/water-sensor-view.ts")
-@CssImport("./views/sensors/water-sensor-view.css")
-@ParentLayout(MainView.class)
-@PageTitle("Water sensor detail")
+@Tag(value="water-sensor-view")
+@JsModule(value="./views/sensors/water-sensor-view.ts")
+@CssImport(value="./views/sensors/water-sensor-view.css")
+@ParentLayout(value=MainView.class)
+@PageTitle(value="Water sensor detail")
 public class WaterSensorView extends LitTemplate {
 
     @Id("editButton")
