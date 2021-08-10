@@ -30,16 +30,13 @@ import org.springframework.beans.factory.annotation.Value;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag(value="login-view")
-@JsModule(value="./views/login/login-view.ts")
-@Route(value = "login")
-@RouteAlias(value = "")
-@PageTitle(value="Login")
-@CssImport(value="./views/login/login-view.css")
+@Tag("login-view")
+@JsModule("./views/login/login-view.ts")
+@Route("login")
+@RouteAlias("")
+@PageTitle("Login")
+@CssImport("./views/login/login-view.css")
 public class LoginView extends LitTemplate {
-
-    public LoginView() {
-    }
 
     @Value( "${adminContact}" )
     private String adminContact;

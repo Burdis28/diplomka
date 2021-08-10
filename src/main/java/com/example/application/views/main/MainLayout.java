@@ -26,28 +26,26 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
-@Tag(value="MainView")
-@CssImport(value="./views/main/main-view.css")
-@JsModule(value="./styles/shared-styles.js")
-@JsModule(value="./js/theme-selector.js")
-@EnableScheduling
-public class MainView extends AppLayout {
+@CssImport("./views/main/main-view.css")
+@JsModule("./styles/shared-styles.js")
+@JsModule("./js/theme-selector.js")
+public class MainLayout extends AppLayout {
 
     private final Tabs menu;
     private H1 viewTitle;
 
-    private final AuthService authService;
-
-    public MainView(AuthService authService) {
-        this.authService = authService;
+    public MainLayout() {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
@@ -57,7 +55,6 @@ public class MainView extends AppLayout {
     private Component createHeaderContent() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setId("header");
-        //layout.getThemeList().set("dark", true);
         layout.setWidthFull();
         layout.setSpacing(false);
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -132,7 +129,7 @@ public class MainView extends AppLayout {
 
     private Component createDropDownMenu(List<AuthorizedRouteData> routesList) {
         User user = VaadinSession.getCurrent().getAttribute(User.class);
-        Component[] tabs = authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
+        Component[] tabs = AuthService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
                 createTab(route.getName(), route.getView(), route.getIcon())).toArray(Component[]::new);
         Select<Tab> select = new Select<>();
         select.add(tabs);
@@ -143,7 +140,7 @@ public class MainView extends AppLayout {
     private Component[] createMenuItems() {
         // Využiju Vaadin session, získám usera a podle jeho role vytvořím jednotlivé taby, které může navštívit
         User user = VaadinSession.getCurrent().getAttribute(User.class);
-        return authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
+        return AuthService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
                 createTab(route.getName(), route.getView(), route.getIcon())).toArray(Component[]::new);
     }
 

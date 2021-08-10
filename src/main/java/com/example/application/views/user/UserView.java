@@ -3,7 +3,7 @@ package com.example.application.views.user;
 import com.example.application.data.entity.User;
 import com.example.application.data.service.UserRepository;
 import com.example.application.utils.PatternStringUtils;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -33,11 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag(value="user-view")
-@JsModule(value="./views/user/user-view.ts")
-@ParentLayout(value=MainView.class)
-@PageTitle(value="User administration")
-@CssImport(value="./views/user/user-view.css")
+@Tag("user-view")
+@JsModule("./views/user/user-view.ts")
+@ParentLayout(MainLayout.class)
+@PageTitle("User administration")
+@CssImport("./views/user/user-view.css")
 public class UserView extends LitTemplate {
 
     @Id("firstNameField")

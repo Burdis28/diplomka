@@ -10,8 +10,8 @@ import com.vaadin.flow.component.littemplate.LitTemplate;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag(value="sensor-gas-dashboard")
-@JsModule(value="./views/dashboard/sensor-gas-dashboard.ts")
+@Tag("sensor-gas-dashboard")
+@JsModule("./views/dashboard/sensor-gas-dashboard.ts")
 public class SensorGasDashboard extends LitTemplate {
 
     /**

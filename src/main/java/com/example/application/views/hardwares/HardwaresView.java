@@ -6,7 +6,7 @@ import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.User;
 import com.example.application.data.service.*;
 import com.example.application.views.hardwares.components.HardwareTile;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@JsModule(value="./views/hardwares/hardwares-view.ts")
-@CssImport(value="./views/hardwares/hardwares-view.css")
-@Tag(value="hardwares-view")
-@ParentLayout(value=MainView.class)
-@PageTitle(value="Hardware management")
+@JsModule("./views/hardwares/hardwares-view.ts")
+@CssImport("./views/hardwares/hardwares-view.css")
+@Tag("hardwares-view")
+@ParentLayout(MainLayout.class)
+@PageTitle("Hardware management")
 public class HardwaresView extends LitTemplate {
 
     private HardwareService hardwareService;
@@ -47,11 +47,10 @@ public class HardwaresView extends LitTemplate {
         this.userService = userService;
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
 
-        createTiles(hardwareService, hardwareLiveService, sensorService, userService);
+        createTiles();
     }
 
-    private void createTiles(HardwareService hardwareService, HardwareLiveService hardwareLiveService,
-                             SensorService sensorService, UserService userService) {
+    private void createTiles() {
 
         List<Hardware> hardwareList;
         List<HardwareLive> hardwareLiveList;
@@ -75,14 +74,14 @@ public class HardwaresView extends LitTemplate {
         for (Hardware hardware : hardwareList ) {
             attachedSensors = new ArrayList<>(sensorService.findSensorByIdHw(hardware.getSerial_HW()));
 
-            //try {
+            try {
                 HardwareTile tile = new HardwareTile(hardware, hardwareLiveMap.get(hardware.getSerial_HW()), attachedSensors,
                         userService.getHardwareOwner(hardware.getSerial_HW()).getFullName(), hardwareService, hardwareLiveService);
                 tile.addClassName("tile");
                 verticalBaseLayout.add(tile);
-//            } catch (Exception e) {
-//                System.out.println(e.getMessage());
-//            }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 }

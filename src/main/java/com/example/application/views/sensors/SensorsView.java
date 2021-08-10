@@ -8,7 +8,7 @@ import com.example.application.data.service.data.DataElectricService;
 import com.example.application.data.service.data.DataWaterService;
 import com.example.application.utils.DevelopmentDataCreator;
 import com.example.application.utils.SensorsUtils;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -43,12 +43,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.util.Arrays;
 import java.util.List;
 
-@JsModule(value="./views/sensors/sensors-view.ts")
-@CssImport(value="./views/sensors/sensors-view.css")
+@JsModule("./views/sensors/sensors-view.ts")
+@CssImport("./views/sensors/sensors-view.css")
 @CssImport(value = "./views/sensors/my-grid-styles.css", themeFor = "vaadin-grid-pro")
-@Tag(value="sensors-view")
-@ParentLayout(value=MainView.class)
-@PageTitle(value="Sensors management")
+@Tag("sensors-view")
+@ParentLayout(MainLayout.class)
+@PageTitle("Sensors management")
 public class SensorsView extends LitTemplate {
 
     @Id("grid")

@@ -15,8 +15,8 @@ import com.vaadin.flow.server.VaadinSession;
 
 import java.util.List;
 
-@PageTitle(value="Logout")
-@Tag(value="logout")
+@PageTitle("Logout")
+@Tag("logout")
 public class LogoutView extends Composite<VerticalLayout> {
 
     public LogoutView() {

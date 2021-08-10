@@ -8,7 +8,7 @@ import com.example.application.data.service.SensorService;
 import com.example.application.helpers.validators.ElectricSensorValidator;
 import com.example.application.utils.PatternStringUtils;
 import com.example.application.utils.RegexDoubleStringValidator;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.example.application.views.sensors.components.SensorInfoComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -25,7 +25,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.validator.RegexpValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -33,7 +32,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Optional;
 
 /**
@@ -42,11 +40,11 @@ import java.util.Optional;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag(value="electric-sensor-view")
-@JsModule(value="./views/sensors/electric-sensor-view.ts")
-@CssImport(value="./views/sensors/electric-sensor-view.css")
-@ParentLayout(value=MainView.class)
-@PageTitle(value="Electric sensor detail")
+@Tag("electric-sensor-view")
+@JsModule("./views/sensors/electric-sensor-view.ts")
+@CssImport("./views/sensors/electric-sensor-view.css")
+@ParentLayout(MainLayout.class)
+@PageTitle("Electric sensor detail")
 @EnableScheduling
 public class ElectricSensorView extends LitTemplate {
 

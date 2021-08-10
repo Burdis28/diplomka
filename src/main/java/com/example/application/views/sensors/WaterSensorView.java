@@ -7,26 +7,21 @@ import com.example.application.data.service.SensorWaterService;
 import com.example.application.data.service.StateValveService;
 import com.example.application.data.service.UserService;
 import com.example.application.utils.PatternStringUtils;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.example.application.views.sensors.components.SensorInfoComponent;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -44,11 +39,11 @@ import java.util.Optional;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag(value="water-sensor-view")
-@JsModule(value="./views/sensors/water-sensor-view.ts")
-@CssImport(value="./views/sensors/water-sensor-view.css")
-@ParentLayout(value=MainView.class)
-@PageTitle(value="Water sensor detail")
+@Tag("water-sensor-view")
+@JsModule("./views/sensors/water-sensor-view.ts")
+@CssImport("./views/sensors/water-sensor-view.css")
+@ParentLayout(MainLayout.class)
+@PageTitle("Water sensor detail")
 public class WaterSensorView extends LitTemplate {
 
     @Id("editButton")

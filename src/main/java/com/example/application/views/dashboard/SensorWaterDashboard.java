@@ -2,14 +2,12 @@ package com.example.application.views.dashboard;
 
 import com.example.application.components.StyledTextComponent;
 import com.example.application.data.entity.*;
-import com.example.application.data.entity.data.DataElectric;
 import com.example.application.data.entity.data.DataWater;
 import com.example.application.data.service.*;
-import com.example.application.data.service.data.DataElectricService;
 import com.example.application.data.service.data.DataWaterService;
 import com.example.application.utils.Colors;
 import com.example.application.utils.PatternStringUtils;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.button.Button;
@@ -55,11 +53,11 @@ import static java.time.temporal.TemporalAdjusters.lastDayOfMonth;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag(value="sensor-wat-dashboard")
-@JsModule(value="./views/dashboard/sensor-wat-dashboard.ts")
-@CssImport(value="./views/dashboard/sensor-wat-dashboard.css")
-@ParentLayout(value=MainView.class)
-@PageTitle(value="Water sensor dashboard")
+@Tag("sensor-wat-dashboard")
+@JsModule("./views/dashboard/sensor-wat-dashboard.ts")
+@CssImport("./views/dashboard/sensor-wat-dashboard.css")
+@ParentLayout(MainLayout.class)
+@PageTitle("Water sensor dashboard")
 @EnableScheduling
 public class SensorWaterDashboard extends LitTemplate {
 

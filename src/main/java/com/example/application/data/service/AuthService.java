@@ -10,14 +10,13 @@ import com.example.application.views.sensors.CreatesensorView;
 import com.example.application.views.hardwares.CreateHardwareView;
 import com.example.application.views.hardwares.HardwaresView;
 import com.example.application.views.login.LogoutView;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.example.application.views.sensors.ElectricSensorView;
 import com.example.application.views.sensors.GasSensorView;
 import com.example.application.views.sensors.SensorsView;
 import com.example.application.views.sensors.WaterSensorView;
 import com.example.application.views.user.UserManagementView;
 import com.example.application.views.user.UserView;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinSession;
@@ -54,19 +53,19 @@ public class AuthService {
         // session. Tudíž se uživatel bude schopen dostat jenom na jemu povolené views.
         getAuthorizedRoutes(admin)
                 .forEach(route -> {
-                    RouteConfiguration.forSessionScope().setRoute(route.getRoute(), route.getView(), MainView.class);
+                    RouteConfiguration.forSessionScope().setRoute(route.getRoute(), route.getView(), MainLayout.class);
                 });
-        RouteConfiguration.forSessionScope().setRoute("sensor-el-detail", ElectricSensorView.class, MainView.class);
-        RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainView.class);
-        RouteConfiguration.forSessionScope().setRoute("sensor-gas-detail", GasSensorView.class, MainView.class);
-        RouteConfiguration.forSessionScope().setRoute("sensor-el-dashboard", SensorElectricDashboard.class, MainView.class);
-        RouteConfiguration.forSessionScope().setRoute("sensor-wat-dashboard", SensorWaterDashboard.class, MainView.class);
-        RouteConfiguration.forSessionScope().setRoute("sensor-gas-dashboard", SensorGasDashboard.class, MainView.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-el-detail", ElectricSensorView.class, MainLayout.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainLayout.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-gas-detail", GasSensorView.class, MainLayout.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-el-dashboard", SensorElectricDashboard.class, MainLayout.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-wat-dashboard", SensorWaterDashboard.class, MainLayout.class);
+        RouteConfiguration.forSessionScope().setRoute("sensor-gas-dashboard", SensorGasDashboard.class, MainLayout.class);
         RouteConfiguration.forSessionScope().setRoute("login", LoginView.class);
 
     }
 
-    public List<AuthorizedRouteData> getAuthorizedRoutes(boolean admin) {
+    public static List<AuthorizedRouteData> getAuthorizedRoutes(boolean admin) {
         List<AuthorizedRouteData> routes = new ArrayList<>();
 
         if (admin) {

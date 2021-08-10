@@ -6,7 +6,7 @@ import com.example.application.data.service.HardwareLiveService;
 import com.example.application.data.service.HardwareService;
 import com.example.application.data.service.NotificationLogHwService;
 import com.example.application.data.service.SmartPlugService;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
@@ -19,7 +19,6 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -33,11 +32,11 @@ import java.time.LocalDateTime;
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
-@Tag(value="create-hardware-view")
-@JsModule(value="./views/hardwares/create-hardware-view.ts")
-@CssImport(value="./views/hardwares/create-hardware-view.css")
-@ParentLayout(value=MainView.class)
-@PageTitle(value="Create hardware")
+@Tag("create-hardware-view")
+@JsModule("./views/hardwares/create-hardware-view.ts")
+@CssImport("./views/hardwares/create-hardware-view.css")
+@ParentLayout(MainLayout.class)
+@PageTitle("Create hardware")
 public class CreateHardwareView extends LitTemplate {
 
     @Id("nameField")
