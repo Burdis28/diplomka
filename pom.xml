@@ -225,7 +225,15 @@
                             </processTypes>
                         </configuration>
                     </plugin>
-
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>8</source>
+                            <target>11</target>
+                            <compilerArgs>--enable-preview</compilerArgs>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -272,6 +280,15 @@
                             <enableAssertions>true</enableAssertions>
                         </configuration>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>8</source>
+                            <target>11</target>
+                            <compilerArgs>--enable-preview</compilerArgs>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -297,6 +314,15 @@
                         </executions>
                         <configuration>
                             <nodeVersion>v12.13.0</nodeVersion>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>8</source>
+                            <target>11</target>
+                            <compilerArgs>--enable-preview</compilerArgs>
                         </configuration>
                     </plugin>
                 </plugins>
