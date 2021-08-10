@@ -5,11 +5,9 @@ import java.util.Optional;
 
 import com.example.application.data.entity.User;
 import com.example.application.data.service.AuthService;
+import com.example.application.data.service.AuthorizedRouteData;
 import com.vaadin.componentfactory.ToggleButton;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -28,9 +26,12 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -39,16 +40,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @CssImport("./views/main/main-view.css")
 @JsModule("./styles/shared-styles.js")
 @JsModule("./js/theme-selector.js")
-@EnableScheduling
-public class MainView extends AppLayout {
+public class MainLayout extends AppLayout {
 
     private final Tabs menu;
     private H1 viewTitle;
 
-    private final AuthService authService;
-
-    public MainView(AuthService authService) {
-        this.authService = authService;
+    public MainLayout() {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
@@ -58,7 +55,6 @@ public class MainView extends AppLayout {
     private Component createHeaderContent() {
         HorizontalLayout layout = new HorizontalLayout();
         layout.setId("header");
-        //layout.getThemeList().set("dark", true);
         layout.setWidthFull();
         layout.setSpacing(false);
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -131,10 +127,10 @@ public class MainView extends AppLayout {
         return tabs;
     }
 
-    private Component createDropDownMenu(List<AuthService.AuthorizedRoute> routesList) {
+    private Component createDropDownMenu(List<AuthorizedRouteData> routesList) {
         User user = VaadinSession.getCurrent().getAttribute(User.class);
-        Component[] tabs = authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
-                createTab(route.name(), route.view(), route.icon())).toArray(Component[]::new);
+        Component[] tabs = AuthService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
+                createTab(route.getName(), route.getView(), route.getIcon())).toArray(Component[]::new);
         Select<Tab> select = new Select<>();
         select.add(tabs);
         select.addComponentAsFirst(new Text("Management"));
@@ -144,8 +140,8 @@ public class MainView extends AppLayout {
     private Component[] createMenuItems() {
         // Využiju Vaadin session, získám usera a podle jeho role vytvořím jednotlivé taby, které může navštívit
         User user = VaadinSession.getCurrent().getAttribute(User.class);
-        return authService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
-                createTab(route.name(), route.view(), route.icon())).toArray(Component[]::new);
+        return AuthService.getAuthorizedRoutes(user.getAdmin()).stream().map(route ->
+                createTab(route.getName(), route.getView(), route.getIcon())).toArray(Component[]::new);
     }
 
     private static Tab createTab(String text, Class<? extends Component> navigationTarget, VaadinIcon icon) {

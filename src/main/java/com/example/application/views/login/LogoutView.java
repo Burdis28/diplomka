@@ -2,6 +2,7 @@ package com.example.application.views.login;
 
 import com.example.application.data.entity.User;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -15,6 +16,7 @@ import com.vaadin.flow.server.VaadinSession;
 import java.util.List;
 
 @PageTitle("Logout")
+@Tag("logout")
 public class LogoutView extends Composite<VerticalLayout> {
 
     public LogoutView() {

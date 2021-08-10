@@ -3,7 +3,7 @@ package com.example.application.views.sensors;
 import com.example.application.data.entity.*;
 import com.example.application.data.service.*;
 import com.example.application.utils.PatternStringUtils;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -13,16 +13,10 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.littemplate.LitTemplate;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.timepicker.TimePicker;
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
@@ -30,7 +24,6 @@ import com.vaadin.flow.router.ParentLayout;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -43,7 +36,7 @@ import java.util.stream.Collectors;
 @JsModule("./views/sensors/createsensor-view.ts")
 @CssImport("./views/sensors/createsensor-view.css")
 @Tag("createsensor-view")
-@ParentLayout(MainView.class)
+@ParentLayout(MainLayout.class)
 @PageTitle("Create sensor")
 public class CreatesensorView extends LitTemplate {
 

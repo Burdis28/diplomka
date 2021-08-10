@@ -8,7 +8,7 @@ import com.example.application.data.service.data.DataElectricService;
 import com.example.application.data.service.data.DataWaterService;
 import com.example.application.utils.DevelopmentDataCreator;
 import com.example.application.utils.SensorsUtils;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -47,7 +47,7 @@ import java.util.List;
 @CssImport("./views/sensors/sensors-view.css")
 @CssImport(value = "./views/sensors/my-grid-styles.css", themeFor = "vaadin-grid-pro")
 @Tag("sensors-view")
-@ParentLayout(MainView.class)
+@ParentLayout(MainLayout.class)
 @PageTitle("Sensors management")
 public class SensorsView extends LitTemplate {
 

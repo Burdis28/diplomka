@@ -3,7 +3,7 @@ package com.example.application.views.user;
 import com.example.application.data.entity.User;
 import com.example.application.data.service.UserRepository;
 import com.example.application.utils.PatternStringUtils;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -35,7 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Tag("user-view")
 @JsModule("./views/user/user-view.ts")
-@ParentLayout(MainView.class)
+@ParentLayout(MainLayout.class)
 @PageTitle("User administration")
 @CssImport("./views/user/user-view.css")
 public class UserView extends LitTemplate {

@@ -3,10 +3,9 @@ package com.example.application.views.sensors;
 import com.example.application.components.notifications.ErrorNotification;
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorGas;
-import com.example.application.data.entity.SensorWater;
 import com.example.application.data.service.SensorGasService;
 import com.example.application.data.service.SensorService;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.example.application.views.sensors.components.SensorInfoComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -35,7 +34,7 @@ import java.math.BigDecimal;
 @Tag("gas-sensor-view")
 @JsModule("./views/sensors/gas-sensor-view.ts")
 @CssImport("./views/sensors/gas-sensor-view.css")
-@ParentLayout(MainView.class)
+@ParentLayout(MainLayout.class)
 @PageTitle("Gas sensor detail")
 public class GasSensorView extends LitTemplate {
 

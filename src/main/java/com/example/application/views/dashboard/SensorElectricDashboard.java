@@ -10,7 +10,7 @@ import com.example.application.data.service.*;
 import com.example.application.data.service.data.DataElectricService;
 import com.example.application.utils.Colors;
 import com.example.application.utils.PatternStringUtils;
-import com.example.application.views.main.MainView;
+import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.button.Button;
@@ -57,7 +57,7 @@ import static java.time.temporal.TemporalAdjusters.*;
 @Tag("sensor-el-dashboard")
 @JsModule("./views/dashboard/sensor-el-dashboard.ts")
 @CssImport("./views/dashboard/sensor-el-dashboard.css")
-@ParentLayout(MainView.class)
+@ParentLayout(MainLayout.class)
 @PageTitle("Electric sensor dashboard")
 @EnableScheduling
 public class SensorElectricDashboard extends LitTemplate {

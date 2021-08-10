@@ -32,8 +32,8 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @Tag("login-view")
 @JsModule("./views/login/login-view.ts")
-@Route(value = "login")
-@RouteAlias(value = "")
+@Route("login")
+@RouteAlias("")
 @PageTitle("Login")
 @CssImport("./views/login/login-view.css")
 public class LoginView extends LitTemplate {

@@ -17,11 +17,11 @@ public enum SensorTypes {
     }
 
     public static SensorTypes fromCode(String code) {
-        return switch (code) {
-            case "Water" -> w;
-            case "Electric" -> e;
-            case "Gas" -> g;
-            default -> null;
-        };
+        switch (code) {
+            case "Water": return w;
+            case "Electric": return e;
+            case "Gas": return g;
+            default: return null;
+        }
     }
 }
