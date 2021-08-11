@@ -24,8 +24,8 @@ import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * A Designer generated component for the user-view template.
@@ -70,11 +70,13 @@ public class UserView extends LitTemplate {
     private PasswordField passwordField1;
 
     Binder<User> userBinder = new Binder<>();
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Creates a new UserView.
      */
-    public UserView(@Autowired UserRepository userRepository) {
+    public UserView(@Autowired UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
         User user = VaadinSession.getCurrent().getAttribute(User.class);
         setUserFields(user);
         firstNameField.setMaxLength(20);
@@ -142,7 +144,7 @@ public class UserView extends LitTemplate {
                             dialog.open();
                             throw new Exception();
                         } else {
-                            user.setPasswordHash(DigestUtils.md5Hex(pw1));
+                            user.setPasswordHash(passwordEncoder.encode(pw1));
                         }
                     }
 
