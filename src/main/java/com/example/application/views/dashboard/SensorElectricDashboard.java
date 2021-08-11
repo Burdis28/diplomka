@@ -483,7 +483,7 @@ public class SensorElectricDashboard extends LitTemplate {
         priceDiv.add(priceText);
         consumptionProgressBar.setMin(0);
         consumptionProgressBar.setMax(sensor.getLimit_day());
-        consumptionProgressBar.setValue(sensor.getConsumptionActual());
+        setConsumptionProgressBar(sensor);
         consumptionProgressBar.setHeight("15px");
         consumptionProgressBar.setVisible(true);
     }
@@ -493,7 +493,7 @@ public class SensorElectricDashboard extends LitTemplate {
         try {
             ownerSpanField.setText("Owner: " + userService.getHardwareOwner(sensor.getIdHw()).getFullName());
         } catch (Exception e) {
-            ownerSpanField.setText("...");
+            ownerSpanField.setText("Owner: ...");
         }
     }
 
@@ -562,11 +562,19 @@ public class SensorElectricDashboard extends LitTemplate {
     private void refreshConsumptionChart(Optional<Sensor> refreshedSensor) {
         try {
             refreshedSensor.flatMap(value -> getUI()).ifPresent(ui -> ui.access(() -> {
-                consumptionProgressBar.setValue(refreshedSensor.get().getConsumptionActual());
+                setConsumptionProgressBar(refreshedSensor.get());
                 ui.push();
             }));
         } catch (UIDetachedException exception) {
             //ignore, harmless exception in this case
+        }
+    }
+
+    private void setConsumptionProgressBar(Sensor sens) {
+        if (sens.getConsumptionActual() >= sens.getLimit_day()) {
+            consumptionProgressBar.setValue(consumptionProgressBar.getMax());
+        } else {
+            consumptionProgressBar.setValue(sens.getConsumptionActual());
         }
     }
 
