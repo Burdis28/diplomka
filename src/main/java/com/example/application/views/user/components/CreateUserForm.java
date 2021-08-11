@@ -2,12 +2,12 @@ package com.example.application.views.user.components;
 
 import com.example.application.data.entity.User;
 import com.example.application.utils.PatternStringUtils;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import org.apache.commons.codec.digest.DigestUtils;
 import com.vaadin.flow.component.html.H2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class CreateUserForm extends VerticalLayout {
 
@@ -18,6 +18,8 @@ public class CreateUserForm extends VerticalLayout {
     private final TextField emailField = new TextField();
     private final PasswordField passwordField = new PasswordField();
     private final PasswordField passwordField2 = new PasswordField();
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public CreateUserForm() {
         setLabels();
@@ -88,7 +90,7 @@ public class CreateUserForm extends VerticalLayout {
         newUser.setSurname(lastNameFieldField.getValue());
         newUser.setFullName(newUser.getFirstName() + " " + newUser.getSurname());
         newUser.setEmail(emailField.getValue());
-        newUser.setPasswordHash(DigestUtils.md5Hex(passwordField.getValue()));
+        newUser.setPasswordHash(passwordEncoder.encode(passwordField.getValue()));
         newUser.setActive(true);
         newUser.setPushToken("");
         newUser.setPhone("...");

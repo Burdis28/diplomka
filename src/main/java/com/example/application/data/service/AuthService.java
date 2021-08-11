@@ -21,6 +21,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,15 +31,17 @@ import java.util.List;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
-    public AuthService(@Autowired UserRepository userRepository) {
+    public AuthService(@Autowired UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
     public void authenticate(String username, String password) throws AuthException {
         User user = userRepository.getByLogin(username);
 
-        if (user != null && user.checkPassword(password)) {
+        if (user != null && passwordEncoder.matches(password, user.getPasswordHash())) {
             VaadinSession.getCurrent().setAttribute(User.class, user);
             if (RouteConfiguration.forSessionScope().getAvailableRoutes().size() < 3) {
                 createRoutes(user.getAdmin());

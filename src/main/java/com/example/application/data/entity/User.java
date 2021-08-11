@@ -43,10 +43,6 @@ public class User {
         this.isActive = true;
     }
 
-    public boolean checkPassword(String password) {
-        return DigestUtils.md5Hex(password).equals(this.passwordHash);
-    }
-
     public String getLogin() {
         return login;
     }
