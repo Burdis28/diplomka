@@ -3,20 +3,29 @@ package com.example.application.data.entity;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO, generator="native")
     @GenericGenerator(name = "native", strategy = "native")
     private Integer id;
-    private String login, fullName, firstName, surname, phone, email, passwordHash, pushToken;
-    private boolean isAdmin, isActive;
+    @Column(name="fullname")
+    private String fullName;
+    @Column(name="firstname")
+    private String firstName;
+    private String login, surname, phone, email;
+    @Column(name="passwordhash")
+    private String passwordHash;
+    @Column(name="pushtoken")
+    private String pushToken;
+    @Column(name="isadmin")
+    private boolean isAdmin;
+    @Column(name="isactive")
+    private boolean isActive;
 
     public User() {
     }
