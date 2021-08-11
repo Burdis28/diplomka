@@ -274,7 +274,7 @@ public class SensorWaterDashboard extends LitTemplate {
         try {
             ownerSpanField.setText("Owner: " + userService.getHardwareOwner(sensor.getIdHw()).getFullName());
         } catch (Exception e) {
-            ownerSpanField.setText("...");
+            ownerSpanField.setText("Owner: ...");
         }
     }
 
@@ -288,7 +288,7 @@ public class SensorWaterDashboard extends LitTemplate {
         priceDiv.add(priceText);
         consumptionProgressBar.setMin(0);
         consumptionProgressBar.setMax(sensor.getLimit_day());
-        consumptionProgressBar.setValue(sensor.getConsumptionActual());
+        setConsumptionProgressBarValue(sensor);
         consumptionProgressBar.setHeight("15px");
         consumptionProgressBar.setVisible(true);
     }
@@ -488,11 +488,20 @@ public class SensorWaterDashboard extends LitTemplate {
     private void refreshConsumptionChart(Optional<Sensor> refreshedSensor) {
         try {
             refreshedSensor.flatMap(value -> getUI()).ifPresent(ui -> ui.access(() -> {
-                consumptionProgressBar.setValue(refreshedSensor.get().getConsumptionActual());
+                setConsumptionProgressBarValue(refreshedSensor.get());
+                //consumptionProgressBar.setValue(refreshedSensor.get().getConsumptionActual());
                 ui.push();
             }));
         } catch (UIDetachedException exception) {
             //ignore, harmless exception in this case
+        }
+    }
+
+    private void setConsumptionProgressBarValue(Sensor sensor) {
+        if (sensor.getConsumptionActual() >= sensor.getLimit_day()) {
+            consumptionProgressBar.setValue(consumptionProgressBar.getMax());
+        } else {
+            consumptionProgressBar.setValue(sensor.getConsumptionActual());
         }
     }
 
