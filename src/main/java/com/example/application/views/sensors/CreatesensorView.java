@@ -12,11 +12,13 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
@@ -70,37 +72,37 @@ public class CreatesensorView extends LitTemplate {
     @Id("cancel")
     private Button cancel;
 
-    //Electric components
     @Id("electricLayout")
     private FormLayout electricLayout;
-    @Id("highRateCheckBox")
-    private Checkbox highRateCheckBox;
-    @Id("pricePerKwHighField")
-    private TextField pricePerKwHighField;
-
-    //Water components
-    @Id("waterLayout")
-    private FormLayout waterLayout;
-    @Id("pricePerM3Field")
-    private TextField pricePerM3Field;
-    @Id("waterStateSelect")
-    private Select<StateValve> waterStateSelect;
-    @Id("implPerLitField")
-    private NumberField implPerLitField;
     @Id("pricePerKwLowField")
     private TextField pricePerKwLowField;
+    @Id("pricePerKwHighField")
+    private TextField pricePerKwHighField;
     @Id("fixedPriceField")
     private TextField fixedPriceField;
     @Id("servicePriceField")
     private TextField servicePriceField;
     @Id("implPerKwField")
     private TextField implPerKwField;
-    @Id("overallLayout")
-    private Element overallLayout;
+    @Id("electricAllAttributesLayout")
+    private Span electricAllAttributesLayout;
+
+    //Water components
+    @Id("waterLayout")
+    private FormLayout waterLayout;
+    @Id("pricePerM3Field")
+    private TextField pricePerM3Field;
+    @Id("implPerLitField")
+    private NumberField implPerLitField;
     @Id("nightEndField")
     private TextField nightEndField;
     @Id("nightStartField")
     private TextField nightStartField;
+    @Id("waterAllAttributesLayout")
+    private Span waterAllAttributesLayout;
+
+    @Id("overallLayout")
+    private Element overallLayout;
 
     public CreatesensorView(SensorService sensorService, HardwareService hardwareService,
                             SensorElectricService sensorElectricService, SensorWaterService sensorWaterService,
@@ -110,8 +112,8 @@ public class CreatesensorView extends LitTemplate {
         this.sensorElectricService = sensorElectricService;
         this.sensorWaterService = sensorWaterService;
         this.stateValveService = stateValveService;
-        electricLayout.setVisible(false);
-        waterLayout.setVisible(false);
+        electricAllAttributesLayout.setVisible(false);
+        waterAllAttributesLayout.setVisible(false);
 
         setFormFieldsPatterns();
         setSelectFields();
@@ -119,8 +121,8 @@ public class CreatesensorView extends LitTemplate {
         clearForm();
 
         typeSelect.addValueChangeListener(event -> {
-            electricLayout.setVisible(typeSelect.getValue().equals(SensorTypes.e.toString()));
-            waterLayout.setVisible(typeSelect.getValue().equals(SensorTypes.w.toString()));
+            electricAllAttributesLayout.setVisible(typeSelect.getValue().equals(SensorTypes.e.toString()));
+            waterAllAttributesLayout.setVisible(typeSelect.getValue().equals(SensorTypes.w.toString()));
             //gasLayout.setVisible(typeSelect.getValue().equals(SensorTypes.g.toString()));
             div.setHeight("1500px");
         });
@@ -155,7 +157,7 @@ public class CreatesensorView extends LitTemplate {
         SensorWater water = new SensorWater();
         water.setSensor_id(createdSensor.getId());
         water.setPrice_per_m3(Double.parseDouble(pricePerM3Field.getValue()));
-        water.setState(waterStateSelect.getValue().getId());
+        water.setState(1);
         water.setImplPerLit(implPerLitField.getValue().intValue());
 
         setNightTimeFields(water);
@@ -184,7 +186,6 @@ public class CreatesensorView extends LitTemplate {
     private SensorElectric setNewElectricSensorFromFields(Sensor createdSensor) {
         SensorElectric electric = new SensorElectric();
         electric.setSensor_id(createdSensor.getId());
-        electric.setHighRate(highRateCheckBox.getValue());
         electric.setImplPerKw(Integer.parseInt(implPerKwField.getValue()));
         electric.setPriceService(Double.parseDouble(servicePriceField.getValue()));
         electric.setPriceFix(Double.parseDouble(fixedPriceField.getValue()));
@@ -305,13 +306,10 @@ public class CreatesensorView extends LitTemplate {
     }
 
     private void setSelectFields() {
-        attachToHardwareSelect.setItems(hardwareService.listHardwareSerials());
+        attachToHardwareSelect.setItems(hardwareService.findAll().stream().map(hardware -> hardware.getName() + " [" + hardware.getSerial_HW() + "]")
+                .collect(Collectors.toList()));
         typeSelect.removeAll();
         typeSelect.setItems(Arrays.stream(SensorTypes.values()).map(SensorTypes::toString).collect(Collectors.toList()));
-
-        waterStateSelect.removeAll();
-        waterStateSelect.setItems(stateValveService.listAll());
-        waterStateSelect.setItemLabelGenerator(StateValve::getState);
     }
 
     private void clearForm() {
@@ -327,9 +325,7 @@ public class CreatesensorView extends LitTemplate {
         pricePerM3Field.clear();
         fixedPriceField.clear();
         servicePriceField.clear();
-        highRateCheckBox.clear();
 
-        waterStateSelect.clear();
         implPerLitField.clear();
         nightStartField.clear();
         nightEndField.clear();

@@ -28,7 +28,10 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
@@ -40,11 +43,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Month;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.TemporalAdjusters.*;
 
@@ -60,11 +62,14 @@ import static java.time.temporal.TemporalAdjusters.*;
 @ParentLayout(MainLayout.class)
 @PageTitle("Electric sensor dashboard")
 @EnableScheduling
+@CssImport(
+        themeFor = "vaadin-progress-bar",
+        value = "./views/dashboard/dynamically-change-progressbar-color.css"
+)
 public class SensorElectricDashboard extends LitTemplate {
 
     private Chart areaSplineRangeChart;
-    private Chart pieChartHighLowRate;
-    private Chart dailyConsumptionChart;
+    private Chart mainChart;
     private SensorElectricService sensorElectricService;
     private DataElectricService dataElectricService;
     private SensorService sensorService;
@@ -76,22 +81,20 @@ public class SensorElectricDashboard extends LitTemplate {
     private Sensor sensor;
 
     private StyledTextComponent consumptionText;
+    private StyledTextComponent consumptionPercentText;
     private StyledTextComponent consumptionMonthText;
+    private StyledTextComponent consumptionTodayText;
     private StyledTextComponent priceMonthText;
-    private StyledTextComponent priceText;
-    private StyledTextComponent priceForADayText;
-    private StyledTextComponent priceForAMonthText;
+    private StyledTextComponent priceTodayText;
+
+    private Double consumptionMaxValue;
 
     private List<DataElectric> dataElectricList;
     private int signalStrength;
     private HardwareLive associatedHwLive;
 
-    @Id("areaSplineRangeChartDiv")
-    private Div areaSplineRangeChartDiv;
     @Id("titleNameField")
     private H2 titleNameField;
-    @Id("ownerSpanField")
-    private Span ownerSpanField;
     @Id("consumptionDivText")
     private Div consumptionDivText;
     @Id("consumptionProgressBar")
@@ -110,32 +113,35 @@ public class SensorElectricDashboard extends LitTemplate {
     private Div dailyConsumptionDiv;
     @Id("consumptionDatePicker")
     private DatePicker consumptionDatePicker;
-    @Id("priceDiv")
-    private Div priceDiv;
-    @Id("monthlyChart")
-    private Chart monthlyChart;
-    @Id("monthlyChartDiv")
-    private Div monthlyChartDiv;
-    @Id("priceForADayDiv")
-    private Div priceForADayDiv;
-    @Id("priceForDayDatePicker")
-    private DatePicker priceForDayDatePicker;
-    @Id("monthSelecter")
-    private Select<Month> monthSelecter;
-    @Id("yearSelecterField")
-    private TextField yearSelecterField;
-    @Id("priceForAMonth")
-    private Div priceForAMonth;
-    @Id("calculateBtn")
-    private Button calculateBtn;
-    @Id("calculateWholeYear")
-    private Button calculateWholeYear;
     @Id("consumptionMonthDivText")
     private Div consumptionMonthDivText;
     @Id("monthLimitProgressBar")
     private ProgressBar monthLimitProgressBar;
     @Id("priceThisMonthDiv")
     private Div priceThisMonthDiv;
+    @Id("ownerSpanField")
+    private Span ownerSpanField;
+    @Id("horizontalLayoutAboveChart")
+    private HorizontalLayout horizontalLayoutAboveChart;
+
+    private RadioButtonGroup<String> consPricesRadioButtonGroup;
+    private RadioButtonGroup<String> periodRadioButtonGroup;
+    @Id("previousButton")
+    private Button previousButton;
+    @Id("nextButton")
+    private Button nextButton;
+    @Id("typeOfChartDiv")
+    private Div typeOfChartDiv;
+    @Id("periodChangerChartDiv")
+    private Div periodChangerChartDiv;
+
+    private LocalDate dateForChart;
+    @Id("consumptionTodayDivText")
+    private Div consumptionTodayDivText;
+    @Id("todayLimitProgressBar")
+    private ProgressBar todayLimitProgressBar;
+    @Id("priceTodayDiv")
+    private Div priceTodayDiv;
 
     /**
      * Creates a new SensorElDashboard.
@@ -150,8 +156,10 @@ public class SensorElectricDashboard extends LitTemplate {
         this.hardwareService = hardwareService;
         this.hardwareLiveService = hardwareLiveService;
         areaSplineRangeChart = new Chart(ChartType.COLUMNRANGE);
-        dailyConsumptionChart = new Chart(ChartType.COLUMN);
-        pieChartHighLowRate = new Chart(ChartType.PIE);
+        mainChart = new Chart(ChartType.COLUMN);
+        consPricesRadioButtonGroup = new RadioButtonGroup<>();
+        periodRadioButtonGroup = new RadioButtonGroup<>();
+        consumptionMaxValue = 0.0;
 
         int sensorId = -1;
         sensorId = (int) VaadinSession.getCurrent().getAttribute("sensorId");
@@ -162,16 +170,174 @@ public class SensorElectricDashboard extends LitTemplate {
             setInfoData();
             setConsumptionBar();
             setDailyConsumptionChart();
-            setPieChartHighLowRate();
-            //setChartData();
-            setHwInfoData();
-            setMonthlyLimitBar();
-            setMonthlyConsumptionChart();
-            setPriceOfDayPicker();
-            setPriceCalculationCards();
 
-            areaSplineRangeChartDiv.add(pieChartHighLowRate);
-            dailyConsumptionDiv.add(dailyConsumptionChart);
+            setConsumptionPricesChangerForChart();
+            setPeriodChangerForChart();
+            setMainChartControlButtons();
+
+            setHwInfoData();
+            setTodayLimitBar();
+            setMonthlyLimitBar();
+
+            dailyConsumptionDiv.add(mainChart);
+            typeOfChartDiv.add(consPricesRadioButtonGroup);
+            periodChangerChartDiv.add(periodRadioButtonGroup);
+            dateForChart = LocalDate.now();
+            consumptionDatePicker.setValue(dateForChart);
+        }
+    }
+
+    private void setTodayLimitBar() {
+        //TODO set localDate.now()
+        List<DataElectric> todayData = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
+                LocalDate.of(2021, 8, 11), LocalDate.of(2021, 8, 11));
+        double price = 0.0;
+        double consumption = 0.0;
+        for (DataElectric data : todayData) {
+            price += data.getHighRate() * sensorElectric.getPricePerKwHigh() + data.getLowRate() * sensorElectric.getPricePerKwLow();
+            consumption += data.getHighRate() + data.getLowRate();
+        }
+        consumptionTodayText = new StyledTextComponent("Today consumption: <b>" + PatternStringUtils.formatNumberToText(
+                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + " [kW]</b>");
+        priceTodayText = new StyledTextComponent("Price so far: <b>" + PatternStringUtils.formatNumberToText(
+                getNumberOfDecimalPrecision(price, 3))
+                + " " + sensor.getCurrencyString() + "</b>");
+        consumptionTodayDivText.setText("");
+        consumptionTodayDivText.add(consumptionTodayText);
+        priceTodayDiv.setText("");
+        priceTodayDiv.add(priceTodayText);
+        todayLimitProgressBar.setMin(0);
+        todayLimitProgressBar.setMax(sensor.getLimit_day());
+        if (consumption >= sensor.getLimit_day()) {
+            todayLimitProgressBar.setValue(sensor.getLimit_day());
+        } else {
+            todayLimitProgressBar.setValue(consumption);
+        }
+        todayLimitProgressBar.setHeight("15px");
+        todayLimitProgressBar.setVisible(true);
+    }
+
+    private void setMainChartControlButtons() {
+        previousButton.setIcon(VaadinIcon.ANGLE_LEFT.create());
+        nextButton.setIcon(VaadinIcon.ANGLE_RIGHT.create());
+        nextButton.setIconAfterText(true);
+
+        previousButton.addClickListener(event -> {
+            updateChartToPreviousData();
+        });
+
+        nextButton.addClickListener(event -> {
+            updateChartToNextData();
+        });
+    }
+
+    private void updateChartToNextData() {
+        if (periodRadioButtonGroup.getValue().equals("Day")) {
+            dateForChart = dateForChart.plusDays(1);
+            updateMainChartData(dateForChart, dateForChart, consPricesRadioButtonGroup.getValue().equals("Consumption"));
+        } else {
+            if (periodRadioButtonGroup.getValue().equals("Month")) {
+                dateForChart = dateForChart.withDayOfMonth(1).plusMonths(1);
+                updateMainChartData(YearMonth.from(dateForChart).atDay(1), YearMonth.from(dateForChart).atEndOfMonth(), consPricesRadioButtonGroup.getValue().equals("Consumption"));
+            } else {
+                dateForChart = dateForChart.withDayOfYear(1).plusYears(1);
+                updateMainChartData(dateForChart.withDayOfYear(1), LocalDate.of(dateForChart.getYear(), 12, 31), consPricesRadioButtonGroup.getValue().equals("Consumption"));
+            }
+        }
+        Notification.show("Teď jsem se posunul o něco dále").setPosition(Notification.Position.MIDDLE);
+    }
+
+    private void updateChartToPreviousData() {
+        if (periodRadioButtonGroup.getValue().equals("Day")) {
+            dateForChart = dateForChart.minusDays(1);
+            updateMainChartData(dateForChart, dateForChart, consPricesRadioButtonGroup.getValue().equals("Consumption"));
+        } else {
+            if (periodRadioButtonGroup.getValue().equals("Month")) {
+                dateForChart = dateForChart.withDayOfMonth(1).minusMonths(1);
+                updateMainChartData(YearMonth.from(dateForChart).atDay(1), YearMonth.from(dateForChart).atEndOfMonth(), consPricesRadioButtonGroup.getValue().equals("Consumption"));
+            } else {
+                dateForChart = dateForChart.withDayOfYear(1).minusYears(1);
+                updateMainChartData(dateForChart.withDayOfYear(1), LocalDate.of(dateForChart.getYear(), 12, 31), consPricesRadioButtonGroup.getValue().equals("Consumption"));
+            }
+        }
+        Notification.show("Teď jsem se posunul o něco dřív").setPosition(Notification.Position.MIDDLE);
+    }
+
+    private void setConsumptionPricesChangerForChart() {
+        consPricesRadioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        consPricesRadioButtonGroup.setItems("Consumption", "Prices");
+        consPricesRadioButtonGroup.setValue("Prices");
+        consPricesRadioButtonGroup.addValueChangeListener(event -> {
+            if (event.getValue().equals("Prices")) {
+                alterChartToPrices();
+            } else {
+                Tooltip tooltip = new Tooltip();
+                tooltip.setShared(true);
+                tooltip.setValueDecimals(5);
+                tooltip.setValueSuffix(" [kW]");
+                mainChart.getConfiguration().setTooltip(tooltip);
+                alterChartToConsumptions();
+            }
+        });
+    }
+
+    private void setPeriodChangerForChart() {
+        periodRadioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        periodRadioButtonGroup.setItems("Day", "Month", "Year");
+        periodRadioButtonGroup.setValue("Day");
+        periodRadioButtonGroup.addValueChangeListener(event -> {
+            switch (event.getValue()) {
+                case "Day":
+                    dateForChart = LocalDate.now();
+                    alterChartToDay();
+                    consumptionDatePicker.setVisible(true);
+                    return;
+                case "Month":
+                    alterChartToMonth();
+                    consumptionDatePicker.setVisible(false);
+                    return;
+                case "Year":
+                    alterChartToYear();
+                    consumptionDatePicker.setVisible(false);
+            }
+        });
+    }
+
+    private void alterChartToYear() {
+        dateForChart = dateForChart.withDayOfYear(1);
+        updateMainChartData(dateForChart, LocalDate.of(dateForChart.getYear(), 12, 31), consPricesRadioButtonGroup.getValue().equals("Consumption"));
+        Notification.show("Teď ukazuju v grafu ročně").setPosition(Notification.Position.MIDDLE);
+    }
+
+    private void alterChartToMonth() {
+        dateForChart = dateForChart.withDayOfMonth(1);
+        updateMainChartData(dateForChart, YearMonth.from(dateForChart).atEndOfMonth(), consPricesRadioButtonGroup.getValue().equals("Consumption"));
+        Notification.show("Teď ukazuju v grafu měsíčně").setPosition(Notification.Position.MIDDLE);
+    }
+
+    private void alterChartToDay() {
+        consumptionDatePicker.setValue(dateForChart);
+        updateMainChartData(dateForChart, dateForChart, consPricesRadioButtonGroup.getValue().equals("Consumption"));
+        Notification.show("Teď ukazuju v grafu denně").setPosition(Notification.Position.MIDDLE);
+    }
+
+    private void alterChartToPrices() {
+        changeChartBasedOnPeriod();
+        Notification.show("Teď ukazuju v grafu prices").setPosition(Notification.Position.MIDDLE);
+    }
+
+    private void alterChartToConsumptions() {
+        changeChartBasedOnPeriod();
+        Notification.show("Teď ukazuju v grafu consumption").setPosition(Notification.Position.MIDDLE);
+    }
+
+    private void changeChartBasedOnPeriod() {
+        if (periodRadioButtonGroup.getValue().equals("Day")) {
+            alterChartToDay();
+        } else if (periodRadioButtonGroup.getValue().equals("Month")) {
+            alterChartToMonth();
+        } else {
+            alterChartToYear();
         }
     }
 
@@ -203,139 +369,61 @@ public class SensorElectricDashboard extends LitTemplate {
         monthLimitProgressBar.setVisible(true);
     }
 
-    private void setPriceCalculationCards() {
-        yearSelecterField.setPattern(PatternStringUtils.yearRegex);
-        yearSelecterField.setErrorMessage(PatternStringUtils.yearErrorMessage);
-        yearSelecterField.setPlaceholder("Type in a year.");
-        yearSelecterField.setRequired(true);
 
-        monthSelecter.removeAll();
-        monthSelecter.setItems(PatternStringUtils.months);
-        monthSelecter.setTextRenderer(Enum::name);
-        monthSelecter.setValue(LocalDate.now().getMonth());
-
-        priceForAMonthText = new StyledTextComponent("");
-        priceForAMonth.add(priceForAMonthText);
-        priceForAMonth.setClassName("priceForADayOrMonthDiv");
-
-        calculateWholeYear.setThemeName("secondary");
-
-        calculateBtn.addClickListener(event -> {
-            if (!monthSelecter.isInvalid() && !yearSelecterField.isInvalid()) {
-                LocalDate date = getDateFromSelecterFields();
-
-                List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
-                        date.with(firstDayOfMonth()), date.with(lastDayOfMonth()));
-                Double price = dataElectrics.stream().mapToDouble(value -> value.getHighRate() * sensorElectric.getPricePerKwHigh()
-                        + value.getLowRate() * sensorElectric.getPricePerKwLow()).sum();
-                priceForAMonthText.setText("Monthly price: <b>" + PatternStringUtils.formatNumberToText(getNumberOfDecimalPrecision(price, 3)) + " [" + sensor.getCurrencyString() + "]");
-                Notification.show("Price successfully calculated.");
-            }
-        });
-
-        calculateWholeYear.addClickListener(event -> {
-            if (!yearSelecterField.isInvalid()) {
-                int year;
-                try {
-                    year = Integer.parseInt(yearSelecterField.getValue());
-                } catch (NumberFormatException e) {
-                    year = LocalDate.now().getYear();
-                    Dialog dialog = new Dialog();
-                    dialog.setModal(true);
-                    dialog.add("Wrong year input. This year chosen by default.");
-                    dialog.open();
-                    yearSelecterField.setValue(LocalDate.now().getYear()+"");
-                }
-                LocalDate dateFrom = LocalDate.of(year, 1, 1);
-                LocalDate dateTo = LocalDate.of(year, 12, 31);
-
-                List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
-                        dateFrom, dateTo);
-                Double price = dataElectrics.stream().mapToDouble(value -> value.getHighRate() * sensorElectric.getPricePerKwHigh()
-                        + value.getLowRate() * sensorElectric.getPricePerKwLow()).sum();
-                priceForAMonthText.setText("Yearly price: <b>" + PatternStringUtils.formatNumberToText(getNumberOfDecimalPrecision(price, 3)) + " [" + sensor.getCurrencyString() + "]");
-                Notification.show("Price successfully calculated.");
-            }
-        });
-    }
-
-    private LocalDate getDateFromSelecterFields() {
-        Month month = monthSelecter.getValue();
-        if (month == null) {
-            month = LocalDate.now().getMonth();
-        }
-        int year;
-        try {
-            year = Integer.parseInt(yearSelecterField.getValue());
-        } catch (NumberFormatException e) {
-            year = LocalDate.now().getYear();
-            Dialog dialog = new Dialog();
-            dialog.setModal(true);
-            dialog.add("Wrong year input. This year chosen by default.");
-            dialog.open();
-            yearSelecterField.setValue(LocalDate.now().getYear()+"");
-        }
-        return LocalDate.of(year, month, 1);
-    }
-
-    private void setPieChartHighLowRate(){
-        LocalDate date = LocalDate.now();
-        Configuration conf = pieChartHighLowRate.getConfiguration();
-
-        conf.setTitle("Low and High rate difference in the past 30 days.");
-
-        Tooltip tooltip = new Tooltip();
-        tooltip.setValueDecimals(2);
-        tooltip.setValueSuffix(" [kW]");
-        conf.setTooltip(tooltip);
-
-        PlotOptionsPie plotOptions = new PlotOptionsPie();
-        plotOptions.setAllowPointSelect(true);
-        plotOptions.setCursor(Cursor.POINTER);
-        plotOptions.setShowInLegend(true);
-        conf.setPlotOptions(plotOptions);
-
-        List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), date.minusDays(30), date);
-        List<Number> highRates = new ArrayList<>();
-        List<Number> lowRates = new ArrayList<>();
-        getHighLowRates(dataElectrics, highRates, lowRates);
-
-        DataSeries series = new DataSeries();
-        DataSeriesItem lowRate = new DataSeriesItem("Low rate", lowRates.stream().mapToDouble(Number::doubleValue).sum());
-        lowRate.setSelected(true);
-        series.add(lowRate);
-        series.add(new DataSeriesItem("High rate", highRates.stream().mapToDouble(Number::doubleValue).sum()));
-        conf.setSeries(series);
-        pieChartHighLowRate.setVisibilityTogglingDisabled(true);
-    }
-
-    private void setMonthlyConsumptionChart() {
-        LocalDate date = LocalDate.now();
-
-        Configuration configuration = monthlyChart.getConfiguration();
-        configuration.getChart().setType(ChartType.COLUMN);
-
-        configuration.getSubTitle().setText("Prices aggregated by daily consumptions of low and high rate and according" +
-                " price values.");
-
-        YAxis yAxis = configuration.getyAxis();
-        yAxis.setTitle(new AxisTitle("Aggregated price [" + sensor.getCurrencyString() + "]"));
-
-        PlotOptionsLine plotOptions = new PlotOptionsLine();
-        plotOptions.setEnableMouseTracking(false);
-        configuration.setPlotOptions(plotOptions);
-
+    private ArrayList<DataSeriesItem> getPricesForTime(Configuration configuration,
+                                                       LocalDate dateFrom, LocalDate dateTo) {
         List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(
-                sensor.getId(), date.minusDays(30), date);
+                sensor.getId(), dateFrom, dateTo);
 
-        DataSeries ds = new DataSeries();
+        ArrayList<DataSeriesItem> aggregatedPrices = new ArrayList<>();
 
-        PlotOptionsColumn plotOpts = new PlotOptionsColumn();
-        plotOpts.setColor(SolidColor.LIMEGREEN);
-        ds.setPlotOptions(plotOpts);
-        ds.setName("Price");
+        if (periodRadioButtonGroup.getValue().equals("Day")) {
+            Map<Integer, Double> pricesDailyMap = calculatePricesForEachHourOfDay(dataElectrics);
+            pricesDailyMap.forEach((hour, aDouble) -> {
+                aggregatedPrices.add(new DataSeriesItem(String.valueOf(hour), aDouble));
+            });
+        } else if (periodRadioButtonGroup.getValue().equals("Month")) {
+            Map<LocalDate, Double> pricesDailyMap = calculatePricesForEachDayOfMonth(dataElectrics);
+            Month month = dateFrom.plusDays(3).getMonth();
+            pricesDailyMap.forEach((localDate, aDouble) -> {
+                if(localDate.getMonth() == month) {
+                    configuration.setTitle(localDate.getMonth().name() + " of " + localDate.getYear());
+                    aggregatedPrices.add(new DataSeriesItem(localDate.format(DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy")), aDouble));
+                }
+            });
 
-        ArrayList<DataSeriesItem> dailyPrices = new ArrayList<>();
+        } else {
+            Map<Month, Double> pricesMonthMap = calculatePricesForEachMonthOfYear(dataElectrics);
+            pricesMonthMap.forEach((month, aDouble) -> {
+                aggregatedPrices.add(new DataSeriesItem(month.name(), aDouble));
+            });
+        }
+        return aggregatedPrices;
+    }
+
+    private Map<Integer, Double> calculatePricesForEachHourOfDay(List<DataElectric> dataElectrics) {
+        Map<Integer, Double> pricesMap = new TreeMap<>(Comparator.naturalOrder());
+        for (DataElectric data : dataElectrics) {
+            Integer hour = data.getTime().toLocalDateTime().getHour();
+            Double price = data.getLowRate() * sensorElectric.getPricePerKwLow();
+            price += data.getHighRate() * sensorElectric.getPricePerKwHigh();
+            if (pricesMap.containsKey(hour)) {
+                pricesMap.replace(hour, (pricesMap.get(hour) + price));
+            } else {
+                pricesMap.put(hour, price);
+            }
+        }
+
+        for (int i = 0; i < 24; i++) {
+            if (!pricesMap.containsKey(i)) {
+                pricesMap.put(i, 0.0);
+            }
+        }
+
+        return pricesMap;
+    }
+
+    private Map<LocalDate, Double> calculatePricesForEachDayOfMonth(List<DataElectric> dataElectrics) {
         Map<LocalDate, Double> pricesMap = new TreeMap<>(Comparator.naturalOrder());
         for (DataElectric data : dataElectrics) {
             LocalDate time = data.getTime().toLocalDateTime().toLocalDate();
@@ -348,40 +436,44 @@ public class SensorElectricDashboard extends LitTemplate {
             }
         }
 
-        pricesMap.forEach((localDate, aDouble) -> {
-            configuration.getxAxis().addCategory(localDate.format(DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy")));
-            dailyPrices.add(new DataSeriesItem("",aDouble));
-        });
-        configuration.getxAxis().setVisible(false);
+        for (LocalDate date : dateForChart.withDayOfMonth(1)
+                .datesUntil(dateForChart.withDayOfMonth(1).plusMonths(1)).collect(Collectors.toList())) {
+            if (!pricesMap.containsKey(date)) {
+                pricesMap.put(date, 0.0);
+            }
+        }
 
-        Tooltip tooltip = new Tooltip();
-        tooltip.setShared(true);
-        tooltip.setValueSuffix(" " + sensor.getCurrencyString());
-        configuration.setTooltip(tooltip);
+        return pricesMap;
+    }
 
-        ds.setData(dailyPrices);
-        configuration.addSeries(ds);
+    private Map<Month, Double> calculatePricesForEachMonthOfYear(List<DataElectric> dataElectrics) {
+        Map<Month, Double> pricesMap = new TreeMap<>(Comparator.naturalOrder());
+        for (DataElectric data : dataElectrics) {
+            Month time = data.getTime().toLocalDateTime().toLocalDate().getMonth();
+            Double price = data.getLowRate() * sensorElectric.getPricePerKwLow();
+            price += data.getHighRate() * sensorElectric.getPricePerKwHigh();
+            if (pricesMap.containsKey(time)) {
+                pricesMap.replace(time, (pricesMap.get(time) + price));
+            } else {
+                pricesMap.put(time, price);
+            }
+        }
+
+        for (Month month : Month.values()) {
+            if (!pricesMap.containsKey(month)) {
+                pricesMap.put(month, 0.0);
+            }
+        }
+        return pricesMap;
     }
 
     private void setDailyConsumptionChart() {
-        LocalDate date = LocalDate.now();
-        consumptionDatePicker.setValue(date);
+        //consumptionDatePicker.setValue(dateForChart);
 
-        Configuration configuration = dailyConsumptionChart.getConfiguration();
-        configuration.setTitle("Daily consumption of " + sensor.getName());
-        configuration.setSubTitle("Date: " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-
-        List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), date, date);
-        List<Number> highRates = new ArrayList<>();
-        List<Number> lowRates = new ArrayList<>();
-        getHighLowRates(dataElectrics, highRates, lowRates);
-        configuration.addSeries(new ListSeries("Low rate", lowRates));
-        configuration.addSeries(new ListSeries("High rate", highRates));
-        configuration.addSeries(new ListSeries("Sum of both rates", getSumListOfHighAndLowRates(highRates, lowRates)));
+        Configuration configuration = mainChart.getConfiguration();
 
         XAxis x = new XAxis();
         x.setCrosshair(new Crosshair());
-        x.setCategories(PatternStringUtils.hoursOfDay);
         x.setTitle("Hour");
         configuration.addxAxis(x);
 
@@ -396,22 +488,8 @@ public class SensorElectricDashboard extends LitTemplate {
         configuration.setTooltip(tooltip);
 
         consumptionDatePicker.addValueChangeListener(event -> {
-            updateDailyConsumptionChartData(event.getValue());
-        });
-    }
-
-    private void setPriceOfDayPicker() {
-        priceForADayText = new StyledTextComponent("");
-        priceForADayDiv.add(priceForADayText);
-        priceForDayDatePicker.addValueChangeListener(event -> {
-            List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
-                    event.getValue(), event.getValue());
-            priceForADayDiv.setClassName("priceForADayOrMonthDiv");
-            Double price = dataElectrics.stream().mapToDouble(value -> value.getHighRate() * sensorElectric.getPricePerKwHigh()
-                    + value.getLowRate() * sensorElectric.getPricePerKwLow()).sum();
-            priceForADayText.setText("Price: <b>" + PatternStringUtils.formatNumberToText(
-                    getNumberOfDecimalPrecision(price, 3)) + " [" + sensor.getCurrencyString() + "]" );
-            Notification.show("Price successfully calculated.");
+            dateForChart = event.getValue();
+            updateMainChartData(event.getValue(), event.getValue(), consPricesRadioButtonGroup.getValue().equals("Consumption"));
         });
     }
 
@@ -421,19 +499,114 @@ public class SensorElectricDashboard extends LitTemplate {
                 .doubleValue();
     }
 
-    private void updateDailyConsumptionChartData(LocalDate value) {
-        Configuration configuration = dailyConsumptionChart.getConfiguration();
-        List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), value, value);
-        List<Number> highRates = new ArrayList<>();
-        List<Number> lowRates = new ArrayList<>();
-        getHighLowRates(dataElectrics, highRates, lowRates);
-        configuration.setSeries(new ListSeries("Low rate", lowRates), new ListSeries("High rate", highRates),
-                new ListSeries("Sum of both rates", getSumListOfHighAndLowRates(highRates, lowRates)));
+    private void updateMainChartData(LocalDate dateFrom, LocalDate dateTo, boolean consumption) {
+        Configuration configuration = mainChart.getConfiguration();
+        if (consumption) {
+            Tooltip tooltip = configuration.getTooltip();
+            tooltip.setValueSuffix(" [kW/h]");
+            configuration.setTooltip(tooltip);
+            if (periodRadioButtonGroup.getValue().equals("Day")) {
+                List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
+                Map<Integer, Number> highRates = new TreeMap<>();
+                Map<Integer, Number> lowRates = new TreeMap<>();
+                getHighLowRatesDay(dataElectrics, highRates, lowRates);
+
+                XAxis x = new XAxis();
+                x.setCrosshair(new Crosshair());
+                x.setTitle("Hour");
+                x.setCategories(PatternStringUtils.hoursOfDay);
+                configuration.removexAxes();
+                configuration.addxAxis(x);
+
+                setSeriesToConfiguration(configuration, lowRates.values(), highRates.values());
+            } else if (periodRadioButtonGroup.getValue().equals("Month")) {
+                List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
+                Map<LocalDate, Number> highRates = new TreeMap<>();
+                Map<LocalDate, Number> lowRates = new TreeMap<>();
+                getHighLowRatesMonth(dataElectrics, highRates, lowRates);
+
+                configuration.setTitle(dateForChart.getMonth().name() + " of " + dateForChart.getYear());
+                LocalDate firstOfMonth = dateForChart.withDayOfMonth(1);
+                LocalDate firstOfFollowingMonth = dateForChart.plusMonths(1).withDayOfMonth(1);
+
+                XAxis x = new XAxis();
+                x.setCrosshair(new Crosshair());
+                x.setTitle("Day");
+                x.setCategories(firstOfMonth.datesUntil(firstOfFollowingMonth).map(date ->
+                                date.format(DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy")))
+                        .toArray(String[]::new));
+                configuration.removexAxes();
+                configuration.addxAxis(x);
+                setSeriesToConfiguration(configuration, lowRates.values(), highRates.values());
+            } else {
+                List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
+                Map<Month, Number> highRates = new TreeMap<>();
+                Map<Month, Number> lowRates = new TreeMap<>();
+                getHighLowRatesYear(dataElectrics, highRates, lowRates);
+
+                XAxis x = new XAxis();
+                x.setCrosshair(new Crosshair());
+                x.setTitle("Month");
+                x.setCategories(Arrays.stream(Month.values()).map(Enum::name).toArray(String[]::new));
+                configuration.removexAxes();
+                configuration.addxAxis(x);
+                setSeriesToConfiguration(configuration, lowRates.values(), highRates.values());
+            }
+        } else {
+            Tooltip tooltip = configuration.getTooltip();
+            tooltip.setValueSuffix(" " + sensor.getCurrencyString());
+            configuration.setTooltip(tooltip);
+
+            DataSeries ds = new DataSeries();
+            PlotOptionsColumn plotOpts = new PlotOptionsColumn();
+            plotOpts.setColor(SolidColor.ORANGERED);
+            ds.setPlotOptions(plotOpts);
+            if (periodRadioButtonGroup.getValue().equals("Day")) {
+                XAxis x = new XAxis();
+                x.setCrosshair(new Crosshair());
+                x.setTitle("Hour");
+                x.setCategories(PatternStringUtils.hoursOfDay);
+                configuration.removexAxes();
+                configuration.addxAxis(x);
+            } else if (periodRadioButtonGroup.getValue().equals("Month")) {
+
+                LocalDate firstOfMonth = dateFrom;
+                LocalDate firstOfFollowingMonth = dateTo;
+                System.out.println("Ted vypisuju dny od prvniho do posledniho pro datum: " + dateForChart);
+                firstOfMonth.datesUntil(firstOfFollowingMonth).forEach(System.out::println);
+
+                XAxis x = new XAxis();
+                x.setCrosshair(new Crosshair());
+                x.setTitle("Day");
+                x.setCategories(firstOfMonth.datesUntil(firstOfFollowingMonth).map(date ->
+                                date.format(DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy")))
+                        .toArray(String[]::new));
+                configuration.removexAxes();
+                configuration.addxAxis(x);
+            } else {
+                XAxis x = new XAxis();
+                x.setCrosshair(new Crosshair());
+                x.setTitle("Month");
+                x.setCategories(Arrays.stream(Month.values()).map(Enum::name).toArray(String[]::new));
+                configuration.removexAxes();
+                configuration.addxAxis(x);
+            }
+
+            ds.setName("Price");
+            ds.setData(getPricesForTime(configuration, dateFrom, dateTo));
+            configuration.setSeries(ds);
+        }
         try {
             getUI().ifPresent(ui -> ui.access(() -> {
-                configuration.setSubTitle("Date: " + value.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-                dailyConsumptionChart.setConfiguration(configuration);
-                Notification.show("Daily consumption updated.");
+                if (periodRadioButtonGroup.getValue().equals("Day")) {
+                    configuration.setTitle(dateFrom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                } else if (periodRadioButtonGroup.getValue().equals("Month")) {
+                    configuration.setTitle(dateFrom.getMonth().name() + " " + dateFrom.getYear());
+                } else {
+                    configuration.setTitle("Year " + dateFrom.getYear());
+                }
+                mainChart.setConfiguration(configuration);
+                Notification.show("Chart updated.");
                 ui.push();
             }));
         } catch (UIDetachedException exception) {
@@ -441,7 +614,24 @@ public class SensorElectricDashboard extends LitTemplate {
         }
     }
 
-    private List<Number>  getSumListOfHighAndLowRates(List<Number> highRates, List<Number> lowRates) {
+    private void setSeriesToConfiguration(Configuration configuration, Collection<Number> values, Collection<Number> values2) {
+        ListSeries lowRate = getColoredListSeries(new ArrayList<>(values), "Low rate", SolidColor.BLACK);
+        ListSeries highRate = getColoredListSeries(new ArrayList<>(values2), "High rate", SolidColor.LIGHTGRAY);
+        List<Number> sums = getSumListOfHighAndLowRates(new ArrayList<>(values),
+                new ArrayList<>(values2));
+        ListSeries sum = getColoredListSeries(sums, "Sum of both rates", new SolidColor(Colors.CEZ_TYPE.getRgb()));
+        configuration.setSeries(lowRate, highRate, sum);
+    }
+
+    private ListSeries getColoredListSeries(List<Number> rates, String s, SolidColor black) {
+        ListSeries series = new ListSeries(s, rates);
+        PlotOptionsColumn options = new PlotOptionsColumn();
+        options.setColor(black);
+        series.setPlotOptions(options);
+        return series;
+    }
+
+    private List<Number> getSumListOfHighAndLowRates(List<Number> highRates, List<Number> lowRates) {
         List<Number> sumValues = new ArrayList<>();
         for (int i = 0; i < lowRates.size(); i++) {
             sumValues.add(lowRates.get(i).doubleValue() + highRates.get(i).doubleValue());
@@ -449,10 +639,43 @@ public class SensorElectricDashboard extends LitTemplate {
         return sumValues;
     }
 
-    private void getHighLowRates(List<DataElectric> dataElectrics, List<Number> highRates, List<Number> lowRates) {
+    private void getHighLowRatesDay(List<DataElectric> dataElectrics, Map<Integer, Number> highRates, Map<Integer, Number> lowRates) {
+        for (int i = 0; i < 24; i++) {
+            highRates.put(i, 0.0);
+            lowRates.put(i, 0.0);
+        }
         for (DataElectric data : dataElectrics) {
-            highRates.add(data.getHighRate());
-            lowRates.add(data.getLowRate());
+            Integer hour = data.getTime().toLocalDateTime().getHour();
+            highRates.replace(hour, highRates.get(hour).doubleValue() + data.getHighRate());
+            lowRates.replace(hour, lowRates.get(hour).doubleValue() + data.getLowRate());
+        }
+    }
+
+    private void getHighLowRatesYear(List<DataElectric> dataElectrics, Map<Month, Number> highRates, Map<Month, Number> lowRates) {
+        for (Month month : Month.values()) {
+            highRates.put(month, 0.0);
+            lowRates.put(month, 0.0);
+        }
+
+        for (DataElectric data : dataElectrics) {
+            Month month = data.getTime().toLocalDateTime().getMonth();
+            highRates.replace(month, highRates.get(month).doubleValue() + data.getHighRate());
+            lowRates.replace(month, lowRates.get(month).doubleValue() + data.getLowRate());
+        }
+    }
+
+    private void getHighLowRatesMonth(List<DataElectric> dataElectrics, Map<LocalDate, Number> highRates, Map<LocalDate, Number> lowRates) {
+        System.out.println(dateForChart);
+        for (LocalDate date : dateForChart.withDayOfMonth(1)
+                .datesUntil(dateForChart.withDayOfMonth(1).plusMonths(1)).collect(Collectors.toList())) {
+            highRates.put(date, 0.0);
+            lowRates.put(date, 0.0);
+        }
+
+        for (DataElectric data : dataElectrics) {
+            LocalDate day = data.getTime().toLocalDateTime().toLocalDate();
+            highRates.replace(day, highRates.get(day) == null ? 0.0 : highRates.get(day).doubleValue() + data.getHighRate());
+            lowRates.replace(day, lowRates.get(day) == null ? 0.0 : lowRates.get(day).doubleValue() + data.getLowRate());
         }
     }
 
@@ -465,7 +688,7 @@ public class SensorElectricDashboard extends LitTemplate {
         }
         associatedHwLive = hardwareLiveService.findByHardwareId(sensor.getIdHw());
         signalStrength = associatedHwLive != null ? associatedHwLive.getSignal_strength() : 0;
-        activeStatusHwField.setText("Signal power: " + signalStrength +"% ");
+        activeStatusHwField.setText("Signal power: " + signalStrength + "% ");
         Icon statusIcon = new Icon(VaadinIcon.SIGNAL);
         colorIcon(statusIcon, signalStrength);
         statusIcon.setSize("40px");
@@ -474,18 +697,26 @@ public class SensorElectricDashboard extends LitTemplate {
     }
 
     private void setConsumptionBar() {
-        consumptionText = new StyledTextComponent("Consumption: <b>" + sensor.getConsumptionActual() + " / " + sensor.getLimit_day() + " [kW]</b>");
-        priceText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(sensor.getConsumptionActual() * sensorElectric.getPriceFix())
-                + " " + sensor.getCurrencyString() + "</b>");
+        calculateConsumptionHighestValue();
+        consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + " [W/h]</b>");
         consumptionDivText.setText("");
-        consumptionDivText.add(consumptionText);
-        priceDiv.setText("");
-        priceDiv.add(priceText);
+        consumptionDivText.addComponentAtIndex(0, consumptionText);
         consumptionProgressBar.setMin(0);
-        consumptionProgressBar.setMax(sensor.getLimit_day());
+        consumptionProgressBar.setMax(consumptionMaxValue * 1000);
         setConsumptionProgressBar(sensor);
         consumptionProgressBar.setHeight("15px");
         consumptionProgressBar.setVisible(true);
+    }
+
+    private void calculateConsumptionHighestValue() {
+        List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), LocalDate.now().minusDays(30), LocalDate.now());
+        dataElectrics.forEach(dataElectric -> {
+            if (dataElectric.getLowRate() > consumptionMaxValue) {
+                consumptionMaxValue = dataElectric.getLowRate();
+            } else if (dataElectric.getHighRate() > consumptionMaxValue) {
+                consumptionMaxValue = dataElectric.getHighRate();
+            }
+        });
     }
 
     private void setInfoData() {
@@ -497,36 +728,19 @@ public class SensorElectricDashboard extends LitTemplate {
         }
     }
 
-    private void setChartData() {
-        Configuration configuration = areaSplineRangeChart.getConfiguration();
-        configuration.getTitle().setText("Electricity variation low/high rate");
-
-        Tooltip tooltip = configuration.getTooltip();
-        tooltip.setValueSuffix(" [kW]");
-
-        DataSeries dataSeries = new DataSeries("Electricity");
-        dataElectricList = dataElectricService.findAllBySensorId(sensor.getId());
-        for (DataElectric data : dataElectricList) {
-            dataSeries.add(new DataSeriesItem(data.getTime(), data.getLowRate(), data.getHighRate()));
-        }
-        configuration.setSeries(dataSeries);
-
-        areaSplineRangeChart.setTimeline(true);
-    }
-
     @Scheduled(fixedDelay = 10000)
     public void refreshDashboardData() {
         try {
             Optional<Sensor> refreshedSensor = sensorService.get(sensor.getId());
-            refreshConsumptionChart(refreshedSensor);
-            refreshHardwareStatus();
             getUI().ifPresent(ui -> ui.access(() ->
                     {
+                        refreshHardwareStatus();
+                        refreshConsumptionText(refreshedSensor.get());
+                        refreshConsumptionChart(refreshedSensor.get());
+
                         LocalDateTime now = LocalDateTime.now();
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
                         String formatDateTime = now.format(formatter);
-                        refreshPriceDiv(refreshedSensor.get());
-                        refreshConsumptionText(refreshedSensor.get());
                         actualizedDivField.setText("Updated: " + formatDateTime);
                         hardwareStatusActualizedField.setText("Updated: " + formatDateTime);
                         ui.push();
@@ -535,11 +749,6 @@ public class SensorElectricDashboard extends LitTemplate {
         } catch (UIDetachedException exception) {
             //ignore, harmless exception in this case
         }
-    }
-
-    private void refreshPriceDiv(Sensor sensor) {
-        priceText.setText("Price: <b>" + PatternStringUtils.formatNumberToText(sensor.getConsumptionActual() * sensorElectric.getPriceFix())
-                + " " + sensor.getCurrencyString() + "</b>");
     }
 
     private void refreshHardwareStatus() {
@@ -559,27 +768,20 @@ public class SensorElectricDashboard extends LitTemplate {
         }
     }
 
-    private void refreshConsumptionChart(Optional<Sensor> refreshedSensor) {
-        try {
-            refreshedSensor.flatMap(value -> getUI()).ifPresent(ui -> ui.access(() -> {
-                setConsumptionProgressBar(refreshedSensor.get());
-                ui.push();
-            }));
-        } catch (UIDetachedException exception) {
-            //ignore, harmless exception in this case
-        }
+    private void refreshConsumptionChart(Sensor refreshedSensor) {
+        setConsumptionProgressBar(refreshedSensor);
     }
 
     private void setConsumptionProgressBar(Sensor sens) {
-        if (sens.getConsumptionActual() >= sens.getLimit_day()) {
-            consumptionProgressBar.setValue(consumptionProgressBar.getMax());
+        if (sens.getConsumptionActual() >= consumptionMaxValue*1000) {
+            consumptionProgressBar.setValue(consumptionMaxValue*1000);
         } else {
             consumptionProgressBar.setValue(sens.getConsumptionActual());
         }
     }
 
     private void refreshConsumptionText(Sensor sensor) {
-        consumptionText.setText("Consumption: <b>" + sensor.getConsumptionActual() + " / " + sensor.getLimit_day() + " [kW]</b>");
+        consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + " [W/h]</b>");
     }
 
     private void colorIcon(Icon signalIcon, int signal) {

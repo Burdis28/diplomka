@@ -1,6 +1,6 @@
 {
-  "name": "no-name",
   "license": "UNLICENSED",
+  "name": "no-name",
   "dependencies": {
     "lit-element": "2.3.1",
     "@vaadin/router": "1.7.2",
@@ -71,7 +71,9 @@
     "typescript": "4.0.3",
     "webpack-merge": "4.2.2",
     "webpack-dev-server": "3.11.0",
-    "extract-loader": "5.1.0"
+    "extract-loader": "5.1.0",
+    "rollup-plugin-lit-css": "^2.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0"
   },
   "vaadin": {
     "dependencies": {
@@ -144,6 +146,6 @@
       "webpack-dev-server": "3.11.0",
       "extract-loader": "5.1.0"
     },
-    "hash": "40b39cf1beab7a854bf138266c0ab4d8b02a972cacc2c2e3d83230a0f9e51d31"
+    "hash": "36a9df5baee568f51b3ff6742a8eabbca2dd7434d52520fa49c056359dd9df79"
   }
 }

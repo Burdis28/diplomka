@@ -22,7 +22,6 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -45,14 +44,14 @@ import java.util.List;
 
 @JsModule("./views/sensors/sensors-view.ts")
 @CssImport("./views/sensors/sensors-view.css")
-@CssImport(value = "./views/sensors/my-grid-styles.css", themeFor = "vaadin-grid-pro")
+@CssImport(value = "./views/sensors/my-grid-styles.css", themeFor = "vaadin-grid")
 @Tag("sensors-view")
 @ParentLayout(MainLayout.class)
 @PageTitle("Sensors management")
 public class SensorsView extends LitTemplate {
 
     @Id("grid")
-    private GridPro<Sensor> grid;
+    private Grid<Sensor> grid;
     private GridListDataView<Sensor> gridListDataView;
 
     private Grid.Column<Sensor> idColumn;

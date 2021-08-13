@@ -25,6 +25,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
@@ -131,6 +132,16 @@ public class SensorWaterDashboard extends LitTemplate {
     private ProgressBar monthLimitProgressBar;
     @Id("priceThisMonthDiv")
     private Div priceThisMonthDiv;
+    @Id("horizontalLayoutAboveChart")
+    private HorizontalLayout horizontalLayoutAboveChart;
+    @Id("typeOfChartDiv")
+    private Div typeOfChartDiv;
+    @Id("periodChangerChartDiv")
+    private Div periodChangerChartDiv;
+    @Id("previousButton")
+    private Button previousButton;
+    @Id("nextButton")
+    private Button nextButton;
 
     /**
      * Creates a new SensorWatDashboard.

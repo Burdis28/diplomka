@@ -51,6 +51,7 @@ dependencies:
   lit-element: 2.3.1
   open: 7.4.2
 devDependencies:
+  '@rollup/plugin-node-resolve': 11.2.1
   '@types/validator': 13.1.0
   awesome-typescript-loader: 5.2.1_typescript@4.0.3
   chokidar: 3.5.2
@@ -60,6 +61,7 @@ devDependencies:
   html-webpack-plugin: 3.2.0_webpack@4.42.0
   lit-css-loader: 0.0.4
   lit-html: 1.2.1
+  rollup-plugin-lit-css: 2.1.0
   script-ext-html-webpack-plugin: 2.1.4_f9f57bd8a148b6edc3192202e3fa66cb
   typescript: 4.0.3
   validator: 13.1.17
@@ -165,6 +167,37 @@ packages:
     dev: false
     resolution:
       integrity: sha512-L6uV1oM6T6xbwbVx6t3biG5T2VSSB03LxnIrUd9M2pr6RkHVPFHJ37pC5MUwBAEhkGFJif7eks7fdMMSGZTeEQ==
+  /@rollup/plugin-node-resolve/11.2.1:
+    dependencies:
+      '@rollup/pluginutils': 3.1.0
+      '@types/resolve': 1.17.1
+      builtin-modules: 3.2.0
+      deepmerge: 4.2.2
+      is-module: 1.0.0
+      resolve: 1.20.0
+    dev: true
+    engines:
+      node: '>= 10.0.0'
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0
+    resolution:
+      integrity: sha512-yc2n43jcqVyGE2sqV5/YCmocy9ArjVAP/BeXyTtADTBBX6V0e5UMqwO8CdQ0kzjb6zu5P1qMzsScCMRvE9OlVg==
+  /@rollup/pluginutils/3.1.0:
+    dependencies:
+      '@types/estree': 0.0.39
+      estree-walker: 1.0.1
+      picomatch: 2.3.0
+    dev: true
+    engines:
+      node: '>= 8.0.0'
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0
+    resolution:
+      integrity: sha512-GksZ6pr6TpIjHm8h9lSQ8pi8BE9VeubNT0OMJ3B5uZJ8pz73NPiqOtCog/x2/QzM1ENChPKxMDhiQuRHsqc+lg==
+  /@types/estree/0.0.39:
+    dev: true
+    resolution:
+      integrity: sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==
   /@types/glob/7.1.3:
     dependencies:
       '@types/minimatch': 3.0.4
@@ -184,6 +217,12 @@ packages:
     dev: true
     resolution:
       integrity: sha512-zrNj1+yqYF4WskCMOHwN+w9iuD12+dGm0rQ35HLl9/Ouuq52cEtd0CH9qMgrdNmi5ejC1/V7vKEXYubB+65DkA==
+  /@types/resolve/1.17.1:
+    dependencies:
+      '@types/node': 15.12.4
+    dev: true
+    resolution:
+      integrity: sha512-yy7HuzQhj0dhGpD8RLXSZWEkLsV9ibvxvi6EiJ3bkqLAO1RGo0WbkWQiwpRlSFymTJRz0d3k5LM3kkx8ArDbLw==
   /@types/validator/13.1.0:
     dev: true
     resolution:
@@ -1863,6 +1902,12 @@ packages:
     dev: true
     resolution:
       integrity: sha512-xq+q3SRMOxGivLhBNaUdC64hDTQwejJ+H0T/NB1XMtTVEwNTrfFF3gAxiyW0Bu/xWEGhjVKgUcMhCrUy2+uCWg==
+  /builtin-modules/3.2.0:
+    dev: true
+    engines:
+      node: '>=6'
+    resolution:
+      integrity: sha512-lGzLKcioL90C7wMczpkY0n/oART3MbBa8R9OFGE1rJxoVI86u4WAGfEk8Wjv10eKSyTHVGkSo3bvBylCEtk7LA==
   /builtin-status-codes/3.0.0:
     dev: true
     resolution:
@@ -2421,6 +2466,12 @@ packages:
     dev: true
     resolution:
       integrity: sha512-yd9c5AdiqVcR+JjcwUQb9DkhJc8ngNr0MahEBGvDiJw8puWab2yZlh+nkasOnZP+EGTAP6rRp2JzJhJZzvNF8g==
+  /deepmerge/4.2.2:
+    dev: true
+    engines:
+      node: '>=0.10.0'
+    resolution:
+      integrity: sha512-FJ3UgI4gIl+PHZm53knsuSFpE+nESMr7M4v9QcgB7S63Kj/6WqMiFQJpBBYz1Pt+66bZpP3Q7Lye0Oo9MPKEdg==
   /default-gateway/4.2.0:
     dependencies:
       execa: 1.0.0
@@ -2761,6 +2812,14 @@ packages:
       node: '>=4.0'
     resolution:
       integrity: sha512-BxbNGGNm0RyRYvUdHpIwv9IWzeM9XClbOxwoATuFdOE7ZE6wHL+HQ5T8hoPM+zHvmKzzsEqhgy0GrQ5X13afiQ==
+  /estree-walker/0.6.1:
+    dev: true
+    resolution:
+      integrity: sha512-SqmZANLWS0mnatqbSfRP5g8OXZC12Fgg1IwNtLsyHDzJizORW4khDfjPqJZsemPWBB2uqykUah5YpQ6epsqC/w==
+  /estree-walker/1.0.1:
+    dev: true
+    resolution:
+      integrity: sha512-1fMXF3YP4pZZVozF8j/ZLfvnR8NSIljt56UhbZ5PeeDmmGHpgpdwQt7ITlGvYaQukCvuBRMLEiKiYC+oeIg4cg==
   /esutils/2.0.3:
     dev: true
     engines:
@@ -3748,6 +3807,10 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha512-5G0tKtBTFImOqDnLB2hG6Bp2qcKEFduo4tZu9MT/H6NQv/ghhy30o55ufafxJ/LdH79LLs2Kfrn85TLKyA7BUg==
+  /is-module/1.0.0:
+    dev: true
+    resolution:
+      integrity: sha1-Mlj7afeMFNW4FdZkM2tM/7ZEFZE=
   /is-negative-zero/2.0.1:
     dev: true
     engines:
@@ -5261,6 +5324,20 @@ packages:
     dev: true
     resolution:
       integrity: sha512-ii4iagi25WusVoiC4B4lq7pbXfAp3D9v5CwfkY33vffw2+pkDjY1D8GaN7spsxvCSx8dkPqOZCEZyfxcmJG2IA==
+  /rollup-plugin-lit-css/2.1.0:
+    dependencies:
+      rollup-pluginutils: 2.8.2
+      string-to-template-literal: 0.2.2
+      uglifycss: 0.0.29
+    dev: true
+    resolution:
+      integrity: sha512-/sQRK00EmI7C6QNLFeFTjGzMoFX75puY31QFtZncFVVv1gi2U5KDNShcNTNV3R1g3sPRf4XnVKchtzIofPVixg==
+  /rollup-pluginutils/2.8.2:
+    dependencies:
+      estree-walker: 0.6.1
+    dev: true
+    resolution:
+      integrity: sha512-EEp9NhnUkwY8aif6bxgovPHMoMoNr2FulJziTndpt5H9RdwC47GSGuII9XxpSdzVGM0GWrNPHV6ie1LTNJPaLQ==
   /run-queue/1.0.3:
     dependencies:
       aproba: 1.2.0
@@ -5644,6 +5721,12 @@ packages:
     dev: true
     resolution:
       integrity: sha512-AiisoFqQ0vbGcZgQPY1cdP2I76glaVA/RauYR4G4thNFgkTqr90yXTo4LYX60Jl+sIlPNHHdGSwo01AvbKUSVQ==
+  /string-to-template-literal/0.2.2:
+    dev: true
+    engines:
+      node: '>=8.0.0'
+    resolution:
+      integrity: sha512-9lSNOLoQKhtdHkp1avgpraImiSvBBgxJQwkVriDDcHmvPsnCZpLbAMJnJxj9Mf1GkziHBo3vwxipukhA+KCC0g==
   /string-width/3.1.0:
     dependencies:
       emoji-regex: 7.0.3
@@ -5896,6 +5979,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-Y2VsbPVs0FIshJztycsO2SfPk7/KAF/T72qzv9u5EpQ4kB2hQoHlhNQTsNyy6ul7lQtqJN/AoWeS23OzEiEFxw==
+  /uglifycss/0.0.29:
+    dev: true
+    engines:
+      node: '>=6.4.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-J2SQ2QLjiknNGbNdScaNZsXgmMGI0kYNrXaDlr4obnPW9ni1jljb1NeEVWAiTgZ8z+EBWP2ozfT9vpy03rjlMQ==
   /unbox-primitive/1.0.1:
     dependencies:
       function-bind: 1.1.1
@@ -6343,6 +6433,7 @@ specifiers:
   '@polymer/iron-icon': 3.0.1
   '@polymer/iron-list': 3.1.0
   '@polymer/polymer': 3.2.0
+  '@rollup/plugin-node-resolve': ^11.2.0
   '@types/validator': 13.1.0
   '@vaadin-component-factory/vcf-toggle-button': 1.0.3
   '@vaadin/flow-frontend': ./target/flow-frontend
@@ -6400,6 +6491,7 @@ specifiers:
   lit-element: 2.3.1
   lit-html: 1.2.1
   open: ^7.2.1
+  rollup-plugin-lit-css: ^2.1.0
   script-ext-html-webpack-plugin: 2.1.4
   typescript: 4.0.3
   validator: 13.1.17
