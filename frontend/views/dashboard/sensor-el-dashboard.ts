@@ -45,7 +45,6 @@ export class SensorElDashboard extends LitElement {
     <div id="hardwareStatusActualizedField"></div>
    </div>
   </div>
-  <div class="wrapper"></div>
  </vaadin-board-row>
  <vaadin-board-row>
   <div class="wrapper">
