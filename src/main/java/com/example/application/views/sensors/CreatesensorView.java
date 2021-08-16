@@ -26,6 +26,7 @@ import com.vaadin.flow.router.ParentLayout;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -65,7 +66,7 @@ public class CreatesensorView extends LitTemplate {
     @Id("pinIdField")
     private TextField pinIdField;
     @Id("attachToHardware")
-    private Select<String> attachToHardwareSelect;
+    private Select<Hardware> attachToHardwareSelect;
 
     @Id("save")
     private Button save;
@@ -157,6 +158,7 @@ public class CreatesensorView extends LitTemplate {
         SensorWater water = new SensorWater();
         water.setSensor_id(createdSensor.getId());
         water.setPrice_per_m3(Double.parseDouble(pricePerM3Field.getValue()));
+        // "open_confirm" state by default
         water.setState(1);
         water.setImplPerLit(implPerLitField.getValue().intValue());
 
@@ -200,7 +202,7 @@ public class CreatesensorView extends LitTemplate {
 
         sensor.setName(nameField.getValue());
         sensor.setCurrencyString(currencyField.getValue());
-        sensor.setIdHw(attachToHardwareSelect.getValue());
+        sensor.setIdHw(attachToHardwareSelect.getValue().getSerial_HW());
         sensor.setType(SensorTypes.fromCode(typeSelect.getValue()).name());
         sensor.setPinId(Integer.parseInt(pinIdField.getValue()));
         sensor.setLimit_day(Double.parseDouble(limitDayField.getValue()));
@@ -306,8 +308,8 @@ public class CreatesensorView extends LitTemplate {
     }
 
     private void setSelectFields() {
-        attachToHardwareSelect.setItems(hardwareService.findAll().stream().map(hardware -> hardware.getName() + " [" + hardware.getSerial_HW() + "]")
-                .collect(Collectors.toList()));
+        attachToHardwareSelect.setItems(new ArrayList<>(hardwareService.findAll()));
+        attachToHardwareSelect.setTextRenderer(item -> item.getName() + " [" + item.getSerial_HW() + "]");
         typeSelect.removeAll();
         typeSelect.setItems(Arrays.stream(SensorTypes.values()).map(SensorTypes::toString).collect(Collectors.toList()));
     }

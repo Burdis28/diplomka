@@ -30,21 +30,21 @@ export class CreatesensorView extends LitElement {
    <vaadin-text-field id="pinIdField" required label="Pin ID" prevent-invalid-input helper-text="Sensor PIN number" invalid></vaadin-text-field>
    <vaadin-select label="Attach to hardware" id="attachToHardware" placeholder="Hardware serial number" required invalid helper-text="Sensor has to be attached to a physical hardware unit"></vaadin-select>
   </vaadin-form-layout>
-  <span id="electricAllAttributesLayout"><h3>Electric price attributes</h3>
+  <span id="electricAllAttributesLayout"><h3>Electric attributes - price</h3>
    <vaadin-form-layout id="electricLayout" style="margin-top: var(--lumo-space-xl);">
     <vaadin-text-field label="Price per KW - low" id="pricePerKwLowField" required helper-text="Valid input format: 1234.00" invalid></vaadin-text-field>
     <vaadin-text-field label="Price per KW - high" id="pricePerKwHighField" required helper-text="Valid input format: 1234.00" invalid></vaadin-text-field>
     <vaadin-text-field label="Fixed price" id="fixedPriceField" required helper-text="Valid input format: 1234.00" invalid></vaadin-text-field>
     <vaadin-text-field label="Service price" id="servicePriceField" required helper-text="Valid input format: 1234.00" invalid></vaadin-text-field>
-   </vaadin-form-layout><h3>Electric detail attributes</h3>
+   </vaadin-form-layout><h3>Electric attributes - impulse</h3>
    <vaadin-form-layout>
     <vaadin-text-field label="Impl. per KW" id="implPerKwField" required helper-text="Valid input format: non-decimal number" invalid></vaadin-text-field>
    </vaadin-form-layout></span>
-  <span id="waterAllAttributesLayout"><h3 style="margin-top: var(--lumo-space-xl);">Water price attributes</h3>
+  <span id="waterAllAttributesLayout"><h3 style="margin-top: var(--lumo-space-xl);">Water attributes - price</h3>
    <vaadin-form-layout id="waterLayout">
     <vaadin-text-field id="pricePerM3Field" required label="Price per m3" helper-text="Valid input format: 1234.00" invalid></vaadin-text-field>
     <vaadin-number-field id="implPerLitField" required label="Impl. per liter" prevent-invalid-input invalid helper-text="Valid input: non decimal number"></vaadin-number-field>
-   </vaadin-form-layout><h3>Water detail attributes </h3>
+   </vaadin-form-layout><h3>Water attributes - others</h3>
    <vaadin-form-layout>
     <vaadin-text-field id="nightStartField" required label="Time of start at night" helper-text="Valid input format: HH:MM"></vaadin-text-field>
     <vaadin-text-field id="nightEndField" required label="Time of end at night" helper-text="Valid input format: HH:MM"></vaadin-text-field>

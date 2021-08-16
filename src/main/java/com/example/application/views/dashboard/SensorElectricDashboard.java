@@ -1,16 +1,14 @@
 package com.example.application.views.dashboard;
 
 import com.example.application.components.StyledTextComponent;
-import com.example.application.data.entity.Hardware;
-import com.example.application.data.entity.HardwareLive;
-import com.example.application.data.entity.Sensor;
-import com.example.application.data.entity.SensorElectric;
+import com.example.application.data.entity.*;
 import com.example.application.data.entity.data.DataElectric;
 import com.example.application.data.service.*;
 import com.example.application.data.service.data.DataElectricService;
 import com.example.application.utils.Colors;
 import com.example.application.utils.PatternStringUtils;
 import com.example.application.views.main.MainLayout;
+import com.example.application.views.sensors.components.SensorsUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.button.Button;
@@ -20,9 +18,9 @@ import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -32,9 +30,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -43,12 +39,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static java.time.temporal.TemporalAdjusters.*;
 
 /**
  * A Designer generated component for the sensor-el-dashboard template.
@@ -68,7 +63,6 @@ import static java.time.temporal.TemporalAdjusters.*;
 )
 public class SensorElectricDashboard extends LitTemplate {
 
-    private Chart areaSplineRangeChart;
     private Chart mainChart;
     private SensorElectricService sensorElectricService;
     private DataElectricService dataElectricService;
@@ -78,6 +72,7 @@ public class SensorElectricDashboard extends LitTemplate {
     private SensorElectric sensorElectric;
     private HardwareService hardwareService;
     private HardwareLiveService hardwareLiveService;
+    private NotificationLogHwService notificationLogHwService;
     private Sensor sensor;
 
     private StyledTextComponent consumptionText;
@@ -88,10 +83,13 @@ public class SensorElectricDashboard extends LitTemplate {
     private StyledTextComponent priceTodayText;
 
     private Double consumptionMaxValue;
+    private Image signalImage;
 
     private List<DataElectric> dataElectricList;
     private int signalStrength;
     private HardwareLive associatedHwLive;
+
+    private LocalDate dateForChart;
 
     @Id("titleNameField")
     private H2 titleNameField;
@@ -99,10 +97,8 @@ public class SensorElectricDashboard extends LitTemplate {
     private Div consumptionDivText;
     @Id("consumptionProgressBar")
     private ProgressBar consumptionProgressBar;
-    @Id("activeStatusHwField")
-    private Div activeStatusHwField;
-    @Id("hardwareStatusButton")
-    private Button hardwareStatusButton;
+    @Id("signalPowerHwField")
+    private Div signalPowerHwField;
     @Id("hwNameField")
     private Span hwNameField;
     @Id("actualizedDivField")
@@ -119,8 +115,6 @@ public class SensorElectricDashboard extends LitTemplate {
     private ProgressBar monthLimitProgressBar;
     @Id("priceThisMonthDiv")
     private Div priceThisMonthDiv;
-    @Id("ownerSpanField")
-    private Span ownerSpanField;
     @Id("horizontalLayoutAboveChart")
     private HorizontalLayout horizontalLayoutAboveChart;
 
@@ -135,31 +129,38 @@ public class SensorElectricDashboard extends LitTemplate {
     @Id("periodChangerChartDiv")
     private Div periodChangerChartDiv;
 
-    private LocalDate dateForChart;
     @Id("consumptionTodayDivText")
     private Div consumptionTodayDivText;
     @Id("todayLimitProgressBar")
     private ProgressBar todayLimitProgressBar;
     @Id("priceTodayDiv")
     private Div priceTodayDiv;
+    @Id("onlineStatusDiv")
+    private Div onlineStatusDiv;
+    @Id("createdField")
+    private Span createdField;
+    @Id("ownerSpanField")
+    private Span ownerSpanField;
 
     /**
      * Creates a new SensorElDashboard.
      */
     public SensorElectricDashboard(SensorElectricService sensorElectricService,
                                    SensorService sensorService, DataElectricService dataElectricService,
-                                   UserService userService, HardwareService hardwareService, HardwareLiveService hardwareLiveService) {
+                                   UserService userService, HardwareService hardwareService, HardwareLiveService hardwareLiveService,
+                                   NotificationLogHwService notificationLogHwService) {
         this.sensorElectricService = sensorElectricService;
         this.sensorService = sensorService;
         this.dataElectricService = dataElectricService;
         this.userService = userService;
         this.hardwareService = hardwareService;
         this.hardwareLiveService = hardwareLiveService;
-        areaSplineRangeChart = new Chart(ChartType.COLUMNRANGE);
+        this.notificationLogHwService = notificationLogHwService;
         mainChart = new Chart(ChartType.COLUMN);
         consPricesRadioButtonGroup = new RadioButtonGroup<>();
         periodRadioButtonGroup = new RadioButtonGroup<>();
         consumptionMaxValue = 0.0;
+        signalImage = new Image();
 
         int sensorId = -1;
         sensorId = (int) VaadinSession.getCurrent().getAttribute("sensorId");
@@ -187,6 +188,7 @@ public class SensorElectricDashboard extends LitTemplate {
         }
     }
 
+
     private void setTodayLimitBar() {
         //TODO set localDate.now()
         List<DataElectric> todayData = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
@@ -198,7 +200,8 @@ public class SensorElectricDashboard extends LitTemplate {
             consumption += data.getHighRate() + data.getLowRate();
         }
         consumptionTodayText = new StyledTextComponent("Today consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + " [kW]</b>");
+                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + "</b> [kW] -> <b>" +
+                String.format("%.2f", (consumption/sensor.getLimit_day())*100) + "%</b>");
         priceTodayText = new StyledTextComponent("Price so far: <b>" + PatternStringUtils.formatNumberToText(
                 getNumberOfDecimalPrecision(price, 3))
                 + " " + sensor.getCurrencyString() + "</b>");
@@ -306,29 +309,29 @@ public class SensorElectricDashboard extends LitTemplate {
     private void alterChartToYear() {
         dateForChart = dateForChart.withDayOfYear(1);
         updateMainChartData(dateForChart, LocalDate.of(dateForChart.getYear(), 12, 31), consPricesRadioButtonGroup.getValue().equals("Consumption"));
-        Notification.show("Teď ukazuju v grafu ročně").setPosition(Notification.Position.MIDDLE);
+        //Notification.show("Teď ukazuju v grafu ročně").setPosition(Notification.Position.BOTTOM_START);
     }
 
     private void alterChartToMonth() {
         dateForChart = dateForChart.withDayOfMonth(1);
         updateMainChartData(dateForChart, YearMonth.from(dateForChart).atEndOfMonth(), consPricesRadioButtonGroup.getValue().equals("Consumption"));
-        Notification.show("Teď ukazuju v grafu měsíčně").setPosition(Notification.Position.MIDDLE);
+        //Notification.show("Teď ukazuju v grafu měsíčně").setPosition(Notification.Position.BOTTOM_START);
     }
 
     private void alterChartToDay() {
         consumptionDatePicker.setValue(dateForChart);
         updateMainChartData(dateForChart, dateForChart, consPricesRadioButtonGroup.getValue().equals("Consumption"));
-        Notification.show("Teď ukazuju v grafu denně").setPosition(Notification.Position.MIDDLE);
+        //Notification.show("Teď ukazuju v grafu denně").setPosition(Notification.Position.BOTTOM_START);
     }
 
     private void alterChartToPrices() {
         changeChartBasedOnPeriod();
-        Notification.show("Teď ukazuju v grafu prices").setPosition(Notification.Position.MIDDLE);
+        //Notification.show("Teď ukazuju v grafu prices").setPosition(Notification.Position.BOTTOM_START);
     }
 
     private void alterChartToConsumptions() {
         changeChartBasedOnPeriod();
-        Notification.show("Teď ukazuju v grafu consumption").setPosition(Notification.Position.MIDDLE);
+        //Notification.show("Teď ukazuju v grafu consumption").setPosition(Notification.Position.BOTTOM_START);
     }
 
     private void changeChartBasedOnPeriod() {
@@ -350,7 +353,8 @@ public class SensorElectricDashboard extends LitTemplate {
             consumption += data.getHighRate() + data.getLowRate();
         }
         consumptionMonthText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_month() + " [kW]</b>");
+                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_month() + "</b> [kW] -> <b>" +
+                String.format("%.2f", (consumption/sensor.getLimit_month())*100) + "%</b>");
         priceMonthText = new StyledTextComponent("Monthly price so far: <b>" + PatternStringUtils.formatNumberToText(
                 getNumberOfDecimalPrecision(price, 3))
                 + " " + sensor.getCurrencyString() + "</b>");
@@ -616,10 +620,10 @@ public class SensorElectricDashboard extends LitTemplate {
 
     private void setSeriesToConfiguration(Configuration configuration, Collection<Number> values, Collection<Number> values2) {
         ListSeries lowRate = getColoredListSeries(new ArrayList<>(values), "Low rate", SolidColor.BLACK);
-        ListSeries highRate = getColoredListSeries(new ArrayList<>(values2), "High rate", SolidColor.LIGHTGRAY);
+        ListSeries highRate = getColoredListSeries(new ArrayList<>(values2), "High rate", SolidColor.DARKGRAY);
         List<Number> sums = getSumListOfHighAndLowRates(new ArrayList<>(values),
                 new ArrayList<>(values2));
-        ListSeries sum = getColoredListSeries(sums, "Sum of both rates", new SolidColor(Colors.CEZ_TYPE.getRgb()));
+        ListSeries sum = getColoredListSeries(sums, "Sum of both rates", new SolidColor(Colors.CEZ_TYPE_ORANGE.getRgb()));
         configuration.setSeries(lowRate, highRate, sum);
     }
 
@@ -687,18 +691,40 @@ public class SensorElectricDashboard extends LitTemplate {
             hwNameField.setText("HW serial code: ...");
         }
         associatedHwLive = hardwareLiveService.findByHardwareId(sensor.getIdHw());
+        onlineStatusDiv.add(addOnlineStatusIcon());
         signalStrength = associatedHwLive != null ? associatedHwLive.getSignal_strength() : 0;
-        activeStatusHwField.setText("Signal power: " + signalStrength + "% ");
-        Icon statusIcon = new Icon(VaadinIcon.SIGNAL);
-        colorIcon(statusIcon, signalStrength);
-        statusIcon.setSize("40px");
-        hardwareStatusButton.setIcon(statusIcon);
-        hardwareStatusButton.setEnabled(false);
+
+        //signalPowerHwField.setText("Signal power: ");
+        SensorsUtil.setSignalImage(associatedHwLive, signalPowerHwField, signalImage);
+        signalImage.setClassName("statusImage");
+    }
+
+    private Icon addOnlineStatusIcon() {
+        NotificationLogHw logHw = notificationLogHwService.findBySerialHw(sensor.getIdHw());
+        Icon icon;
+        if (logHw == null) {
+            icon = VaadinIcon.CIRCLE.create();
+            icon.setColor(Colors.GREEN.getRgb());
+            icon.setClassName("onlineIcon");
+            icon.setSize("20px");
+        } else {
+            icon = VaadinIcon.CIRCLE.create();
+            icon.setColor(Colors.RED.getRgb());
+            icon.setClassName("onlineIcon");
+            icon.setSize("20px");
+        }
+        return icon;
     }
 
     private void setConsumptionBar() {
         calculateConsumptionHighestValue();
-        consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + " [W/h]</b>");
+        if (consumptionMaxValue == 0.0) {
+            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [W/h] -> <b>" +
+                    sensor.getConsumptionActual() + "%</b>");
+        } else {
+            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + "</b> [W/h] -> <b>" +
+                    String.format("%.2f", (sensor.getConsumptionActual()/(consumptionMaxValue*1000))*100) + "%</b>");
+        }
         consumptionDivText.setText("");
         consumptionDivText.addComponentAtIndex(0, consumptionText);
         consumptionProgressBar.setMin(0);
@@ -722,10 +748,15 @@ public class SensorElectricDashboard extends LitTemplate {
     private void setInfoData() {
         titleNameField.setText(sensor.getName());
         try {
-            ownerSpanField.setText("Owner: " + userService.getHardwareOwner(sensor.getIdHw()).getFullName());
+            List<User> users = userService.getHardwareOwner(sensor.getIdHw());
+            if (!users.isEmpty()) {
+                User user = users.get(0);
+                ownerSpanField.setText("Owner: " + user.getFullName());
+            }
         } catch (Exception e) {
             ownerSpanField.setText("Owner: ...");
         }
+        createdField.setText("Created: " + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(sensor.getCreatedDate()));
     }
 
     @Scheduled(fixedDelay = 10000)
@@ -757,9 +788,7 @@ public class SensorElectricDashboard extends LitTemplate {
             signalStrength = associatedHwLive != null ? associatedHwLive.getSignal_strength() : 0;
             getUI().ifPresent(ui -> ui.access(() ->
                     {
-                        activeStatusHwField.setText("Signal power: " + signalStrength + "% ");
-                        Icon icon = (Icon) hardwareStatusButton.getIcon();
-                        colorIcon(icon, signalStrength);
+                        SensorsUtil.updateSignalImage(associatedHwLive, signalImage);
                         ui.push();
                     }
             ));
@@ -781,18 +810,12 @@ public class SensorElectricDashboard extends LitTemplate {
     }
 
     private void refreshConsumptionText(Sensor sensor) {
-        consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + " [W/h]</b>");
-    }
-
-    private void colorIcon(Icon signalIcon, int signal) {
-        if (signal >= 75 && signal <= 100) {
-            signalIcon.setColor(Colors.GREEN.getRgb());
-        } else if (signal >= 50 && signal < 75) {
-            signalIcon.setColor(Colors.YELLOW.getRgb());
-        } else if (signal >= 25 && signal < 50) {
-            signalIcon.setColor(Colors.ORANGE.getRgb());
-        } else if (signal >= 0 && signal < 25) {
-            signalIcon.setColor(Colors.RED.getRgb());
+        if (consumptionMaxValue == 0.0) {
+            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [W/h] -> <b>" +
+                    sensor.getConsumptionActual() + "%</b>");
+        } else {
+            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + "</b> [W/h] -> <b>" +
+                    String.format("%.2f",(sensor.getConsumptionActual()/(consumptionMaxValue*1000)*100)) + "%</b>");
         }
     }
 }

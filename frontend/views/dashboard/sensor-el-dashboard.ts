@@ -2,9 +2,9 @@ import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-board/src/vaadin-board.js';
 import '@vaadin/vaadin-board/src/vaadin-board-row.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
-import '@vaadin/vaadin-button/src/vaadin-button.js';
 import '@vaadin/vaadin-date-picker/src/vaadin-date-picker.js';
 import '@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js';
+import '@vaadin/vaadin-button/src/vaadin-button.js';
 
 @customElement('sensor-el-dashboard')
 export class SensorElDashboard extends LitElement {
@@ -26,17 +26,21 @@ export class SensorElDashboard extends LitElement {
     <span theme="badge" style="width: 100%;">Electric sensor</span>
     <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m);"></h2>
     <span id="ownerSpanField" style="width: 100%;">Span</span>
+    <span id="createdField">Span</span>
    </div>
   </div>
   <div class="wrapper" style="flex-shrink: 1; flex-grow: 1;">
    <div class="card space-m">
     <span theme="badge error" style="width: 100%;">Hardware info</span>
     <span style="width: 100%; margin-top: var(--lumo-space-m);" id="hwNameField">HW name: </span>
-    <vaadin-horizontal-layout theme="spacing">
-     <div id="activeStatusHwField" style="align-self: center;">
-       Active status 
+    <div id="onlineStatusDiv">
+      Online status: 
+    </div>
+    <vaadin-horizontal-layout theme="spacing" style="align-items: center;">
+     <div>
+       Signal power: 
      </div>
-     <vaadin-button theme="icon" aria-label="Add new" id="hardwareStatusButton"></vaadin-button>
+     <div id="signalPowerHwField" style="align-self: center;"></div>
     </vaadin-horizontal-layout>
     <div id="hardwareStatusActualizedField"></div>
    </div>
@@ -62,7 +66,7 @@ export class SensorElDashboard extends LitElement {
    <div class="card space-m">
     <span style="width: 100%;" theme="badge success">Today consumption</span>
     <div id="consumptionTodayDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
-     Today consumption
+      Today consumption 
     </div>
     <vaadin-progress-bar id="todayLimitProgressBar" max="10" value="6"></vaadin-progress-bar>
     <div id="priceTodayDiv">

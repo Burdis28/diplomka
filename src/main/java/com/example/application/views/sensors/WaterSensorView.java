@@ -2,10 +2,7 @@ package com.example.application.views.sensors;
 
 import com.example.application.components.notifications.ErrorNotification;
 import com.example.application.data.entity.*;
-import com.example.application.data.service.SensorService;
-import com.example.application.data.service.SensorWaterService;
-import com.example.application.data.service.StateValveService;
-import com.example.application.data.service.UserService;
+import com.example.application.data.service.*;
 import com.example.application.utils.PatternStringUtils;
 import com.example.application.views.main.MainLayout;
 import com.example.application.views.sensors.components.SensorInfoComponent;
@@ -85,6 +82,7 @@ public class WaterSensorView extends LitTemplate {
     private final SensorService sensorService;
     private final SensorWaterService sensorWaterService;
     private final StateValveService stateValveService;
+    private final HardwareService hardwareService;
     private final UserService userService;
     private SensorWater sensorWater;
     private Sensor sensor;
@@ -92,6 +90,8 @@ public class WaterSensorView extends LitTemplate {
     private List<StateValve> states;
     private User loggedUser;
     private int initialStateId;
+    private List<Hardware> hardwareList;
+
 
     /**
      * Creates a new WaterSensorView.
@@ -102,11 +102,14 @@ public class WaterSensorView extends LitTemplate {
     public WaterSensorView(SensorService sensorService,
                            SensorWaterService sensorWaterService,
                            StateValveService stateValveService,
-                           UserService userService) {
+                           UserService userService,
+                           HardwareService hardwareService) {
         this.sensorService = sensorService;
         this.sensorWaterService = sensorWaterService;
         this.stateValveService = stateValveService;
         this.userService = userService;
+        this.hardwareService = hardwareService;
+        hardwareList = hardwareService.findAll();
 
         cancelButton.setIcon(new Icon(VaadinIcon.CLOSE_CIRCLE_O));
         saveButton.setIcon(new Icon(VaadinIcon.CHECK_CIRCLE));
@@ -149,13 +152,13 @@ public class WaterSensorView extends LitTemplate {
                 sensorWaterBinder.writeBean(sensorWater);
                 sensorBinder.writeBean(sensor);
                 updateNightTimeFields(sensorWater);
-                //updateModifiedByUserFields(sensorWater);
 
                 sensorWaterService.update(sensorWater);
+
+                sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
                 sensorService.update(sensor);
                 setStateValveFields(sensorWater);
                 setNightTimesFields(sensorWater);
-                //sensorInfo.actualizeConsumptionChart(sensor.getConsumptionActual(), sensor.getLimit_day());
 
                 setButton(saveButton, false);
                 setButton(returnButton, true);
@@ -183,13 +186,11 @@ public class WaterSensorView extends LitTemplate {
             this.sensorService.get(sensorId).ifPresent(sensor -> this.sensor = sensor);
         }
         initialStateId = sensorWater.getState();
-        sensorInfo = new SensorInfoComponent(sensor);
+        sensorInfo = new SensorInfoComponent(sensor, hardwareList);
         sensorInfo.setId("sensorInfoLayout");
         sensorInfo.setVisible(true);
         firstLayout.addComponentAsFirst(sensorInfo);
 
-        sensorInfo.getConsumptionActual().setReadOnly(true);
-        sensorInfo.getConsumptionCorrelation().setReadOnly(true);
         setSensorFields(sensorWater);
 
     }
@@ -199,7 +200,6 @@ public class WaterSensorView extends LitTemplate {
         stateSelect.removeAll();
         stateSelect.setItems(states);
         stateSelect.setTextRenderer(StateValve::getState);
-        //stateSelect.setDataProvider(StateValve::getId);
     }
 
     private void setSensorFields(SensorWater sensorWater) {
@@ -224,11 +224,6 @@ public class WaterSensorView extends LitTemplate {
 
         setStateValveFields(sensorWater);
 
-//        sensorWaterBinder.forField(stateModifiedDateField)
-//                .withConverter(s -> {
-//                   sensorWater.getStateModifiedDate().toString();
-//                })
-//                .bind(SensorWater::getStateModifiedDate, SensorWater::setStateModifiedDate);
         sensorWaterBinder.forField(timeBetweenImplField).asRequired("Required field.")
                 .withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getTimeBtwImpl, SensorWater::setTimeBtwImpl);
@@ -251,14 +246,17 @@ public class WaterSensorView extends LitTemplate {
         sensorBinder.forField(sensorInfo.getLimitMonth()).asRequired("Required field.")
                 .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getLimit_month, Sensor::setLimit_month);
-        sensorBinder.forField(sensorInfo.getConsumptionActual()).asRequired("Required field.")
-                .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
-                .bind(Sensor::getConsumptionActual, Sensor::setConsumptionActual);
         sensorBinder.forField(sensorInfo.getConsumptionCorrelation()).asRequired("Required field.")
                 .withConverter(BigDecimal::doubleValue, BigDecimal::valueOf)
                 .bind(Sensor::getConsumptionCorrelation, Sensor::setConsumptionCorrelation);
         sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.")
                 .bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
+
+        sensorInfo.getAttachToHardwareSelect().setValue(hardwareList.stream()
+                .filter(hardware -> sensor.getIdHw().equals(hardware.getSerial_HW()))
+                .findFirst()
+                .orElse(null)
+        );
 
         sensorBinder.readBean(sensor);
     }
@@ -323,5 +321,7 @@ public class WaterSensorView extends LitTemplate {
         sensorInfo.getLimitDay().setReadOnly(b);
         sensorInfo.getLimitMonth().setReadOnly(b);
         sensorInfo.getCurrency().setReadOnly(b);
+        sensorInfo.getConsumptionCorrelation().setReadOnly(b);
+        sensorInfo.getAttachToHardwareSelect().setReadOnly(b);
     }
 }

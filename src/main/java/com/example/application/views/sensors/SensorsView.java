@@ -1,15 +1,16 @@
 package com.example.application.views.sensors;
 
-import com.example.application.data.entity.Sensor;
-import com.example.application.data.entity.SensorTypes;
-import com.example.application.data.entity.User;
-import com.example.application.data.service.SensorService;
+import com.example.application.data.entity.*;
+import com.example.application.data.service.*;
 import com.example.application.data.service.data.DataElectricService;
 import com.example.application.data.service.data.DataWaterService;
+import com.example.application.utils.Colors;
 import com.example.application.utils.DevelopmentDataCreator;
 import com.example.application.utils.SensorsUtils;
 import com.example.application.views.main.MainLayout;
+import com.example.application.views.sensors.components.SensorsUtil;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -22,7 +23,9 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -39,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,38 +58,49 @@ public class SensorsView extends LitTemplate {
     private Grid<Sensor> grid;
     private GridListDataView<Sensor> gridListDataView;
 
-    private Grid.Column<Sensor> idColumn;
-    private Grid.Column<Sensor> nameColumn;
-    private Grid.Column<Sensor> limitDay;
-    private Grid.Column<Sensor> limitMonth;
     private Grid.Column<Sensor> typeColumn;
-    private Grid.Column<Sensor> consumptionActualColumn;
-    private Grid.Column<Sensor> consumptionCorrelationColumn;
+    private Grid.Column<Sensor> nameColumn;
+    private Grid.Column<Sensor> signalColumn;
+    private Grid.Column<Sensor> stateColumn;
+    private Grid.Column<Sensor> tarifColumn;
+    private Grid.Column<Sensor> onlineColumn;
+    private Grid.Column<Sensor> lastOnlineColumn;
     private Grid.Column<Sensor> toolsColumn;
 
     private final SensorService sensorService;
-    private final DataElectricService dataElectricService;
-    private final DataWaterService dataWaterService;
+    private final SensorElectricService sensorElectricService;
+    private final SensorWaterService sensorWaterService;
+    private final StateValveService stateValveService;
+    private final NotificationLogHwService notificationLogHwService;
+    private final HardwareLiveService hardwareLiveService;
     private final User loggedUser;
 
-    public SensorsView(@Autowired SensorService sensorService, DataElectricService dataElectricService,
-                       DataWaterService dataWaterService, @Value("${generateTestData}") boolean generateTestData) {
+    public SensorsView(@Autowired SensorService sensorService, SensorElectricService sensorElectricService,
+                       SensorWaterService sensorWaterService, StateValveService stateValveService,
+                       NotificationLogHwService notificationLogHwService,
+                       HardwareLiveService hardwareLiveService,
+                       @Value("${generateTestData}") boolean generateTestData) {
         this.sensorService = sensorService;
-        this.dataElectricService = dataElectricService;
-        this.dataWaterService = dataWaterService;
+        this.sensorElectricService = sensorElectricService;
+        this.sensorWaterService = sensorWaterService;
+        this.stateValveService = stateValveService;
+        this.notificationLogHwService = notificationLogHwService;
+        this.hardwareLiveService = hardwareLiveService;
+
         grid.setSelectionMode(SelectionMode.NONE);
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
         grid.setClassName("my-grid");
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
+        grid.setColumnReorderingAllowed(true);
         createGrid();
 
-        //TEST DATA
-        if(generateTestData) {
-            DevelopmentDataCreator testData = new DevelopmentDataCreator(dataElectricService, sensorService, dataWaterService);
-            testData.createElectricData();
-            testData.createWaterData();
-        }
+//        //TEST DATA
+//        if(generateTestData) {
+//            DevelopmentDataCreator testData = new DevelopmentDataCreator(dataElectricService, sensorService, dataWaterService);
+//            testData.createElectricData();
+//            testData.createWaterData();
+//        }
     }
 
     private void createGrid() {
@@ -122,11 +137,15 @@ public class SensorsView extends LitTemplate {
 
     @Scheduled(fixedDelay = 10000)
     public void refreshGrid(){
-        getUI().ifPresent(ui -> ui.access(() -> {
-            grid.setItems(getSensors());
-            gridListDataView.refreshAll();
-            ui.push();
-        }));
+        try {
+            getUI().ifPresent(ui -> ui.access(() -> {
+                grid.setItems(getSensors());
+                gridListDataView.refreshAll();
+                ui.push();
+            }));
+        } catch (Exception e) {
+            // UI Detach exception - do nuthin
+        }
     }
 
     private void createDeleteContextMenu(GridContextMenu<Sensor> contextMenu) {
@@ -159,7 +178,7 @@ public class SensorsView extends LitTemplate {
         contextMenu.addItem("View & edit", event -> {
             Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
             if(sensor != null) {
-                navigateToSensorDetail(sensor);
+                SensorsUtil.navigateToSensorDetail(sensor);
             }
         });
         contextMenu.addItem("Go to dashboard", event -> {
@@ -174,22 +193,6 @@ public class SensorsView extends LitTemplate {
                 }
             }
         });
-    }
-
-    private void navigateToSensorDetail(Sensor sensor) {
-        VaadinSession.getCurrent().setAttribute("sensorId", sensor.getId());
-        switch (sensor.getType()) {
-            case "e":
-                UI.getCurrent().navigate("sensor-el-detail");
-                return;
-            case "w":
-                UI.getCurrent().navigate("sensor-wat-detail");
-                return;
-            case "g":
-                UI.getCurrent().navigate("sensor-gas-detail");
-                return;
-            default:
-        }
     }
 
     private void navigateToSensorDashboard(Sensor sensor) {
@@ -209,59 +212,160 @@ public class SensorsView extends LitTemplate {
     }
 
     private void addColumnsToGrid() {
-        createIdColumn();
-        createNameColumn();
-        createLimitDayColumn();
-        createLimitMonthColumn();
         createTypeColumn();
-        createConsumptionActualColumn();
-        createConsumptionCorrelationColumn();
+        createNameColumn();
+        createOnlineStatusColumn();
+        createSignalColumn();
+        createTarifColumn();
+        createStateColumn();
+        createLastOnlineStatusColumn();
         createToolsColumn();
-    }
-
-    private void createIdColumn() {
-        idColumn = grid.addColumn(Sensor::getId, "id").setHeader("ID").setWidth("100px").setFlexGrow(0);
     }
 
     private void createNameColumn() {
         nameColumn = grid.addColumn(Sensor::getName, "name").setHeader("Name")
-                .setComparator(Sensor::getName).setWidth("350px").setFlexGrow(0);
+                .setComparator(Sensor::getName).setWidth("300px").setFlexGrow(0);
     }
 
-    private void createLimitDayColumn() {
-        limitDay = grid.addColumn(Sensor::getLimit_day, "limit_day").setHeader("Daily limit")
-                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_day).setFlexGrow(0);
+    private void createSignalColumn() {
+        signalColumn = grid.addComponentColumn(sensor -> {
+            HardwareLive live = hardwareLiveService.findByHardwareId(sensor.getIdHw());
+            Div span = new Div();
+            span.setWidthFull();
+            span.addClassName("signalImage");
+            Image image = new Image();
+            SensorsUtil.setSignalImage(live, span, image);
+            return span;
+        }).setHeader("Signal").setWidth("70px").setFlexGrow(0);
     }
 
-    private void createLimitMonthColumn() {
-        limitMonth = grid.addColumn(Sensor::getLimit_month, "limit_month").setHeader("Monthly limit")
-                .setWidth("150px").setFlexGrow(0).setComparator(Sensor::getLimit_month).setFlexGrow(0);
+    private void createOnlineStatusColumn() {
+        onlineColumn = grid.addComponentColumn(sensor -> {
+            NotificationLogHw logHw = notificationLogHwService.findBySerialHw(sensor.getIdHw());
+            Div span = new Div();
+            span.setWidthFull();
+            //span.setClassName("alignCenter");
+            Icon icon;
+            if (logHw == null) {
+                icon = VaadinIcon.CIRCLE.create();
+                icon.setColor(Colors.GREEN.getRgb());
+                icon.setClassName("bottomMarginIcon");
+                //icon.setSize("30px");
+                span.add(icon);
+            } else {
+                icon = VaadinIcon.CIRCLE.create();
+                icon.setColor(Colors.RED.getRgb());
+                icon.setClassName("bottomMarginIcon");
+                //icon.setSize("30px");
+                span.add(icon);
+            }
+            return span;
+        }).setHeader(" ").setWidth("60px").setFlexGrow(0);
+    }
+
+    private void createLastOnlineStatusColumn() {
+        lastOnlineColumn = grid.addComponentColumn(sensor -> {
+            NotificationLogHw logHw = notificationLogHwService.findBySerialHw(sensor.getIdHw());
+            Div span = new Div();
+            span.setClassName("smallerFontSize");
+            span.setWidthFull();
+            if (logHw != null) {
+                String formattedDate = new SimpleDateFormat("dd.MM.yyyy HH:mm").format(logHw.getLastSent().getTime());
+                span.add("Last online: " + formattedDate);
+            } else {
+                span.add(" ");
+            }
+            return span;
+        }).setHeader(" ").setWidth("220px").setFlexGrow(0);
     }
 
     private void createTypeColumn() {
         typeColumn = grid.addComponentColumn(sensor -> {
-            Span span = new Span();
-            span.setText(SensorTypes.valueOf(sensor.getType()).toString());
-            span.getElement().setAttribute("theme", SensorsUtils.getBadgeType(sensor));
-            span.setWidth("115px");
+            Div span = new Div();
+            span.setWidthFull();
+            span.setClassName("alignCenter");
+            Icon icon;
+            if (sensor.getType().equals(SensorTypes.w.name())) {
+                icon = VaadinIcon.DROP.create();
+                icon.setColor(Colors.BLUE.getRgb());
+                icon.setSize("30px");
+                span.add(icon);
+            } else if (sensor.getType().equals(SensorTypes.e.name())) {
+                icon = VaadinIcon.BOLT.create();
+                icon.setColor(Colors.CEZ_TYPE_ORANGE.getRgb());
+                icon.setSize("30px");
+                span.add(icon);
+            } else {
+                icon = VaadinIcon.CLOUD.create();
+                icon.setColor(Colors.GREEN.getRgb());
+                icon.setSize("30px");
+                span.add(icon);
+            }
+//            span.setText(SensorTypes.valueOf(sensor.getType()).toString());
+//            span.getElement().setAttribute("theme", SensorsUtil.getBadgeType(sensor));
+//            span.setWidth("115px");
+            span.setWidthFull();
             return span;
-        }).setHeader("Type").setWidth("150px").setComparator(Sensor::getType).setFlexGrow(0);
+        }).setHeader("Type").setWidth("140px").setComparator(Sensor::getType).setFlexGrow(0);
     }
 
-    private void createConsumptionActualColumn() {
-        consumptionActualColumn = grid.addColumn(Sensor::getConsumptionActual).setComparator(Sensor::getConsumptionActual)
-            .setHeader("Actual consumption").setWidth("150px").setFlexGrow(0);
+    private void createTarifColumn() {
+        tarifColumn = grid.addComponentColumn(sensor -> {
+            Span span = new Span();
+            if (sensor.getType().equals(SensorTypes.e.name())) {
+                SensorElectric sensorElectric = sensorElectricService.get(sensor.getId()).get();
+                Icon tarifIcon;
+                if (sensorElectric.isHighRate()) {
+                    tarifIcon = new Icon(VaadinIcon.ANGLE_DOUBLE_UP);
+                    tarifIcon.setColor(Colors.BLACK.getRgb());
+                    span.setText(" High rate");
+                } else {
+                    tarifIcon = new Icon(VaadinIcon.ANGLE_DOWN);
+                    tarifIcon.setColor(Colors.BLACK.getRgb());
+                    span.setText(" Low rate");
+                }
+                span.addComponentAsFirst(tarifIcon);
+            }
+            return span;
+        }).setHeader("Tarif").setWidth("160px").setFlexGrow(0);
     }
 
-    private void createConsumptionCorrelationColumn() {
-        consumptionCorrelationColumn = grid.addColumn(Sensor::getConsumptionCorrelation).setComparator(Sensor::getConsumptionCorrelation)
-                .setHeader("Correlation consumption").setWidth("150px").setFlexGrow(0);
+    private void createStateColumn() {
+        stateColumn = grid.addComponentColumn(sensor -> {
+            Span span = new Span();
+            if (sensor.getType().equals(SensorTypes.w.name())) {
+                SensorWater sensorWater = sensorWaterService.get(sensor.getId()).get();
+                StateValve state = stateValveService.get(sensorWater.getState()).get();
+                Icon stateIcon;
+                Text text = new Text("Seal ");
+                if (state.getState().equals("open_confirm")) {
+                    stateIcon = new Icon(VaadinIcon.CHECK_CIRCLE_O);
+                    stateIcon.setClassName("bottomMarginIcon");
+                    stateIcon.setColor(Colors.GREEN.getRgb());
+                    span.setText(" Opened");
+                } else if(state.getState().equals("close_confirm")) {
+                    stateIcon = new Icon(VaadinIcon.CLOSE_CIRCLE_O);
+                    stateIcon.setClassName("bottomMarginIcon");
+                    stateIcon.setColor(Colors.RED.getRgb());
+                    span.setText(" Closed");
+                } else {
+                    stateIcon = new Icon(VaadinIcon.REFRESH);
+                    stateIcon.setClassName("bottomMarginIcon");
+                    stateIcon.setColor(Colors.GRAY.getRgb());
+                    span.setText(" Changing");
+                }
+                span.addComponentAsFirst(stateIcon);
+                span.addComponentAsFirst(text);
+
+            }
+            return span;
+        }).setHeader("Seal state").setWidth("210px").setFlexGrow(0);
     }
 
     private void createToolsColumn() {
         toolsColumn = grid.addComponentColumn(sensor -> {
             Icon toolboxIcon = new Icon(VaadinIcon.TOOLS);
-            toolboxIcon.addClickListener(event -> navigateToSensorDetail(sensor));
+            toolboxIcon.addClickListener(event -> SensorsUtil.navigateToSensorDetail(sensor));
             toolboxIcon.getElement().setAttribute("theme", "badge secondary");
             Icon dasboardIcon = new Icon(VaadinIcon.DASHBOARD);
             dasboardIcon.addClickListener(event ->
@@ -293,49 +397,13 @@ public class SensorsView extends LitTemplate {
     private void addFiltersToGrid() {
         HeaderRow filterRow = grid.appendHeaderRow();
 
-        TextField idFilter = getIdFilter();
-        filterRow.getCell(idColumn).setComponent(idFilter);
-
         TextField nameFilter = getNameFilter();
         filterRow.getCell(nameColumn).setComponent(nameFilter);
 
-        TextField dailyLimitFilter = getDailyLimitFilter();
-        filterRow.getCell(limitDay).setComponent(dailyLimitFilter);
-
-        TextField monthlyLimitFilter = getMonthlyLimitFilter();
-        filterRow.getCell(limitMonth).setComponent(monthlyLimitFilter);
-
         ComboBox<String> typeFilter = getTypeFilter();
         filterRow.getCell(typeColumn).setComponent(typeFilter);
-
-        TextField actualConsumptionFilter = getActualConsumptionFilter();
-        filterRow.getCell(consumptionActualColumn).setComponent(actualConsumptionFilter);
-
-        TextField correlationConsumptionFilter = getCorrelationConsumptionFilter();
-        filterRow.getCell(consumptionCorrelationColumn).setComponent(correlationConsumptionFilter);
     }
 
-    private TextField getCorrelationConsumptionFilter() {
-        TextField correlationConsumptionFilter = new TextField();
-        correlationConsumptionFilter.setPlaceholder("Filter");
-        correlationConsumptionFilter.setClearButtonVisible(true);
-        correlationConsumptionFilter.setWidth("100%");
-        correlationConsumptionFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        correlationConsumptionFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
-                .containsIgnoreCase(Double.toString(sensor.getConsumptionCorrelation()), correlationConsumptionFilter.getValue())));
-        return correlationConsumptionFilter;
-    }
-
-    private TextField getActualConsumptionFilter() {
-        TextField actualConsumptionFilter = new TextField();
-        actualConsumptionFilter.setPlaceholder("Filter");
-        actualConsumptionFilter.setClearButtonVisible(true);
-        actualConsumptionFilter.setWidth("100%");
-        actualConsumptionFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        actualConsumptionFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
-                .containsIgnoreCase(Double.toString(sensor.getConsumptionActual()), actualConsumptionFilter.getValue())));
-        return actualConsumptionFilter;
-    }
 
     private ComboBox<String> getTypeFilter() {
         ComboBox<String> typeFilter = new ComboBox<>();
@@ -348,28 +416,6 @@ public class SensorsView extends LitTemplate {
         return typeFilter;
     }
 
-    private TextField getMonthlyLimitFilter() {
-        TextField monthlyLimitFilter = new TextField();
-        monthlyLimitFilter.setPlaceholder("Filter");
-        monthlyLimitFilter.setClearButtonVisible(true);
-        monthlyLimitFilter.setWidth("100%");
-        monthlyLimitFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        monthlyLimitFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
-                .containsIgnoreCase(Double.toString(sensor.getLimit_month()), monthlyLimitFilter.getValue())));
-        return monthlyLimitFilter;
-    }
-
-    private TextField getDailyLimitFilter() {
-        TextField dailyLimitFilter = new TextField();
-        dailyLimitFilter.setPlaceholder("Filter");
-        dailyLimitFilter.setClearButtonVisible(true);
-        dailyLimitFilter.setWidth("100%");
-        dailyLimitFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        dailyLimitFilter.addValueChangeListener(event -> gridListDataView.addFilter(sensor -> StringUtils
-                .containsIgnoreCase(Double.toString(sensor.getLimit_day()), dailyLimitFilter.getValue())));
-        return dailyLimitFilter;
-    }
-
     private TextField getNameFilter() {
         TextField nameFilter = new TextField();
         nameFilter.setPlaceholder("Filter");
@@ -379,17 +425,6 @@ public class SensorsView extends LitTemplate {
         nameFilter.addValueChangeListener(event -> gridListDataView
                 .addFilter(sensor -> StringUtils.containsIgnoreCase(sensor.getName(), nameFilter.getValue())));
         return nameFilter;
-    }
-
-    private TextField getIdFilter() {
-        TextField idFilter = new TextField();
-        idFilter.setPlaceholder("Filter");
-        idFilter.setClearButtonVisible(true);
-        idFilter.setWidth("100%");
-        idFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        idFilter.addValueChangeListener(event -> gridListDataView.addFilter(
-                client -> StringUtils.containsIgnoreCase(Integer.toString(client.getId()), idFilter.getValue())));
-        return idFilter;
     }
 
     private boolean areTypesEqual(Sensor sensor, ComboBox<String> statusFilter) {

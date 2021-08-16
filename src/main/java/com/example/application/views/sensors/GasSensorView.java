@@ -1,8 +1,10 @@
 package com.example.application.views.sensors;
 
 import com.example.application.components.notifications.ErrorNotification;
+import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorGas;
+import com.example.application.data.service.HardwareService;
 import com.example.application.data.service.SensorGasService;
 import com.example.application.data.service.SensorService;
 import com.example.application.views.main.MainLayout;
@@ -24,6 +26,7 @@ import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * A Designer generated component for the gas-sensor-view template.
@@ -57,19 +60,23 @@ public class GasSensorView extends LitTemplate {
 
     private final SensorService sensorService;
     private final SensorGasService sensorGasService;
+    private final HardwareService hardwareService;
     private SensorGas sensorGas;
     private Sensor sensor;
     private SensorInfoComponent sensorInfo;
+    private List<Hardware> hardwareList;
 
     /**
      * Creates a new GasSensorView.
      * @param sensorService
      * @param sensorGasService
      */
-    public GasSensorView(SensorService sensorService, SensorGasService sensorGasService) {
+    public GasSensorView(SensorService sensorService, SensorGasService sensorGasService, HardwareService hardwareService) {
         // You can initialise any data required for the connected UI components here.
         this.sensorService = sensorService;
         this.sensorGasService = sensorGasService;
+        this.hardwareService = hardwareService;
+        hardwareList = hardwareService.findAll();
 
         cancelButton.setIcon(new Icon(VaadinIcon.CLOSE_CIRCLE_O));
         saveButton.setIcon(new Icon(VaadinIcon.CHECK_CIRCLE));
@@ -114,10 +121,12 @@ public class GasSensorView extends LitTemplate {
                 sensor.setLimit_day(sensorInfo.getLimitDay().getValue().doubleValue());
                 sensor.setLimit_month(sensorInfo.getLimitMonth().getValue().doubleValue());
                 sensor.setCurrencyString(sensorInfo.getCurrency().getValue());
+                sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
 
                 if(sensorGas != null) {
                     sensorGasService.update(sensorGas);
                 }
+
                 sensorService.update(sensor);
 
                 setButton(saveButton, false);
@@ -147,7 +156,7 @@ public class GasSensorView extends LitTemplate {
             this.sensorGasService.get(sensorId).ifPresent(gas -> sensorGas = gas);
             this.sensorService.get(sensorId).ifPresent(sensor -> this.sensor = sensor);
         }
-        sensorInfo = new SensorInfoComponent(sensor);
+        sensorInfo = new SensorInfoComponent(sensor, hardwareList);
         sensorInfo.setId("sensorInfoLayout");
         sensorInfo.setVisible(true);
         firstLayout.addComponentAsFirst(sensorInfo);
@@ -164,6 +173,11 @@ public class GasSensorView extends LitTemplate {
         sensorInfo.getConsumptionActual().setValue(BigDecimal.valueOf(sensor.getConsumptionActual()));
         sensorInfo.getConsumptionCorrelation().setValue(BigDecimal.valueOf(sensor.getConsumptionCorrelation()));
         sensorInfo.getCurrency().setValue(sensor.getCurrencyString());
+        sensorInfo.getAttachToHardwareSelect().setValue(hardwareList.stream()
+                .filter(hardware -> sensor.getIdHw().equals(hardware.getSerial_HW()))
+                .findFirst()
+                .orElse(null)
+        );
     }
 
     private void setButton(Button button, boolean b) {
@@ -176,5 +190,8 @@ public class GasSensorView extends LitTemplate {
         sensorInfo.getLimitDay().setReadOnly(b);
         sensorInfo.getLimitMonth().setReadOnly(b);
         sensorInfo.getCurrency().setReadOnly(b);
+        sensorInfo.getAttachToHardwareSelect().setReadOnly(b);
+        sensorInfo.getConsumptionCorrelation().setReadOnly(b);
+
     }
 }

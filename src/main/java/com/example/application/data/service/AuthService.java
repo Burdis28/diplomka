@@ -5,6 +5,7 @@ import com.example.application.data.exceptions.AuthException;
 import com.example.application.views.dashboard.SensorElectricDashboard;
 import com.example.application.views.dashboard.SensorGasDashboard;
 import com.example.application.views.dashboard.SensorWaterDashboard;
+import com.example.application.views.hardwares.HardwareDetailView;
 import com.example.application.views.login.LoginView;
 import com.example.application.views.sensors.CreatesensorView;
 import com.example.application.views.hardwares.CreateHardwareView;
@@ -61,6 +62,7 @@ public class AuthService {
         RouteConfiguration.forSessionScope().setRoute("sensor-el-detail", ElectricSensorView.class, MainLayout.class);
         RouteConfiguration.forSessionScope().setRoute("sensor-wat-detail", WaterSensorView.class, MainLayout.class);
         RouteConfiguration.forSessionScope().setRoute("sensor-gas-detail", GasSensorView.class, MainLayout.class);
+        RouteConfiguration.forSessionScope().setRoute("hardware-detail", HardwareDetailView.class, MainLayout.class);
         RouteConfiguration.forSessionScope().setRoute("sensor-el-dashboard", SensorElectricDashboard.class, MainLayout.class);
         RouteConfiguration.forSessionScope().setRoute("sensor-wat-dashboard", SensorWaterDashboard.class, MainLayout.class);
         RouteConfiguration.forSessionScope().setRoute("sensor-gas-dashboard", SensorGasDashboard.class, MainLayout.class);

@@ -10,4 +10,6 @@ public interface NotificationLogHwRepository extends JpaRepository<NotificationL
     @Transactional
     @Modifying
     void deleteBySerialHw(String serialHw);
+
+    NotificationLogHw findBySerialHw(String serialHw);
 }

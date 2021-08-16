@@ -20,11 +20,31 @@ export class SensorWatDashboard extends LitElement {
  <vaadin-board-row>
   <div class="wrapper">
    <div class="card space-m">
-    <span theme="badge" style="width: 100%;">Electric sensor</span>
+    <span theme="badge" style="width: 100%;">Water sensor</span>
     <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m);"></h2>
-    <span class="secondary-text" id="ownerSpanField" style="width: 100%;">Span</span>
+    <span class="secondary-text" id="ownerSpanField" style="width: 100%;">Owner: </span>
+    <span id="createdField">Created: </span>
    </div>
   </div>
+  <div class="wrapper">
+   <div class="card space-m">
+    <span theme="badge error" style="width: 100%;">Hardware info</span>
+    <span style="width: 100%; margin-top: var(--lumo-space-m);" id="hwNameField">HW name: </span>
+    <div id="onlineStatusDiv">
+     Online status: 
+    </div>
+    <vaadin-horizontal-layout theme="spacing">
+     <div id="activeStatusHwField" style="align-self: center;">
+      Signal power:
+     </div>
+     <div id="signalPowerHwField"></div>
+    </vaadin-horizontal-layout>
+    <div id="hardwareStatusActualizedField"></div>
+   </div>
+  </div>
+  <div class="wrapper"></div>
+ </vaadin-board-row>
+ <vaadin-board-row>
   <div class="wrapper">
    <div class="card space-m">
     <span theme="badge success" style="width: 100%;">Current consumption</span>
@@ -32,25 +52,23 @@ export class SensorWatDashboard extends LitElement {
       Consumption 
     </div>
     <vaadin-progress-bar id="consumptionProgressBar" value="20" max="50"></vaadin-progress-bar>
-    <div id="priceDiv">
-      Div 
-    </div>
     <div id="actualizedDivField" style="margin-top: var(--lumo-space-s);">
       Actualized: 
     </div>
    </div>
   </div>
+ </vaadin-board-row>
+ <vaadin-board-row>
   <div class="wrapper">
    <div class="card space-m">
-    <span theme="badge error" style="width: 100%;">Hardware info</span>
-    <span style="width: 100%; margin-top: var(--lumo-space-m);" id="hwNameField">HW name: </span>
-    <vaadin-horizontal-layout theme="spacing">
-     <div id="activeStatusHwField" style="align-self: center;">
-       Active status 
-     </div>
-     <vaadin-button theme="icon" aria-label="Add new" id="hardwareStatusButton"></vaadin-button>
-    </vaadin-horizontal-layout>
-    <div id="hardwareStatusActualizedField"></div>
+    <span theme="badge success" style="width: 100%;">Today consumption</span>
+    <div id="consumptionTodayDivText" style="width: 100%; margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
+      Today consumption 
+    </div>
+    <vaadin-progress-bar id="todayLimitProgressBar" value="6" max="10"></vaadin-progress-bar>
+    <div id="priceTodayDiv">
+      Div 
+    </div>
    </div>
   </div>
   <div class="wrapper">

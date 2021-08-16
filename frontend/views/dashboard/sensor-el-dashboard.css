@@ -78,3 +78,12 @@ sensor-el-dashboard .priceForADayOrMonthDiv {
 sensor-el-dashboard .highcharts-yaxis-grid .highcharts-grid-line {
     display: none;
 }
+
+sensor-el-dashboard .onlineIcon {
+    margin-left: 20px;
+}
+
+sensor-el-dashboard .statusImage {
+    margin-left: 0px;
+    margin-top: 10px;
+}

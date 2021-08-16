@@ -75,7 +75,8 @@ public class CreateHardwareView extends LitTemplate {
         Icon icon = new Icon(VaadinIcon.THUMBS_UP);
         createHwButton.setIcon(icon);
         Icon iconCancel = new Icon(VaadinIcon.CLOSE);
-        createHwButton.setIcon(iconCancel);
+        cancelButton.setIcon(iconCancel);
+        cancelButton.setIconAfterText(true);
 
         cancelButton.addClickListener(event -> clearForm());
 

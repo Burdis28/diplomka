@@ -43,3 +43,7 @@ hardwares-view .signalIcon {
 hardwares-view .button {
   margin-top: 36px
 }
+
+hardwares-view .smallerFontSize {
+  font-size: var(--lumo-font-size-s);
+}

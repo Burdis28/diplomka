@@ -1,5 +1,6 @@
 package com.example.application.views.sensors.components;
 
+import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
 import com.example.application.utils.SensorsUtils;
@@ -15,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.TextField;
 
@@ -34,15 +36,14 @@ public class SensorInfoComponent extends VerticalLayout {
     private BigDecimalField limitMonth = new BigDecimalField();
     private BigDecimalField consumptionActual = new BigDecimalField();
     private BigDecimalField consumptionCorrelation = new BigDecimalField();
-    private Chart consumptionChart = new Chart(ChartType.SOLIDGAUGE);
+    private Select<Hardware> attachToHardwareSelect = new Select<>();
     private TextField currency = new TextField();
 
-    public SensorInfoComponent(Sensor sensor) {
+    public SensorInfoComponent(Sensor sensor, List<Hardware> hardwares) {
         layout = getLayout();
         if(layout == null) {
             layout = new VerticalLayout();
         }
-        consumptionChart.drawChart(true);
 
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
         layout.setId("sensorInfoLayout");
@@ -64,6 +65,10 @@ public class SensorInfoComponent extends VerticalLayout {
         currency.setValue(sensor.getCurrencyString());
         currency.setWidthFull();
         add(currency);
+        consumptionCorrelation.setLabel("Consumption correlation");
+        consumptionCorrelation.setValue(BigDecimal.valueOf(sensor.getConsumptionCorrelation()));
+        consumptionCorrelation.setWidthFull();
+        add(consumptionCorrelation);
         limitDay.setLabel("Limit day");
         limitDay.setValue(BigDecimal.valueOf(sensor.getLimit_day()));
         limitDay.setWidthFull();
@@ -72,18 +77,17 @@ public class SensorInfoComponent extends VerticalLayout {
         limitMonth.setValue(BigDecimal.valueOf(sensor.getLimit_month()));
         limitMonth.setWidthFull();
         add(limitMonth);
-        add(setConsumptionChart(sensor));
-    }
-
-    private Component setConsumptionChart(Sensor sensor) {
-        return ChartCreatorUtil.createConsumptionChart(sensor, consumptionChart,
-                "350px", "400px", "Today's consumption", "125%");
+        attachToHardwareSelect.setLabel("Attached to hardware");
+        attachToHardwareSelect.setItems(hardwares);
+        attachToHardwareSelect.setTextRenderer(item -> item.getName() + " [" + item.getSerial_HW() + "]");
+        attachToHardwareSelect.setWidthFull();
+        add(attachToHardwareSelect);
     }
 
     private Span getTypeBadge(Sensor sensor) {
         Span span = new Span();
         span.setText(SensorTypes.valueOf(sensor.getType()).toString());
-        span.getElement().setAttribute("theme", SensorsUtils.getBadgeType(sensor));
+        span.getElement().setAttribute("theme", SensorsUtil.getBadgeType(sensor));
         span.setWidth("80px");
         span.setHeight("30px");
         return span;
@@ -157,25 +161,11 @@ public class SensorInfoComponent extends VerticalLayout {
         this.currency = currency;
     }
 
-    public Chart getConsumptionChart() {
-        return consumptionChart;
+    public Select<Hardware> getAttachToHardwareSelect() {
+        return attachToHardwareSelect;
     }
 
-    public void setConsumptionChart(Chart consumptionChart) {
-        this.consumptionChart = consumptionChart;
-    }
-
-    public void actualizeConsumptionChart(Double consumption) {
-        getUI().ifPresent(ui -> ui.access(() -> {
-            DataSeries series = (DataSeries) consumptionChart.getConfiguration().getSeries().get(0);
-            DataSeriesItem item = series.get(0);
-            item.setY(consumption);
-            series.update(item);
-            ui.push();
-        }));
-    }
-
-    public void actualizeConsumptionChart(Sensor sensor) {
-        setConsumptionChart(sensor);
+    public void setAttachToHardwareSelect(Select<Hardware> attachToHardwareSelect) {
+        this.attachToHardwareSelect = attachToHardwareSelect;
     }
 }

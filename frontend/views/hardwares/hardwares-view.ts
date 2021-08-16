@@ -6,6 +6,7 @@ import '@vaadin/vaadin-ordered-layout/vaadin-horizontal-layout';
 import '@vaadin/vaadin-text-field';
 import { customElement, html, LitElement } from 'lit-element';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
+import '@vaadin/vaadin-grid/src/vaadin-grid.js';
 
 @customElement('hardwares-view')
 export class HardwaresView extends LitElement {
@@ -17,7 +18,7 @@ export class HardwaresView extends LitElement {
   render() {
     return html`
 <vaadin-vertical-layout theme="spacing" style="width: 100%; height: 100%;">
- <vaadin-vertical-layout theme="spacing" id="verticalBaseLayout" style="width: 100%; height: 100%; flex-shrink: 1;"></vaadin-vertical-layout>
+ <vaadin-grid id="hardwareGrid" column-reordering-allowed></vaadin-grid>
 </vaadin-vertical-layout>
 `;
   }

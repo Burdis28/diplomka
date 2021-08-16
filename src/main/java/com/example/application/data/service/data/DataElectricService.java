@@ -46,7 +46,6 @@ public class DataElectricService extends CrudService<DataElectric, Integer> {
         // Hledám podle UTC-2
         Calendar cal = Calendar.getInstance();
 
-        ZoneId defaultZoneId = TimeZone.getTimeZone("UTC").toZoneId();
         Timestamp from = Timestamp.valueOf(dateFrom.atStartOfDay());
         Timestamp to = Timestamp.valueOf(dateTo.atTime(LocalTime.MAX));
 
