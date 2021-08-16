@@ -337,17 +337,17 @@ public class SensorsView extends LitTemplate {
                 SensorWater sensorWater = sensorWaterService.get(sensor.getId()).get();
                 StateValve state = stateValveService.get(sensorWater.getState()).get();
                 Icon stateIcon;
-                Text text = new Text("Seal ");
+                Text text = new Text("Valve ");
                 if (state.getState().equals("open_confirm")) {
                     stateIcon = new Icon(VaadinIcon.CHECK_CIRCLE_O);
                     stateIcon.setClassName("bottomMarginIcon");
                     stateIcon.setColor(Colors.GREEN.getRgb());
-                    span.setText(" Opened");
+                    span.setText(" Open");
                 } else if(state.getState().equals("close_confirm")) {
                     stateIcon = new Icon(VaadinIcon.CLOSE_CIRCLE_O);
                     stateIcon.setClassName("bottomMarginIcon");
                     stateIcon.setColor(Colors.RED.getRgb());
-                    span.setText(" Closed");
+                    span.setText(" Close");
                 } else {
                     stateIcon = new Icon(VaadinIcon.REFRESH);
                     stateIcon.setClassName("bottomMarginIcon");
@@ -359,7 +359,7 @@ public class SensorsView extends LitTemplate {
 
             }
             return span;
-        }).setHeader("Seal state").setWidth("210px").setFlexGrow(0);
+        }).setHeader("Valve state").setWidth("210px").setFlexGrow(0);
     }
 
     private void createToolsColumn() {

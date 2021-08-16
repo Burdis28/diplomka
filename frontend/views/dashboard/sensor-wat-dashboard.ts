@@ -21,28 +21,27 @@ export class SensorWatDashboard extends LitElement {
   <div class="wrapper">
    <div class="card space-m">
     <span theme="badge" style="width: 100%;">Water sensor</span>
-    <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m);"></h2>
-    <span class="secondary-text" id="ownerSpanField" style="width: 100%;">Owner: </span>
-    <span id="createdField">Created: </span>
+    <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m); margin-left: var(--lumo-space-l);"></h2>
+    <span class="secondary-text" id="ownerSpanField" style="width: 100%; margin-left: var(--lumo-space-l);">Owner: </span>
+    <span id="createdField" style="margin-left: var(--lumo-space-l);">Created: </span>
    </div>
   </div>
   <div class="wrapper">
    <div class="card space-m">
     <span theme="badge error" style="width: 100%;">Hardware info</span>
-    <span style="width: 100%; margin-top: var(--lumo-space-m);" id="hwNameField">HW name: </span>
-    <div id="onlineStatusDiv">
-     Online status: 
+    <span style="width: 100%; margin-top: var(--lumo-space-m); margin-left: var(--lumo-space-l);" id="hwNameField">HW name: </span>
+    <div id="onlineStatusDiv" style="margin-left: var(--lumo-space-l);">
+      Online status: 
     </div>
-    <vaadin-horizontal-layout theme="spacing">
+    <vaadin-horizontal-layout theme="spacing" style="margin-left: var(--lumo-space-l);">
      <div id="activeStatusHwField" style="align-self: center;">
-      Signal power:
+       Signal power: 
      </div>
      <div id="signalPowerHwField"></div>
     </vaadin-horizontal-layout>
-    <div id="hardwareStatusActualizedField"></div>
+    <div id="hardwareStatusActualizedField" style="margin-left: var(--lumo-space-l);"></div>
    </div>
   </div>
-  <div class="wrapper"></div>
  </vaadin-board-row>
  <vaadin-board-row>
   <div class="wrapper">
