@@ -2,7 +2,7 @@ sensors-view {
   display: block;
   height: 100%;
 }
-sensors-view vaadin-grid-pro {
+sensors-view vaadin-grid {
   font-size: 20px;
   height: 100%;
 }
@@ -10,10 +10,10 @@ sensors-view vaadin-grid-filter,
 sensors-view vaadin-grid-filter > * {
   width: 100%;
 }
-sensors-view vaadin-grid-pro vaadin-horizontal-layout {
+sensors-view vaadin-grid vaadin-horizontal-layout {
   align-items: center;
 }
-sensors-view vaadin-grid-pro img {
+sensors-view vaadin-grid img {
   border-radius: 50%;
   flex-shrink: 0;
   height: var(--lumo-size-m);
@@ -24,10 +24,31 @@ sensors-view .name {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-sensors-view vaadin-grid-pro.v-grid-select-all-checkbox {
+
+sensors-view .alignCenter {
+  margin-left: 40px;
+}
+
+sensors-view .bottomMarginIcon {
+  margin-bottom: 4px;
+}
+sensors-view .signalImage {
+  margin-left: 2px;
+  margin-bottom: -2px;
+}
+
+sensors-view .smallerFontSize {
+  font-size: var(--lumo-font-size-s);
+}
+
+sensors-view .bigFontSize {
+  font-size: var(--lumo-font-size-l);
+}
+
+sensors-view vaadin-grid.v-grid-select-all-checkbox {
   display: none;
 }
-sensors-view vaadin-grid-pro span {
+sensors-view vaadin-grid span {
   align-items: center;
   text-align: center;
   width: var(--lumo-size-m);

@@ -38,6 +38,7 @@ public class HardwareService extends CrudService<Hardware, Integer> {
 
     @Override
     public void delete(Integer integer) {
+        super.delete(integer);
     }
 
     public void delete(Integer id, String serialHW) {

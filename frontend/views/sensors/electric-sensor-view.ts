@@ -1,7 +1,6 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
 import '@polymer/iron-icon/iron-icon.js';
-import '@vaadin/vaadin-checkbox/src/vaadin-checkbox.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 
@@ -49,10 +48,6 @@ export class ElectricSensorView extends LitElement {
        Kč 
      </div>
     </vaadin-big-decimal-field>
-    <vaadin-horizontal-layout theme="spacing-l" style="padding-left: var(--lumo-space-m); align-self: center; flex-shrink: 0; padding: var(--lumo-space-m); padding-right: var(--lumo-space-m);">
-      High rate active 
-     <vaadin-checkbox id="highRateCheckbox" style="flex-grow: 0; flex-shrink: 0;"></vaadin-checkbox>
-    </vaadin-horizontal-layout>
    </vaadin-vertical-layout>
   </vaadin-horizontal-layout>
   <vaadin-horizontal-layout theme="spacing" style="align-self: center; padding: var(--lumo-space-l); justify-content: center;">

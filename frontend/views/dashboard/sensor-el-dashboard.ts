@@ -1,12 +1,9 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-board/src/vaadin-board.js';
-import '@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js';
 import '@vaadin/vaadin-board/src/vaadin-board-row.js';
-import '@vaadin/vaadin-charts/src/vaadin-chart.js';
-import '@vaadin/vaadin-date-picker/src/vaadin-date-picker.js';
-import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
-import '@vaadin/vaadin-select/src/vaadin-select.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vaadin-date-picker/src/vaadin-date-picker.js';
+import '@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
 
 @customElement('sensor-el-dashboard')
@@ -24,50 +21,68 @@ export class SensorElDashboard extends LitElement {
     return html`
 <vaadin-board>
  <vaadin-board-row>
-  <div class="wrapper">
+  <div class="wrapper" style="flex-grow: 1;">
    <div class="card space-m">
     <span theme="badge" style="width: 100%;">Electric sensor</span>
     <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m);"></h2>
-    <span class="secondary-text" id="ownerSpanField" style="width: 100%;">Span</span>
+    <span id="ownerSpanField" style="width: 100%;">Span</span>
+    <span id="createdField">Span</span>
    </div>
   </div>
+  <div class="wrapper" style="flex-shrink: 1; flex-grow: 1;">
+   <div class="card space-m">
+    <span theme="badge error" style="width: 100%;">Hardware info</span>
+    <span style="width: 100%; margin-top: var(--lumo-space-m);" id="hwNameField">HW name: </span>
+    <div id="onlineStatusDiv">
+      Online status: 
+    </div>
+    <vaadin-horizontal-layout theme="spacing" style="align-items: center;">
+     <div>
+       Signal power: 
+     </div>
+     <div id="signalPowerHwField" style="align-self: center;"></div>
+    </vaadin-horizontal-layout>
+    <div id="hardwareStatusActualizedField"></div>
+   </div>
+  </div>
+  <div class="wrapper"></div>
+ </vaadin-board-row>
+ <vaadin-board-row>
   <div class="wrapper">
    <div class="card space-m">
     <span theme="badge success" style="width: 100%;">Current consumption</span>
     <div id="consumptionDivText" style="width: 100%; margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
       Consumption 
     </div>
-    <vaadin-progress-bar id="consumptionProgressBar" value="20" max="50"></vaadin-progress-bar>
-    <div id="priceDiv">
-      Div 
-    </div>
+    <vaadin-progress-bar id="consumptionProgressBar" max="" min=""></vaadin-progress-bar>
     <div id="actualizedDivField" style="margin-top: var(--lumo-space-s);">
       Actualized: 
     </div>
    </div>
   </div>
+ </vaadin-board-row>
+ <vaadin-board-row>
   <div class="wrapper">
    <div class="card space-m">
-    <span theme="badge error" style="width: 100%;">Hardware info</span>
-    <span style="width: 100%; margin-top: var(--lumo-space-m);" id="hwNameField">HW name: </span>
-    <vaadin-horizontal-layout theme="spacing">
-     <div id="activeStatusHwField" style="align-self: center;">
-       Active status 
-     </div>
-     <vaadin-button theme="icon" aria-label="Add new" id="hardwareStatusButton"></vaadin-button>
-    </vaadin-horizontal-layout>
-    <div id="hardwareStatusActualizedField"></div>
+    <span style="width: 100%;" theme="badge success">Today consumption</span>
+    <div id="consumptionTodayDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
+      Today consumption 
+    </div>
+    <vaadin-progress-bar id="todayLimitProgressBar" max="10" value="6"></vaadin-progress-bar>
+    <div id="priceTodayDiv">
+      Div 
+    </div>
    </div>
   </div>
   <div class="wrapper">
    <div class="card space-m">
-    <span style="width: 100%;" theme="badge success">Monthly consumption limit</span>
+    <span style="width: 100%;" theme="badge success">Monthly consumption</span>
     <div id="consumptionMonthDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
-     This month consumption
+      This month consumption 
     </div>
     <vaadin-progress-bar id="monthLimitProgressBar" max="20" value="12"></vaadin-progress-bar>
     <div id="priceThisMonthDiv">
-     Price: 
+      Price: 
     </div>
    </div>
   </div>
@@ -75,47 +90,17 @@ export class SensorElDashboard extends LitElement {
  <vaadin-board-row>
   <div class="wrapper" style="flex-grow: 1;">
    <div class="card" id="dailyConsumptionDiv">
-    <vaadin-date-picker id="consumptionDatePicker" style="margin: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding-left: var(--lumo-space-m);" label="Date" helper-text="Today's date chosen by default"></vaadin-date-picker>
-   </div>
-  </div>
-  <div class="wrapper">
-   <div class="card" id="areaSplineRangeChartDiv"></div>
-  </div>
- </vaadin-board-row>
- <vaadin-board-row>
-  <div class="wrapper">
-   <div class="card">
-    <div id="monthlyChartDiv" style="margin: var(--lumo-space-l);"></div>
-    <vaadin-chart title="Consumption prices for past 30 days" id="monthlyChart" style="margin-top: var(--lumo-space-l);"></vaadin-chart>
-   </div>
-  </div>
- </vaadin-board-row>
- <vaadin-board-row>
-  <div class="wrapper">
-   <div class="wrapper">
-    <div class="card">
-     <h4 style="margin: var(--lumo-space-s); margin-top: var(--lumo-space-l); margin-left: var(--lumo-space-l); margin-right: var(--lumo-space-l); margin-bottom: var(--lumo-space-m);">Price of electricity consumed for a certain day </h4>
-     <vaadin-date-picker label="Date" placeholder="Pick a date" id="priceForDayDatePicker" style="margin-left: var(--lumo-space-l);"></vaadin-date-picker>
-     <div id="priceForADayDiv" style="margin-top: var(--lumo-space-l); margin-left: var(--lumo-space-l); margin-bottom: var(--lumo-space-l);"></div>
-    </div>
-   </div>
-   <div class="wrapper">
-    <div class="card" style="padding: var(--lumo-space-l); padding-top: var(--lumo-space-xs);">
-     <h4>Price of electricity consumed during a certain month and year</h4>
-     <vaadin-horizontal-layout theme="spacing">
-      <vaadin-text-field label="Choose a year" id="yearSelecterField" maxlength="4" required has-value></vaadin-text-field>
-      <vaadin-select id="monthSelecter" label="Choose a month"></vaadin-select>
-     </vaadin-horizontal-layout>
-     <vaadin-horizontal-layout>
-      <vaadin-button id="calculateBtn" style="align-self: flex-start; margin-top: var(--lumo-space-xl);" theme="primary first">
-        Calculate month 
-      </vaadin-button>
-      <vaadin-button id="calculateWholeYear" style="margin-top: var(--lumo-space-xl); align-self: flex-start; margin-left: var(--lumo-space-m);" theme="secondary">
-        Calculate whole year 
-      </vaadin-button>
-     </vaadin-horizontal-layout>
-     <div id="priceForAMonth" style="margin-top: var(--lumo-space-l);"></div>
-    </div>
+    <vaadin-horizontal-layout id="horizontalLayoutAboveChart" style="justify-content: center; align-items: center; width: 100%;">
+     <div id="typeOfChartDiv"></div>
+     <div id="periodChangerChartDiv"></div>
+     <vaadin-date-picker id="consumptionDatePicker" style="margin: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding-left: var(--lumo-space-m); flex-shrink: 1;" label="Date" helper-text="Today's date chosen by default"></vaadin-date-picker>
+     <vaadin-button id="previousButton" style="margin: var(--lumo-space-m); margin-top: var(--lumo-space-m); flex-shrink: 1; margin-right: var(--lumo-space-s);">
+       Previous 
+     </vaadin-button>
+     <vaadin-button id="nextButton" style="margin: var(--lumo-space-m); margin-top: var(--lumo-space-m); flex-shrink: 1; margin-left: var(--lumo-space-s);">
+       Next 
+     </vaadin-button>
+    </vaadin-horizontal-layout>
    </div>
   </div>
  </vaadin-board-row>

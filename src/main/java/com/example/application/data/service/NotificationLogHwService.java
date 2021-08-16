@@ -15,6 +15,10 @@ public class NotificationLogHwService extends CrudService<NotificationLogHw, Int
         this.notificationLogHwRepository = notificationLogHwRepository;
     }
 
+    public NotificationLogHw findBySerialHw(String serialHw) {
+        return this.notificationLogHwRepository.findBySerialHw(serialHw);
+    }
+
     public void deleteBySerialHW(String serialHw) {
         notificationLogHwRepository.deleteBySerialHw(serialHw);
     }

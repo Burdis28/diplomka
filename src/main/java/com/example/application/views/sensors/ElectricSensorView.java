@@ -1,8 +1,10 @@
 package com.example.application.views.sensors;
 
 import com.example.application.components.notifications.ErrorNotification;
+import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorElectric;
+import com.example.application.data.service.HardwareService;
 import com.example.application.data.service.SensorElectricService;
 import com.example.application.data.service.SensorService;
 import com.example.application.helpers.validators.ElectricSensorValidator;
@@ -29,10 +31,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.List;
 
 /**
  * A Designer generated component for the water-sensor template.
@@ -45,7 +46,6 @@ import java.util.Optional;
 @CssImport("./views/sensors/electric-sensor-view.css")
 @ParentLayout(MainLayout.class)
 @PageTitle("Electric sensor detail")
-@EnableScheduling
 public class ElectricSensorView extends LitTemplate {
 
     @Id("priceFixedField")
@@ -76,8 +76,6 @@ public class ElectricSensorView extends LitTemplate {
     private Div priceServiceSuffix;
     @Id("implPerKwSuffix")
     private Div implPerKwSuffix;
-    @Id("highRateCheckbox")
-    private Checkbox highRateCheckbox;
     @Id("vaadinHorizontalLayout")
     private HorizontalLayout vaadinHorizontalLayout;
     @Id("electricAttributesTitle")
@@ -87,18 +85,22 @@ public class ElectricSensorView extends LitTemplate {
 
     private final SensorService sensorService;
     private final SensorElectricService sensorElectricService;
+    private final HardwareService hardwareService;
     private SensorElectric sensorElectric;
     private Sensor sensor;
     private SensorInfoComponent sensorInfo;
 
     private Binder<Sensor> sensorBinder = new Binder<>();
     private Binder<SensorElectric> sensorElectricBinder = new Binder<>();
+    private List<Hardware> hardwareList;
 
 
     public ElectricSensorView(SensorElectricService sensorElectricService,
-                              SensorService sensorService) {
+                              SensorService sensorService, HardwareService hardwareService) {
         this.sensorElectricService = sensorElectricService;
         this.sensorService = sensorService;
+        this.hardwareService = hardwareService;
+        hardwareList = hardwareService.findAll();
 
         cancelButton.setIcon(new Icon(VaadinIcon.CLOSE_CIRCLE_O));
         saveButton.setIcon(new Icon(VaadinIcon.CHECK_CIRCLE));
@@ -152,10 +154,11 @@ public class ElectricSensorView extends LitTemplate {
                     sensorBinder.writeBean(sensor);
 
                     sensorElectricService.update(sensorElectric);
+
+                    sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
                     sensorService.update(sensor);
                     pricePerKwLowField.setInvalid(false);
                     pricePerKwHighField.setInvalid(false);
-                    sensorInfo.actualizeConsumptionChart(sensor);
 
                     setButton(saveButton, false);
                     setButton(returnButton, true);
@@ -187,7 +190,7 @@ public class ElectricSensorView extends LitTemplate {
         }
         setCurrencySuffixes();
 
-        sensorInfo = new SensorInfoComponent(sensor);
+        sensorInfo = new SensorInfoComponent(sensor, hardwareList);
         sensorInfo.setId("sensorInfoLayout");
         sensorInfo.setVisible(true);
         firstLayout.addComponentAsFirst(sensorInfo);
@@ -225,7 +228,6 @@ public class ElectricSensorView extends LitTemplate {
                 .bind(SensorElectric::getPriceService, SensorElectric::setPriceService);
         sensorElectricBinder.forField(implPerKWField).asRequired("Required field.").withConverter(BigDecimal::intValue, BigDecimal::valueOf)
                 .bind(SensorElectric::getImplPerKw, SensorElectric::setImplPerKw);
-        sensorElectricBinder.forField(highRateCheckbox).bind(SensorElectric::isHighRate, SensorElectric::setHighRate);
 
         sensorElectricBinder.readBean(sensorElectric);
 
@@ -245,6 +247,12 @@ public class ElectricSensorView extends LitTemplate {
                 .bind(Sensor::getConsumptionCorrelation, Sensor::setConsumptionCorrelation);
         sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.").bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
 
+        sensorInfo.getAttachToHardwareSelect().setValue(hardwareList.stream()
+                .filter(hardware -> sensor.getIdHw().equals(hardware.getSerial_HW()))
+                .findFirst()
+                .orElse(null)
+        );
+
         sensorBinder.readBean(sensor);
     }
 
@@ -259,18 +267,14 @@ public class ElectricSensorView extends LitTemplate {
         priceFixedField.setReadOnly(b);
         priceServiceField.setReadOnly(b);
         implPerKWField.setReadOnly(b);
-        highRateCheckbox.setReadOnly(b);
+
 
         sensorInfo.getSensorName().setReadOnly(b);
         sensorInfo.getLimitDay().setReadOnly(b);
         sensorInfo.getLimitMonth().setReadOnly(b);
         sensorInfo.getCurrency().setReadOnly(b);
-    }
+        sensorInfo.getAttachToHardwareSelect().setReadOnly(b);
+        sensorInfo.getConsumptionCorrelation().setReadOnly(b);
 
-    // every 30 seconds refresh data for gauge chart
-    @Scheduled(fixedDelay=30000)
-    public void refreshSensorConsumption() {
-        Optional<Sensor> refreshedSensor = sensorService.get(sensor.getId());
-        refreshedSensor.ifPresent(value -> sensorInfo.actualizeConsumptionChart(value.getConsumptionActual()));
     }
 }

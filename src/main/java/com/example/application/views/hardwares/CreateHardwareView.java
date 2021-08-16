@@ -5,11 +5,9 @@ import com.example.application.data.entity.*;
 import com.example.application.data.service.HardwareLiveService;
 import com.example.application.data.service.HardwareService;
 import com.example.application.data.service.NotificationLogHwService;
-import com.example.application.data.service.SmartPlugService;
 import com.example.application.views.main.MainLayout;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.icon.Icon;
@@ -41,32 +39,21 @@ public class CreateHardwareView extends LitTemplate {
 
     @Id("nameField")
     private TextField nameField;
-    @Id("smartPlugSerialCodeField")
-    private TextField smartPlugSerialCodeField;
     @Id("serialHwCodeField")
     private TextField serialHwCodeField;
     @Id("cancelButton")
     private Button cancelButton;
     @Id("createHwButton")
     private Button createHwButton;
-    @Id("smartPlugNameField")
-    private TextField smartPlugNameField;
-    @Id("activationCodeField")
-    private TextField activationCodeField;
-    @Id("dateTimePickerField")
-    private DateTimePicker dateTimePickerField;
 
     private HardwareService hardwareService;
     private HardwareLiveService hardwareLiveService;
-    private SmartPlugService smartPlugService;
     private NotificationLogHwService notificationLogHwService;
 
     private Binder<Hardware> hardwareBinder;
-    private Binder<SmartPlug> smartPlugBinder;
 
     private Hardware hardware;
     private HardwareLive hardwareLive;
-    private SmartPlug smartPlug;
     private User loggedUser;
 
     /**
@@ -74,17 +61,13 @@ public class CreateHardwareView extends LitTemplate {
      */
     public CreateHardwareView(HardwareService hardwareService,
                               HardwareLiveService hardwareLiveService,
-                              NotificationLogHwService notificationLogHwService,
-                              SmartPlugService smartPlugService) {
+                              NotificationLogHwService notificationLogHwService) {
         this.hardwareService = hardwareService;
         this.hardwareLiveService = hardwareLiveService;
-        this.smartPlugService = smartPlugService;
         this.notificationLogHwService = notificationLogHwService;
         this.hardwareBinder = new Binder<>();
-        this.smartPlugBinder = new Binder<>();
         this.hardware = new Hardware();
         this.hardwareLive = new HardwareLive();
-        this.smartPlug = new SmartPlug();
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
 
         setBinderFields();
@@ -92,7 +75,8 @@ public class CreateHardwareView extends LitTemplate {
         Icon icon = new Icon(VaadinIcon.THUMBS_UP);
         createHwButton.setIcon(icon);
         Icon iconCancel = new Icon(VaadinIcon.CLOSE);
-        createHwButton.setIcon(iconCancel);
+        cancelButton.setIcon(iconCancel);
+        cancelButton.setIconAfterText(true);
 
         cancelButton.addClickListener(event -> clearForm());
 
@@ -123,11 +107,6 @@ public class CreateHardwareView extends LitTemplate {
         hwLive.setDateTime(timeNow);
         hardwareLiveService.update(hwLive);
 
-        smartPlugBinder.writeBean(smartPlug);
-        smartPlug.setSerialHw(hardware.getSerial_HW());
-        smartPlug.setActiveTill(Timestamp.valueOf(LocalDateTime.now()));
-        smartPlugService.update(smartPlug);
-
         NotificationLogHw notificationLogHw = new NotificationLogHw();
         notificationLogHw.setSerialHw(hardware.getSerial_HW());
         notificationLogHw.setLastSent(timeNow);
@@ -138,10 +117,6 @@ public class CreateHardwareView extends LitTemplate {
     private void clearForm() {
         nameField.clear();
         serialHwCodeField.clear();
-        smartPlugSerialCodeField.clear();
-        smartPlugNameField.clear();
-        activationCodeField.clear();
-        dateTimePickerField.clear();
     }
 
     private void setBinderFields() {
@@ -151,24 +126,6 @@ public class CreateHardwareView extends LitTemplate {
         hardwareBinder.forField(serialHwCodeField).asRequired("Required field.")
                 .bind(Hardware::getSerial_HW, Hardware::setSerial_HW);
 
-        smartPlugBinder.forField(smartPlugSerialCodeField).asRequired("Required field.")
-                .bind(SmartPlug::getSerialPlug, SmartPlug::setSerialPlug);
-
-        smartPlugBinder.forField(smartPlugNameField).asRequired("Required field.")
-                .bind(SmartPlug::getName, SmartPlug::setName);
-
-        smartPlugBinder.forField(activationCodeField).asRequired("Required field.")
-                .bind(SmartPlug::getActivationCode, SmartPlug::setActivationCode);
-
-//        smartPlugBinder.forField(dateTimePickerField).asRequired("Required field.")
-//                .bind(smartPlug1 -> smartPlug1.getActiveTill() == null ? null :
-//                                smartPlug1.getActiveTill().toLocalDateTime(),
-//                        (smartPlug1, localDateTime) -> {
-//                            if (localDateTime != null) {
-//                                smartPlug1.setActiveTill(Timestamp.valueOf(localDateTime));
-//                            }
-//                        });
         hardwareBinder.readBean(hardware);
-        smartPlugBinder.readBean(smartPlug);
     }
 }

@@ -7,12 +7,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     User getByLogin(String login);
 
-    @Query("SELECT u from User u where u.id = (SELECT userid from UserHW where hwid=:hwId)")
-    User getHardwareOwner(@Param("hwId") String serial_hw);
+    @Query("SELECT u from User u where u.id IN (SELECT userid from UserHW where hwid=:hwId)")
+    List<User> getHardwareOwner(@Param("hwId") String serial_hw);
 
     @Transactional
     @Modifying

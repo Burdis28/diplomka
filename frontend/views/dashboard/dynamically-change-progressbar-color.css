@@ -1,0 +1,6 @@
+:host {
+    --progress-color: #f24f00;
+}
+:host [part="value"] {
+    background-color: var(--progress-color);
+}

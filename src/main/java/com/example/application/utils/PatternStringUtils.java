@@ -37,7 +37,7 @@ public class PatternStringUtils {
         }
         DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setGroupingSeparator(' ');
-        DecimalFormat df = new DecimalFormat("###,###,###,###,###.000", symbols);
+        DecimalFormat df = new DecimalFormat("###,###,###,###,##0.000", symbols);
         return df.format(number);
     }
 

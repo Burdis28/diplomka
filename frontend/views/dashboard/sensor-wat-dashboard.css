@@ -74,3 +74,12 @@ sensor-wat-dashboard .priceForADayOrMonthDiv {
     align-items: center;
     align-content: center;
 }
+
+sensor-wat-dashboard .onlineIcon {
+    margin-left: 20px;
+}
+
+sensor-wat-dashboard .statusImage {
+    margin-left: 0px;
+    margin-top: 10px;
+}
