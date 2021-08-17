@@ -150,7 +150,7 @@ public class UserManagementView extends LitTemplate {
             span.getElement().setAttribute("theme", user.getActive() ? "badge success secondary" : "badge error secondary");
             span.setWidth("120px");
             return span;
-        }).setHeader("Active").setWidth("130px").setFlexGrow(0);
+        }).setHeader("Active").setWidth("150px").setFlexGrow(0);
         ;
     }
 

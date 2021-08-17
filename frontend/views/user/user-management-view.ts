@@ -17,19 +17,19 @@ export class UserManagementView extends LitElement {
 
   render() {
     return html`
-<vaadin-vertical-layout style="width: 100%; height: 100%;">
- <div class="overallDiv" style="align-self: center; flex-grow: 1;">
+<vaadin-vertical-layout style="width: 100%; height: 95%;">
+ <div class="overallDiv" style="align-self: center; flex-grow: 1; height: 100%; width: 95%;">
   <vaadin-vertical-layout id="controlPanelLayout">
-   <div style="align-self: center;">
+   <div style="align-self: center; flex-shrink: 1; flex-grow: 0;">
     <vaadin-horizontal-layout style="align-items: center;">
      <h2 style="align-self: center;">Users management</h2>
     </vaadin-horizontal-layout>
    </div>
   </vaadin-vertical-layout>
-  <vaadin-vertical-layout theme="spacing" id="gridLayout" style="margin: var(--lumo-space-xl);">
-   <vaadin-grid id="usersGrid" loading size="50"></vaadin-grid>
-   <vaadin-button theme="primary" id="createUserBtn" style="align-self: center; margin-top: var(--lumo-space-xl);">
-    Create new user
+  <vaadin-vertical-layout theme="spacing" id="gridLayout" style="margin: var(--lumo-space-m); height: 80%; margin-top: var(--lumo-space-m);">
+   <vaadin-grid id="usersGrid" loading size="50" theme="column-borders" style="height: 100%;"></vaadin-grid>
+   <vaadin-button theme="primary" id="createUserBtn" style="align-self: center; margin-top: var(--lumo-space-m);">
+     Create new user 
    </vaadin-button>
   </vaadin-vertical-layout>
  </div>

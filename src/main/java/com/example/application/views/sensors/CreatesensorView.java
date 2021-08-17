@@ -16,6 +16,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
@@ -28,6 +29,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -64,7 +66,7 @@ public class CreatesensorView extends LitTemplate {
     @Id("limitDayField")
     private TextField limitDayField;
     @Id("pinIdField")
-    private TextField pinIdField;
+    private IntegerField pinIdField;
     @Id("attachToHardware")
     private Select<Hardware> attachToHardwareSelect;
 
@@ -204,7 +206,7 @@ public class CreatesensorView extends LitTemplate {
         sensor.setCurrencyString(currencyField.getValue());
         sensor.setIdHw(attachToHardwareSelect.getValue().getSerial_HW());
         sensor.setType(SensorTypes.fromCode(typeSelect.getValue()).name());
-        sensor.setPinId(Integer.parseInt(pinIdField.getValue()));
+        sensor.setPinId(pinIdField.getValue());
         sensor.setLimit_day(Double.parseDouble(limitDayField.getValue()));
         sensor.setLimit_month(Double.parseDouble(limitMonthField.getValue()));
         sensor.setConsumptionActual(BigDecimal.ZERO.doubleValue());
@@ -222,10 +224,24 @@ public class CreatesensorView extends LitTemplate {
             // logic validations of fields.
             valid = limitDayField.getValue().compareTo(limitMonthField.getValue()) <= 0;
             if (!valid) validateDialog("Validation error: Monthly limit must be bigger than daily limit.");
+
+            valid = validatePinId();
+            if (!valid) validateDialog("Validation error: Pin ID on selected Hardware is already in use.");
+
         } catch (Exception e) {
             valid = false;
         }
         return valid;
+    }
+
+    private boolean validatePinId() {
+        List<Sensor> sensors = sensorService.findSensorByIdHw(attachToHardwareSelect.getValue().getSerial_HW());
+        for (Sensor sensor : sensors) {
+            if (sensor.getPinId() == pinIdField.getValue()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean validateRequiredFields() {
@@ -274,7 +290,6 @@ public class CreatesensorView extends LitTemplate {
         nameField.setErrorMessage(PatternStringUtils.fieldIsRequired);
         currencyField.setMaxLength(45);
         currencyField.setErrorMessage(PatternStringUtils.fieldIsRequired);
-        pinIdField.setPattern(PatternStringUtils.onlyNumbersRegex);
         pinIdField.setErrorMessage(PatternStringUtils.fieldIsRequired);
         nameField.setErrorMessage(PatternStringUtils.fieldIsRequired);
         limitDayField.setPattern(PatternStringUtils.doubleNumberRegex63);
@@ -303,7 +318,7 @@ public class CreatesensorView extends LitTemplate {
     private void setRequiredFields() {
         nameField.setRequired(true);
         currencyField.setRequired(true);
-        pinIdField.setRequired(true);
+        pinIdField.setRequiredIndicatorVisible(true);
         limitDayField.setRequired(true);
     }
 
@@ -315,21 +330,29 @@ public class CreatesensorView extends LitTemplate {
     }
 
     private void clearForm() {
-        nameField.clear();
-        currencyField.clear();
+        clearAndValidateField(nameField);
+        clearAndValidateField(currencyField);
+        clearAndValidateField(limitDayField);
+        clearAndValidateField(limitMonthField);
+
+        clearAndValidateField(implPerKwField);
+        clearAndValidateField(pricePerKwHighField);
+        clearAndValidateField(pricePerKwLowField);
+        clearAndValidateField(pricePerM3Field);
+        clearAndValidateField(fixedPriceField);
+        clearAndValidateField(servicePriceField);
+
         pinIdField.clear();
-        limitDayField.clear();
-        limitMonthField.clear();
-
-        implPerKwField.clear();
-        pricePerKwHighField.clear();
-        pricePerKwLowField.clear();
-        pricePerM3Field.clear();
-        fixedPriceField.clear();
-        servicePriceField.clear();
-
+        pinIdField.setInvalid(false);
         implPerLitField.clear();
-        nightStartField.clear();
-        nightEndField.clear();
+        implPerLitField.setInvalid(false);
+
+        clearAndValidateField(nightStartField);
+        clearAndValidateField(nightEndField);
+    }
+
+    private void clearAndValidateField(TextField implPerKwField) {
+        implPerKwField.clear();
+        implPerKwField.setInvalid(false);
     }
 }

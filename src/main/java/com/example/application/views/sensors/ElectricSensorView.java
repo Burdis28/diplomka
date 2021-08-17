@@ -7,7 +7,6 @@ import com.example.application.data.entity.SensorElectric;
 import com.example.application.data.service.HardwareService;
 import com.example.application.data.service.SensorElectricService;
 import com.example.application.data.service.SensorService;
-import com.example.application.helpers.validators.ElectricSensorValidator;
 import com.example.application.utils.PatternStringUtils;
 import com.example.application.utils.RegexDoubleStringValidator;
 import com.example.application.views.main.MainLayout;
@@ -15,7 +14,6 @@ import com.example.application.views.sensors.components.SensorInfoComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
@@ -30,7 +28,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -94,6 +91,7 @@ public class ElectricSensorView extends LitTemplate {
     private Binder<SensorElectric> sensorElectricBinder = new Binder<>();
     private List<Hardware> hardwareList;
 
+    private boolean pinAlreadyInUse;
 
     public ElectricSensorView(SensorElectricService sensorElectricService,
                               SensorService sensorService, HardwareService hardwareService) {
@@ -136,25 +134,19 @@ public class ElectricSensorView extends LitTemplate {
 
             setReadOnlyFields(true);
 
-            //setSensorFields(sensorElectric);
+            sensorBinder.readBean(sensor);
+            sensorElectricBinder.readBean(sensorElectric);
+            setAttachedHardwareValue();
         });
 
         saveButton.addClickListener(buttonClickEvent -> {
             try {
-                if (!ElectricSensorValidator.validateLowHigh(
-                        pricePerKwLowField.getValue().doubleValue(),
-                        pricePerKwHighField.getValue().doubleValue())) {
-                    ErrorNotification error = new ErrorNotification();
-                    error.setErrorText("[Price per KW - low] musí být menší, než [Price per KW - high]");
-                    error.open();
-                    pricePerKwLowField.setInvalid(true);
-                    pricePerKwHighField.setInvalid(true);
-                } else {
                     sensorElectricBinder.writeBean(sensorElectric);
                     sensorBinder.writeBean(sensor);
 
                     sensorElectricService.update(sensorElectric);
 
+                    validatePinOnNewHardware();
                     sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
                     sensorService.update(sensor);
                     pricePerKwLowField.setInvalid(false);
@@ -167,11 +159,16 @@ public class ElectricSensorView extends LitTemplate {
 
                     setReadOnlyFields(true);
 
-                    //setSensorFields(sensorElectric);
-                }
+                sensorBinder.readBean(sensor);
+                sensorElectricBinder.readBean(sensorElectric);
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                error.setErrorText("Wrong form data input.");
+                if (pinAlreadyInUse) {
+                    error.setErrorText("Pin is already in use on new selected HW.");
+                } else {
+                    error.setErrorText("Wrong form data input.");
+                }
+                pinAlreadyInUse = false;
                 error.open();
             }
         });
@@ -179,6 +176,24 @@ public class ElectricSensorView extends LitTemplate {
         returnButton.addClickListener(buttonClickEvent -> {
             UI.getCurrent().navigate("sensors");
         });
+    }
+
+    private void setAttachedHardwareValue() {
+        sensorInfo.getAttachToHardwareSelect().setValue(hardwareList.stream()
+                .filter(hardware -> sensor.getIdHw().equals(hardware.getSerial_HW()))
+                .findFirst()
+                .orElse(null)
+        );
+    }
+
+    private void validatePinOnNewHardware() throws Exception {
+        List<Sensor> sensors = sensorService.findSensorByIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
+        for(Sensor sensor : sensors) {
+            if (sensor != this.sensor && sensor.getPinId() == sensorInfo.getPinIdField().getValue()) {
+                pinAlreadyInUse = true;
+                throw new Exception("Sensor");
+            }
+        }
     }
 
     public void setSensor() {
@@ -247,11 +262,7 @@ public class ElectricSensorView extends LitTemplate {
                 .bind(Sensor::getConsumptionCorrelation, Sensor::setConsumptionCorrelation);
         sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.").bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
 
-        sensorInfo.getAttachToHardwareSelect().setValue(hardwareList.stream()
-                .filter(hardware -> sensor.getIdHw().equals(hardware.getSerial_HW()))
-                .findFirst()
-                .orElse(null)
-        );
+        setAttachedHardwareValue();
 
         sensorBinder.readBean(sensor);
     }

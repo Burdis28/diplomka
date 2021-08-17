@@ -92,6 +92,7 @@ public class WaterSensorView extends LitTemplate {
     private int initialStateId;
     private List<Hardware> hardwareList;
 
+    private boolean pinAlreadyInUse;
 
     /**
      * Creates a new WaterSensorView.
@@ -145,6 +146,9 @@ public class WaterSensorView extends LitTemplate {
             setButton(cancelButton, false);
 
             setReadOnlyFields(true);
+            sensorBinder.readBean(sensor);
+            sensorWaterBinder.readBean(sensorWater);
+            setAttachedHardwareValue();
         });
 
         saveButton.addClickListener(buttonClickEvent -> {
@@ -155,6 +159,7 @@ public class WaterSensorView extends LitTemplate {
 
                 sensorWaterService.update(sensorWater);
 
+                validatePinOnNewHardware();
                 sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
                 sensorService.update(sensor);
                 setStateValveFields(sensorWater);
@@ -166,9 +171,16 @@ public class WaterSensorView extends LitTemplate {
                 setButton(editButton, true);
 
                 setReadOnlyFields(true);
+                sensorBinder.readBean(sensor);
+                sensorWaterBinder.readBean(sensorWater);
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                error.setErrorText("Wrong form data input.");
+                if (pinAlreadyInUse) {
+                    error.setErrorText("Pin is already in use on new selected HW.");
+                } else {
+                    error.setErrorText("Wrong form data input.");
+                }
+                pinAlreadyInUse = false;
                 error.open();
             }
         });
@@ -176,6 +188,14 @@ public class WaterSensorView extends LitTemplate {
         {
             UI.getCurrent().navigate("sensors");
         });
+    }
+
+    private void setAttachedHardwareValue() {
+        sensorInfo.getAttachToHardwareSelect().setValue(hardwareList.stream()
+                .filter(hardware -> sensor.getIdHw().equals(hardware.getSerial_HW()))
+                .findFirst()
+                .orElse(null)
+        );
     }
 
     public void setSensor() {
@@ -200,6 +220,16 @@ public class WaterSensorView extends LitTemplate {
         stateSelect.removeAll();
         stateSelect.setItems(states);
         stateSelect.setTextRenderer(StateValve::getState);
+    }
+
+    private void validatePinOnNewHardware() throws Exception {
+        List<Sensor> sensors = sensorService.findSensorByIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
+        for(Sensor sensor : sensors) {
+            if (sensor != this.sensor && sensor.getPinId() == sensorInfo.getPinIdField().getValue()) {
+                pinAlreadyInUse = true;
+                throw new Exception("Sensor");
+            }
+        }
     }
 
     private void setSensorFields(SensorWater sensorWater) {
@@ -252,11 +282,7 @@ public class WaterSensorView extends LitTemplate {
         sensorBinder.forField(sensorInfo.getCurrency()).asRequired("Required field.")
                 .bind(Sensor::getCurrencyString, Sensor::setCurrencyString);
 
-        sensorInfo.getAttachToHardwareSelect().setValue(hardwareList.stream()
-                .filter(hardware -> sensor.getIdHw().equals(hardware.getSerial_HW()))
-                .findFirst()
-                .orElse(null)
-        );
+        setAttachedHardwareValue();
 
         sensorBinder.readBean(sensor);
     }

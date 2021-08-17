@@ -8,6 +8,8 @@ import com.example.application.views.main.MainLayout;
 import com.example.application.views.sensors.components.SensorsUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -29,6 +31,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -65,6 +68,12 @@ public class HardwaresView extends LitTemplate {
     @Id("hardwareGrid")
     private Grid<Hardware> grid;
     private GridListDataView<Hardware> gridListDataView;
+    @Id("controlPanelLayout")
+    private Element controlPanelLayout;
+    @Id("gridLayout")
+    private Element gridLayout;
+    @Id("createHwButton")
+    private Button createHwButton;
 
 
     public HardwaresView(@Autowired HardwareService hardwareService, HardwareLiveService hardwareLiveService,
@@ -78,10 +87,12 @@ public class HardwaresView extends LitTemplate {
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
 
         grid.setSelectionMode(Grid.SelectionMode.NONE);
-        grid.setClassName("my-grid");
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
         grid.setColumnReorderingAllowed(true);
+
+        createHwButton.addClickListener(event ->  UI.getCurrent().navigate("create-hardware"));
+
         createGrid();
         createTiles();
     }
@@ -118,12 +129,16 @@ public class HardwaresView extends LitTemplate {
     }
 
     @Scheduled(fixedDelay = 10000)
-    public void refreshGrid(){
-        getUI().ifPresent(ui -> ui.access(() -> {
-            grid.setItems(getAllHardware());
-            gridListDataView.refreshAll();
-            ui.push();
-        }));
+    public void refreshGrid() {
+        try {
+            getUI().ifPresent(ui -> ui.access(() -> {
+                grid.setItems(getAllHardware());
+                gridListDataView.refreshAll();
+                ui.push();
+            }));
+        } catch (UIDetachedException ex) {
+            //do nothin
+        }
     }
 
     private void createDeleteContextMenu(GridContextMenu<Hardware> contextMenu) {
@@ -162,18 +177,37 @@ public class HardwaresView extends LitTemplate {
     }
 
     private void addColumnsToGrid() {
-        createNameColumn();
-        createSerialHwColumn();
         createOnlineStatusColumn();
         createSignalColumn();
+
+        createNameColumn();
+        createSerialHwColumn();
+
         createOwnerColumn();
-        createLastOnlineStatusColumn();
         createToolsColumn();
     }
 
     private void createNameColumn() {
-        nameColumn = grid.addColumn(Hardware::getName, "name").setHeader("Name")
-                .setComparator(Hardware::getName).setWidth("300px").setFlexGrow(0);
+        nameColumn = grid.addComponentColumn(hardware -> {
+            NotificationLogHw logHw = notificationLogHwService.findBySerialHw(hardware.getSerial_HW());
+            VerticalLayout verticalLayout = new VerticalLayout();
+            verticalLayout.setWidthFull();
+            verticalLayout.setClassName("alignLeft");
+            Div nameText = new Div();
+            nameText.setText(hardware.getName());
+            nameText.setWidthFull();
+            Div lastOnlineText = new Div();
+            lastOnlineText.setWidthFull();
+            lastOnlineText.setClassName("smallerFontSize");
+            lastOnlineText.setWidthFull();
+            if (logHw != null) {
+                String formattedDate = new SimpleDateFormat("dd.MM.yyyy HH:mm").format(logHw.getLastSent().getTime());
+                lastOnlineText.add("Last online: " + formattedDate);
+                verticalLayout.add(lastOnlineText);
+            }
+            verticalLayout.addComponentAsFirst(nameText);
+            return verticalLayout;
+        }).setHeader("Name").setWidth("350px").setComparator(Hardware::getName).setFlexGrow(0);
     }
 
     private void createSerialHwColumn() {
@@ -190,7 +224,7 @@ public class HardwaresView extends LitTemplate {
             Image image = new Image();
             SensorsUtil.setSignalImage(live, span, image);
             return span;
-        }).setHeader("Signal").setWidth("70px").setFlexGrow(0);
+        }).setHeader("Signal").setWidth("90px").setFlexGrow(0);
     }
 
     private void createOnlineStatusColumn() {
@@ -198,23 +232,20 @@ public class HardwaresView extends LitTemplate {
             NotificationLogHw logHw = notificationLogHwService.findBySerialHw(hardware.getSerial_HW());
             Div span = new Div();
             span.setWidthFull();
-            //span.setClassName("alignCenter");
             Icon icon;
             if (logHw == null) {
                 icon = VaadinIcon.CIRCLE.create();
                 icon.setColor(Colors.GREEN.getRgb());
-                icon.setClassName("bottomMarginIcon");
-                //icon.setSize("30px");
+                icon.setClassName("onlineStatusIcon");
                 span.add(icon);
             } else {
                 icon = VaadinIcon.CIRCLE.create();
                 icon.setColor(Colors.RED.getRgb());
-                icon.setClassName("bottomMarginIcon");
-                //icon.setSize("30px");
+                icon.setClassName("onlineStatusIcon");
                 span.add(icon);
             }
             return span;
-        }).setHeader(" ").setWidth("60px").setFlexGrow(0);
+        }).setHeader("Status").setWidth("80px").setFlexGrow(0);
     }
 
     private void createOwnerColumn() {
@@ -235,22 +266,6 @@ public class HardwaresView extends LitTemplate {
         }).setHeader("Owner").setWidth("160px").setFlexGrow(0);
     }
 
-    private void createLastOnlineStatusColumn() {
-        lastOnlineColumn = grid.addComponentColumn(sensor -> {
-            NotificationLogHw logHw = notificationLogHwService.findBySerialHw(sensor.getSerial_HW());
-            Div span = new Div();
-            span.setClassName("smallerFontSize");
-            span.setWidthFull();
-            if (logHw != null) {
-                String formattedDate = new SimpleDateFormat("dd.MM.yyyy HH:mm").format(logHw.getLastSent().getTime());
-                span.add("Last online: " + formattedDate);
-            } else {
-                span.add(" ");
-            }
-            return span;
-        }).setHeader(" ").setWidth("220px").setFlexGrow(0);
-    }
-
     private void createToolsColumn() {
         toolsColumn = grid.addComponentColumn(sensor -> {
             Icon toolboxIcon = new Icon(VaadinIcon.TOOLS);
@@ -267,7 +282,7 @@ public class HardwaresView extends LitTemplate {
                     addComponentAtIndex(1, trashCanIcon);
                 }
             };
-        }).setHeader("Tools").setWidth("150px").setFlexGrow(0);
+        }).setHeader("Tools").setWidth("150px");
     }
 
 
