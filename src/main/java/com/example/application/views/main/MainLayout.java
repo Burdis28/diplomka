@@ -44,12 +44,14 @@ public class MainLayout extends AppLayout {
 
     private final Tabs menu;
     private H1 viewTitle;
+    private Image logo;
 
     public MainLayout() {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
         addToDrawer(createDrawerContent(menu));
+        logo.setSrc("images/smart_home_dark.png");
     }
 
     private Component createHeaderContent() {
@@ -72,18 +74,22 @@ public class MainLayout extends AppLayout {
         Div div = new Div();
         div.setId("themeSwitcher");
         HorizontalLayout layout = new HorizontalLayout();
-        //layout.setId("themeSwitcher");
         Component icon = new Icon(VaadinIcon.MOON);
         ToggleButton btn = new ToggleButton();
+
+        btn.setValue(true);
+        themeList.add(Lumo.DARK);
         btn.addValueChangeListener(click -> {
             if (themeList.contains(Lumo.DARK)) {
                 System.out.println("je tam dark");
                 UI.getCurrent().getPage().executeJavaScript("document.documentElement.setAttribute(\"theme\",\"light\")");
+                logo.setSrc("images/smart_home_light.png");
                 themeList.remove(Lumo.DARK);
                 themeList.add(Lumo.LIGHT);
             } else {
                 System.out.println("je tam light");
                 UI.getCurrent().getPage().executeJavaScript("document.documentElement.setAttribute(\"theme\",\"dark\")");
+                logo.setSrc("images/smart_home_dark.png");
                 themeList.remove(Lumo.LIGHT);
                 themeList.add(Lumo.DARK);
             }
@@ -113,7 +119,8 @@ public class MainLayout extends AppLayout {
         layout.setAlignItems(FlexComponent.Alignment.STRETCH);
         HorizontalLayout logoLayout = new HorizontalLayout();
         logoLayout.setId("logo");
-        logoLayout.add(new Image("images/smart_home.png", "Diplomka logo"));
+        logo = new Image("images/smart_home.png", "Diplomka logo");
+        logoLayout.add(logo);
         layout.add(logoLayout, menu);
         return layout;
     }

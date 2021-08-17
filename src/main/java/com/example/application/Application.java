@@ -21,7 +21,7 @@ import org.vaadin.artur.helpers.LaunchUtil;
  *
  */
 @SpringBootApplication
-@Theme(value = Lumo.class, variant = Lumo.LIGHT)
+@Theme(value = Lumo.class, variant = Lumo.DARK)
 @PWA(name = "Diplomka", shortName = "Diplomka", offlineResources = {"images/logo.png"})
 @EnableScheduling
 @Push

@@ -8,7 +8,9 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
@@ -57,6 +59,8 @@ public class LoginView extends LitTemplate {
     private H3 loginTitleH3;
     @Id("registerButton")
     private Button registerButton;
+    @Id("imageDiv")
+    private Div imageDiv;
 
     /**
      * Creates a new LoginView.
@@ -75,6 +79,9 @@ public class LoginView extends LitTemplate {
         registerButton.addClickListener(buttonClickEvent -> {
             showRegisterNotification();
         });
+        Image image = new Image("images/smart_home_dark.png", "Diplomová práce");
+        imageDiv.add(image);
+        imageDiv.setClassName("alignCenter");
     }
 
     private void showRegisterNotification() {

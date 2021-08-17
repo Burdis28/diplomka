@@ -16,6 +16,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.component.charts.model.style.Style;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -38,6 +39,7 @@ import com.vaadin.flow.server.VaadinSession;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.awt.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -47,6 +49,7 @@ import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -235,7 +238,7 @@ public class SensorWaterDashboard extends LitTemplate {
     private void setConsumptionPricesChangerForChart() {
         consPricesRadioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         consPricesRadioButtonGroup.setItems("Consumption", "Prices");
-        consPricesRadioButtonGroup.setValue("Prices");
+        consPricesRadioButtonGroup.setValue("Consumption");
         consPricesRadioButtonGroup.addValueChangeListener(event -> {
             if (event.getValue().equals("Prices")) {
                 alterChartToPrices();
@@ -519,8 +522,8 @@ public class SensorWaterDashboard extends LitTemplate {
 
 
     private void setSeriesToConfiguration(Configuration configuration, Collection<Number> values) {
-        ListSeries lowRate = getColoredListSeries(new ArrayList<>(values), "m3", new SolidColor(Colors.BLUE.getRgb()));
-        configuration.setSeries(lowRate);
+        ListSeries series = getColoredListSeries(new ArrayList<>(values), "m3", new SolidColor(Colors.BLUE.getRgb()));
+        configuration.setSeries(series);
     }
 
     private ListSeries getColoredListSeries(List<Number> rates, String s, SolidColor black) {
@@ -717,6 +720,13 @@ public class SensorWaterDashboard extends LitTemplate {
         tooltip.setShared(true);
         tooltip.setValueSuffix(" [kW]");
         configuration.setTooltip(tooltip);
+
+        configuration.getChart().setBackgroundColor(new SolidColor(255,255,255,0));
+        Style style = new Style();
+        style.setColor(SolidColor.BLACK);
+        HTMLLabels labels = new HTMLLabels();
+        labels.setStyle(style);
+        configuration.setLabels(labels);
 
         consumptionDatePicker.addValueChangeListener(event -> {
             dateForChart = event.getValue();

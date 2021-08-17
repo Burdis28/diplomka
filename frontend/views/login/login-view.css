@@ -1,7 +1,3 @@
-login-view .vaadinVerticalLayout {
-    background-color: #0b8043;
-}
-
 login-view vaadin-vertical-layout{
     background-color: var(--lumo-contrast-15pct);
     box-shadow: var(--lumo-box-shadow-xl);
@@ -13,4 +9,10 @@ login-view h1{
 
 login-view h3{
     margin-top: var(--lumo-box-shadow-xl);
+}
+
+login-view .alignCenter {
+    align-content: center;
+    align-items: center;
+    align-self: center;
 }
