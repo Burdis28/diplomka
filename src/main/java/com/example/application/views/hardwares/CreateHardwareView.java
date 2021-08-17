@@ -89,7 +89,7 @@ public class CreateHardwareView extends LitTemplate {
                 notification.setText("Hardware created successfully.");
             } catch (Exception ex) {
                 ErrorNotification error = new ErrorNotification();
-                error.setErrorText("Hardware creation has failed. Please try again. " + ex.getMessage());
+                error.setErrorText("Hardware creation has failed. Please try again. Make sure Serial Code is unique and doesn't exist already." + ex.getMessage());
                 ex.printStackTrace();
                 error.open();
             }
