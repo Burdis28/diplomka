@@ -1,10 +1,10 @@
 import {LitElement, html, customElement} from 'lit-element';
-import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-form-layout/src/vaadin-form-layout.js';
 import '@vaadin/vaadin-text-field/src/vaadin-password-field.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
-import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 
 @customElement('login-view')
 export class LoginView extends LitElement {
@@ -16,7 +16,9 @@ export class LoginView extends LitElement {
     render() {
         return html`
 <vaadin-vertical-layout style="width: 100%; height: 100%; align-items: center; justify-content: center;" id="vaadinVerticalLayout">
- <h1 id="Title" style="align-self: center;">Diplomka - Správa chytrého domu</h1>
+ <vaadin-horizontal-layout style="width: 370px; height: 250px; justify-content: center; align-items: flex-end; align-self: center;">
+  <div id="imageDiv" style="width: 370px; height: 250px; align-self: center;"></div>
+ </vaadin-horizontal-layout>
  <vaadin-form-layout id="vaadinFormLayout" style="align-self: center;">
   <vaadin-vertical-layout theme="spacing" id="vaadinVerticalLayout1">
    <h3 id="loginTitleH3" style="align-self: flex-start; margin-top: var(--lumo-space-l); margin-bottom: var(--lumo-space-xs);">Log in</h3>
@@ -27,7 +29,7 @@ export class LoginView extends LitElement {
       Log in 
     </vaadin-button>
     <vaadin-button id="registerButton">
-     Register
+      Register 
     </vaadin-button>
    </vaadin-horizontal-layout>
   </vaadin-vertical-layout>

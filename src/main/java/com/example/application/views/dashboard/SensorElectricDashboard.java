@@ -494,6 +494,8 @@ public class SensorElectricDashboard extends LitTemplate {
         tooltip.setValueSuffix(" [kW]");
         configuration.setTooltip(tooltip);
 
+        configuration.getChart().setBackgroundColor(new SolidColor(255,255,255,0));
+
         consumptionDatePicker.addValueChangeListener(event -> {
             dateForChart = event.getValue();
             updateMainChartData(event.getValue(), event.getValue(), consPricesRadioButtonGroup.getValue().equals("Consumption"));
