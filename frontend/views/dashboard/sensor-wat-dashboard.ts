@@ -21,25 +21,26 @@ export class SensorWatDashboard extends LitElement {
   <div class="wrapper">
    <div class="card space-m">
     <span theme="badge" style="width: 100%;">Water sensor</span>
-    <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m); margin-left: var(--lumo-space-l);"></h2>
-    <span class="secondary-text" id="ownerSpanField" style="width: 100%; margin-left: var(--lumo-space-l);">Owner: </span>
-    <span id="createdField" style="margin-left: var(--lumo-space-l);">Created: </span>
+    <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m); margin-left: var(--lumo-space-s);"></h2>
+    <span class="secondary-text" id="ownerSpanField" style="width: 100%; margin-left: var(--lumo-space-s); margin-top: var(--lumo-space-m);">Owner: </span>
+    <span id="createdField" style="margin-left: var(--lumo-space-s); margin-top: var(--lumo-space-m);">Created: </span>
    </div>
   </div>
   <div class="wrapper">
    <div class="card space-m">
-    <span theme="badge error" style="width: 100%;">Hardware info</span>
-    <span style="width: 100%; margin-top: var(--lumo-space-m); margin-left: var(--lumo-space-l);" id="hwNameField">HW name: </span>
-    <div id="onlineStatusDiv" style="margin-left: var(--lumo-space-l);">
+    <span theme="badge error" style="width: 100%; margin-left: var(--lumo-space-xs);">Hardware info</span>
+    <span style="width: 100%; margin-top: var(--lumo-space-m); margin-left: var(--lumo-space-s);" id="hwNameField">HW name: </span>
+    <span id="hwSerialCodeField" style="width: 100%; margin-left: var(--lumo-space-s); margin-top: var(--lumo-space-xs); margin-bottom: var(--lumo-space-xs);">Span</span>
+    <div id="onlineStatusDiv" style="margin-left: var(--lumo-space-s);">
       Online status: 
     </div>
-    <vaadin-horizontal-layout theme="spacing" style="margin-left: var(--lumo-space-l);">
+    <vaadin-horizontal-layout theme="spacing" style="margin-left: var(--lumo-space-s);">
      <div id="activeStatusHwField" style="align-self: center;">
        Signal power: 
      </div>
      <div id="signalPowerHwField"></div>
     </vaadin-horizontal-layout>
-    <div id="hardwareStatusActualizedField" style="margin-left: var(--lumo-space-l);"></div>
+    <div id="hardwareStatusActualizedField" style="margin-left: var(--lumo-space-s);"></div>
    </div>
   </div>
  </vaadin-board-row>

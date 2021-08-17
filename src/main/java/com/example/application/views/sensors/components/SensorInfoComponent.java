@@ -3,21 +3,15 @@ package com.example.application.views.sensors.components;
 import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
-import com.example.application.utils.SensorsUtils;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 
 import java.math.BigDecimal;
@@ -37,6 +31,7 @@ public class SensorInfoComponent extends VerticalLayout {
     private BigDecimalField consumptionActual = new BigDecimalField();
     private BigDecimalField consumptionCorrelation = new BigDecimalField();
     private Select<Hardware> attachToHardwareSelect = new Select<>();
+    private IntegerField pinIdField = new IntegerField();
     private TextField currency = new TextField();
 
     public SensorInfoComponent(Sensor sensor, List<Hardware> hardwares) {
@@ -82,12 +77,21 @@ public class SensorInfoComponent extends VerticalLayout {
         attachToHardwareSelect.setTextRenderer(item -> item.getName() + " [" + item.getSerial_HW() + "]");
         attachToHardwareSelect.setWidthFull();
         add(attachToHardwareSelect);
+        pinIdField.setLabel("Pin ID");
+        pinIdField.setValue(sensor.getPinId());
+        pinIdField.setReadOnly(true);
+        pinIdField.setWidthFull();
+        add(pinIdField);
     }
 
     private Span getTypeBadge(Sensor sensor) {
         Span span = new Span();
         span.setText(SensorTypes.valueOf(sensor.getType()).toString());
-        span.getElement().setAttribute("theme", SensorsUtil.getBadgeType(sensor));
+        if (sensor.getType().equals(SensorTypes.e.name())) {
+            span.setClassName("cez_color");
+        } else {
+            span.getElement().setAttribute("theme", SensorsUtil.getBadgeType(sensor));
+        }
         span.setWidth("80px");
         span.setHeight("30px");
         return span;
@@ -167,5 +171,13 @@ public class SensorInfoComponent extends VerticalLayout {
 
     public void setAttachToHardwareSelect(Select<Hardware> attachToHardwareSelect) {
         this.attachToHardwareSelect = attachToHardwareSelect;
+    }
+
+    public IntegerField getPinIdField() {
+        return pinIdField;
+    }
+
+    public void setPinIdField(IntegerField pinIdField) {
+        this.pinIdField = pinIdField;
     }
 }

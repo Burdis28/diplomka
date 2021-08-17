@@ -68,6 +68,7 @@ public class SensorWaterDashboard extends LitTemplate {
     private SensorService sensorService;
     private UserService userService;
     private Chart mainChart;
+    private Icon onlineStatusIcon;
 
     private SensorWater sensorWater;
     private HardwareService hardwareService;
@@ -141,6 +142,8 @@ public class SensorWaterDashboard extends LitTemplate {
     private Double consumptionMaxValue;
     private Image signalImage;
     private LocalDate dateForChart;
+    @Id("hwSerialCodeField")
+    private Span hwSerialCodeField;
 
     /**
      * Creates a new SensorWatDashboard.
@@ -199,9 +202,9 @@ public class SensorWaterDashboard extends LitTemplate {
     }
 
     private void setTodayLimitBar() {
-        //TODO set localDate.now()
+        LocalDate date = LocalDate.now();
         List<DataWater> todayData = dataWaterService.findAllBySensorIdAndDate(sensor.getId(),
-                LocalDate.of(2021, 8, 11), LocalDate.of(2021, 8, 11));
+                date, date);
         double price = 0.0;
         double consumption = 0.0;
         for (DataWater data : todayData) {
@@ -528,14 +531,6 @@ public class SensorWaterDashboard extends LitTemplate {
         return series;
     }
 
-    private List<Number> getSumListOfHighAndLowRates(List<Number> highRates, List<Number> lowRates) {
-        List<Number> sumValues = new ArrayList<>();
-        for (int i = 0; i < lowRates.size(); i++) {
-            sumValues.add(lowRates.get(i).doubleValue() + highRates.get(i).doubleValue());
-        }
-        return sumValues;
-    }
-
     private void getConsumptionM3Day(List<DataWater> dataWaterList, Map<Integer, Number> consumptionMap) {
         for (int i = 0; i < 24; i++) {
             consumptionMap.put(i, 0.0);
@@ -689,19 +684,18 @@ public class SensorWaterDashboard extends LitTemplate {
 
     private Icon addOnlineStatusIcon() {
         NotificationLogHw logHw = notificationLogHwService.findBySerialHw(sensor.getIdHw());
-        Icon icon;
         if (logHw == null) {
-            icon = VaadinIcon.CIRCLE.create();
-            icon.setColor(Colors.GREEN.getRgb());
-            icon.setClassName("onlineIcon");
-            icon.setSize("20px");
+            onlineStatusIcon = VaadinIcon.CIRCLE.create();
+            onlineStatusIcon.setColor(Colors.GREEN.getRgb());
+            onlineStatusIcon.setClassName("onlineIcon");
+            onlineStatusIcon.setSize("20px");
         } else {
-            icon = VaadinIcon.CIRCLE.create();
-            icon.setColor(Colors.RED.getRgb());
-            icon.setClassName("onlineIcon");
-            icon.setSize("20px");
+            onlineStatusIcon = VaadinIcon.CIRCLE.create();
+            onlineStatusIcon.setColor(Colors.RED.getRgb());
+            onlineStatusIcon.setClassName("onlineIcon");
+            onlineStatusIcon.setSize("20px");
         }
-        return icon;
+        return onlineStatusIcon;
     }
 
     private void setDailyConsumptionChart() {
@@ -730,29 +724,16 @@ public class SensorWaterDashboard extends LitTemplate {
         });
     }
 
-    private void updateDailyConsumptionChartData(LocalDate value) {
-        Configuration configuration = mainChart.getConfiguration();
-        List<DataWater> dataWaters = dataWaterService.findAllBySensorIdAndDate(sensor.getId(), value, value);
-        configuration.setSeries(new ListSeries("Consumption m3", dataWaters.stream().map(DataWater::getM3)
-                .collect(Collectors.toCollection(ArrayList::new))));
-        try {
-            getUI().ifPresent(ui -> ui.access(() -> {
-                configuration.setSubTitle("Date: " + value.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
-                mainChart.setConfiguration(configuration);
-                Notification.show("Daily consumption updated.");
-                ui.push();
-            }));
-        } catch (UIDetachedException exception) {
-            //ignore, harmless exception in this case of a push
-        }
-    }
-
     private void setHwInfoData() {
         Optional<Hardware> hw = hardwareService.getBySerialHW(sensor.getIdHw());
         if (hw.isPresent()) {
-            hwNameField.setText("HW serial code: " + hw.get().getName());
+            hwNameField.setText("HW name: " + hw.get().getName());
+            hwSerialCodeField.setText("HW serial code: " + hw.get().getSerial_HW());
+
         } else {
-            hwNameField.setText("HW serial code: ...");
+            hwNameField.setText("HW name: ...");
+            hwSerialCodeField.setText("HW serial code: ...");
+
         }
         associatedHwLive = hardwareLiveService.findByHardwareId(sensor.getIdHw());
         onlineStatusDiv.add(addOnlineStatusIcon());
@@ -772,6 +753,7 @@ public class SensorWaterDashboard extends LitTemplate {
                         refreshHardwareStatus();
                         refreshConsumptionText(refreshedSensor.get());
                         refreshConsumptionChart(refreshedSensor.get());
+                        refreshOnlineStatusIcon();
 
                         LocalDateTime now = LocalDateTime.now();
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -803,23 +785,9 @@ public class SensorWaterDashboard extends LitTemplate {
 
     private void refreshConsumptionText(Sensor sensor) {
         if (consumptionMaxValue == 0.0) {
-            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [m3/h] -> <b>" +
-                    sensor.getConsumptionActual() + "%</b>");
+            consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [m3/h]");
         } else {
-            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue + "</b> [m3/h] -> <b>" +
-                    String.format("%.2f",(sensor.getConsumptionActual()/(consumptionMaxValue*1000)*100)) + "%</b>");
-        }
-    }
-
-    private void refreshConsumptionChart(Optional<Sensor> refreshedSensor) {
-        try {
-            refreshedSensor.flatMap(value -> getUI()).ifPresent(ui -> ui.access(() -> {
-                setConsumptionProgressBarValue(refreshedSensor.get());
-                //consumptionProgressBar.setValue(refreshedSensor.get().getConsumptionActual());
-                ui.push();
-            }));
-        } catch (UIDetachedException exception) {
-            //ignore, harmless exception in this case
+            consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue + "</b> [m3/h]");
         }
     }
 
@@ -828,6 +796,15 @@ public class SensorWaterDashboard extends LitTemplate {
             todayLimitProgressBar.setValue(todayLimitProgressBar.getMax());
         } else {
             todayLimitProgressBar.setValue(sensor.getConsumptionActual());
+        }
+    }
+
+    private void refreshOnlineStatusIcon() {
+        NotificationLogHw logHw = notificationLogHwService.findBySerialHw(sensor.getIdHw());
+        if (logHw == null) {
+            onlineStatusIcon.setColor(Colors.GREEN.getRgb());
+        } else {
+            onlineStatusIcon.setColor(Colors.RED.getRgb());
         }
     }
 

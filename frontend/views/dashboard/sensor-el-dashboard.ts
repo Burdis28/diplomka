@@ -24,25 +24,26 @@ export class SensorElDashboard extends LitElement {
   <div class="wrapper" style="flex-grow: 1;">
    <div class="card space-m">
     <span theme="badge" style="width: 100%;">Electric sensor</span>
-    <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m);"></h2>
-    <span id="ownerSpanField" style="width: 100%;">Span</span>
-    <span id="createdField">Span</span>
+    <h2 id="titleNameField" style="margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m); margin-left: var(--lumo-space-s);"></h2>
+    <span id="ownerSpanField" style="width: 100%; margin-left: var(--lumo-space-s); margin-top: var(--lumo-space-m);">Span</span>
+    <span id="createdField" style="margin-left: var(--lumo-space-s); margin-top: var(--lumo-space-m);">Span</span>
    </div>
   </div>
   <div class="wrapper" style="flex-shrink: 1; flex-grow: 1;">
    <div class="card space-m">
     <span theme="badge error" style="width: 100%;">Hardware info</span>
-    <span style="width: 100%; margin-top: var(--lumo-space-m);" id="hwNameField">HW name: </span>
-    <div id="onlineStatusDiv">
+    <span style="width: 100%; margin-top: var(--lumo-space-m); margin-left: var(--lumo-space-s);" id="hwNameField">HW name: </span>
+    <span id="hwSerialCodeField" style="width: 100%; margin-left: var(--lumo-space-s); margin-top: var(--lumo-space-xs); margin-bottom: var(--lumo-space-xs);">Span</span>
+    <div id="onlineStatusDiv" style="margin-left: var(--lumo-space-s);">
       Online status: 
     </div>
-    <vaadin-horizontal-layout theme="spacing" style="align-items: center;">
+    <vaadin-horizontal-layout theme="spacing" style="align-items: center; margin-left: var(--lumo-space-s);">
      <div>
        Signal power: 
      </div>
      <div id="signalPowerHwField" style="align-self: center;"></div>
     </vaadin-horizontal-layout>
-    <div id="hardwareStatusActualizedField"></div>
+    <div id="hardwareStatusActualizedField" style="margin-left: var(--lumo-space-s);"></div>
    </div>
   </div>
  </vaadin-board-row>

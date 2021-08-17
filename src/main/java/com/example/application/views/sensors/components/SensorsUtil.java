@@ -140,7 +140,7 @@ public class SensorsUtil {
     public static String getBadgeType(Sensor sensor) {
         switch (sensor.getType()) {
             case "w": return "badge primary";
-            case "e": return "badge error primary";
+            //case "e": return "badge error primary";
             case "g": return "badge success primary";
             default: return "";
         }

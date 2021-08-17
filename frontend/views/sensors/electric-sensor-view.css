@@ -14,7 +14,7 @@ electric-sensor-view #wrapperDiv {
     margin: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
     box-shadow: var(--lumo-box-shadow-l);
     padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
-    max-width: 1024px;
+    max-width: 1524px;
 }
 
 electric-sensor-view #verticalLayoutElectric {
@@ -40,4 +40,16 @@ electric-sensor-view #sensorAttributesH3 {
 
 electric-sensor-view #typeSpan {
     margin-top: var(--lumo-space-xl);
+}
+
+electric-sensor-view .cez_color {
+    background-color: #f24f00;
+    color: whitesmoke;
+    text-align: center;
+    border-radius: 4px;
+    font-size: var(--lumo-font-size-s);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
 }

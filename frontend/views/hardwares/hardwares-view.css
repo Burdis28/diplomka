@@ -2,9 +2,19 @@ hardwares-view {
   background-color: var(--lumo-contrast-10pct);
   display: block;
   height: 100%;
-  width: 100%;
   overflow: auto;
+  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
 }
+
+hardwares-view .overallDiv {
+  background-color: var(--lumo-base-color);
+  display: block;
+  margin: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s);
+  box-shadow: var(--lumo-box-shadow-l);
+  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+  max-height: min-content;
+}
+
 hardwares-view .name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -44,6 +54,44 @@ hardwares-view .button {
   margin-top: 36px
 }
 
+hardwares-view .onlineStatusIcon {
+  width: 9px;
+  height: 9px;
+  margin-left: 19px;
+  margin-bottom: 4px;
+}
+
+hardwares-view .alignLeft {
+  align-self: flex-start;
+  align-items: flex-start;
+  alignment: left;
+  margin-bottom: -5px;
+  margin-top: -5px;
+  margin-left: -15px;
+}
+
+hardwares-view .signalImage {
+  margin-left: 11px;
+  margin-bottom: -2px;
+}
+
 hardwares-view .smallerFontSize {
-  font-size: var(--lumo-font-size-s);
+  margin-top: 1px;
+  margin-left: 1px;
+  margin-bottom: 1px;
+  font-size: 11px;
+}
+
+hardwares-view vaadin-grid {
+  font-size: var(--lumo-font-size-l);
+  height: 100%;
+}
+
+hardwares-view vaadin-grid-filter,
+hardwares-view vaadin-grid-filter > * {
+  width: 100%;
+}
+
+hardwares-view vaadin-grid.v-grid-select-all-checkbox {
+  display: none;
 }

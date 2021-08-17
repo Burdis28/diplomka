@@ -24,12 +24,12 @@ export class WaterSensorView extends LitElement {
    <vaadin-vertical-layout style="width: 100%; height: 100%; align-items: center; justify-content: center;" theme="spacing-s" id="verticalLayoutElectric">
     <h3 id="electricAttributesTitle" style="align-self: flex-start;">Water attributes</h3>
     <vaadin-horizontal-layout theme="spacing">
-     <vaadin-text-field label="Price per m3" id="pricePerM3Field" required clear-button-visible></vaadin-text-field>
-     <vaadin-text-field label="Impl per liter" id="implPerLitField" required clear-button-visible></vaadin-text-field>
+     <vaadin-text-field label="Price per m3" id="pricePerM3Field" required clear-button-visible invalid></vaadin-text-field>
+     <vaadin-text-field label="Impl per liter" id="implPerLitField" required clear-button-visible invalid></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
      <vaadin-select id="stateSelect" label="State"></vaadin-select>
-     <vaadin-text-field label="Time between impl" id="timeBetweenImplField" required></vaadin-text-field>
+     <vaadin-text-field label="Time between impl" id="timeBetweenImplField" required invalid></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
      <vaadin-text-field label="State last modified by" id="stateModifiedBy" readonly helper-text="If not filled - state wasn't changed yet."></vaadin-text-field>

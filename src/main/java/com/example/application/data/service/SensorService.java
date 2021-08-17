@@ -35,7 +35,8 @@ public class SensorService extends CrudService<Sensor, Integer> {
         switch (type) {
             case e: sensorElectricRepository.deleteBySensorId(integer);
             case w: sensorWaterRepository.deleteBySensorId(integer);
-            case g: sensorGasRepository.deleteBySensorId(integer);
+            // not in this version
+            //case g: sensorGasRepository.deleteBySensorId(integer);
         }
         super.delete(integer);
     }

@@ -72,12 +72,6 @@ public class CreateHardwareView extends LitTemplate {
 
         setBinderFields();
 
-        Icon icon = new Icon(VaadinIcon.THUMBS_UP);
-        createHwButton.setIcon(icon);
-        Icon iconCancel = new Icon(VaadinIcon.CLOSE);
-        cancelButton.setIcon(iconCancel);
-        cancelButton.setIconAfterText(true);
-
         cancelButton.addClickListener(event -> clearForm());
 
         createHwButton.addClickListener(event -> {
@@ -116,7 +110,9 @@ public class CreateHardwareView extends LitTemplate {
 
     private void clearForm() {
         nameField.clear();
+        nameField.setInvalid(false);
         serialHwCodeField.clear();
+        serialHwCodeField.setInvalid(false);
     }
 
     private void setBinderFields() {

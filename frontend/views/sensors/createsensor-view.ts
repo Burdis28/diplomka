@@ -4,10 +4,11 @@ import '@vaadin/vaadin-ordered-layout/vaadin-horizontal-layout';
 import '@vaadin/vaadin-button';
 import '@vaadin/vaadin-select/src/vaadin-select.js';
 import '@vaadin/vaadin-form-layout';
-import '@vaadin/vaadin-text-field';
-import '@vaadin/vaadin-text-field/src/vaadin-number-field.js';
 import '@vaadin/vaadin-form-layout/src/vaadin-form-layout.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
+import '@vaadin/vaadin-text-field/src/vaadin-number-field.js';
+import '@vaadin/vaadin-text-field/src/vaadin-integer-field.js';
+import '@vaadin/vaadin-text-field';
 
 @customElement('createsensor-view')
 export class CreatesensorView extends LitElement {
@@ -21,13 +22,13 @@ export class CreatesensorView extends LitElement {
 <vaadin-vertical-layout theme="spacing" style="width: 100%; height: 100%; align-items: center;" id="overallLayout">
  <div id="div" class="wrapper" style="width: 100%; height: 100%; margin: var(--lumo-space-m);">
   <h3>Create new sensor </h3>
-  <vaadin-form-layout style="width: 100%;" id="basicSensorAttributesForm">
+  <vaadin-form-layout id="basicSensorAttributesForm">
    <vaadin-text-field label="Name of the sensor" id="nameField" required invalid></vaadin-text-field>
    <vaadin-text-field label="Daily limit" id="limitDayField" required helper-text="Valid input format: 123.000" invalid></vaadin-text-field>
    <vaadin-text-field label="Currency" id="currencyField" required invalid helper-text="Default currency is Kč"></vaadin-text-field>
    <vaadin-text-field label="Monthly limit" id="limitMonthField" required helper-text="Valid input format: 1234567.000" invalid></vaadin-text-field>
    <vaadin-select id="typeSelect" label="Type of sensor" placeholder="Type" required invalid></vaadin-select>
-   <vaadin-text-field id="pinIdField" required label="Pin ID" prevent-invalid-input helper-text="Sensor PIN number" invalid></vaadin-text-field>
+   <vaadin-integer-field id="pinIdField" style="width: 200px;" has-controls required min="0" label="Pin ID" prevent-invalid-input helper-text="Sensor PIN number"></vaadin-integer-field>
    <vaadin-select label="Attach to hardware" id="attachToHardware" placeholder="Hardware serial number" required invalid helper-text="Sensor has to be attached to a physical hardware unit"></vaadin-select>
   </vaadin-form-layout>
   <span id="electricAllAttributesLayout"><h3>Electric attributes - price</h3>

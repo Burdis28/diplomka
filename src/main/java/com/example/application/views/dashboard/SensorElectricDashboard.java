@@ -84,6 +84,7 @@ public class SensorElectricDashboard extends LitTemplate {
 
     private Double consumptionMaxValue;
     private Image signalImage;
+    private Icon onlineStatusIcon;
 
     private List<DataElectric> dataElectricList;
     private int signalStrength;
@@ -141,6 +142,8 @@ public class SensorElectricDashboard extends LitTemplate {
     private Span createdField;
     @Id("ownerSpanField")
     private Span ownerSpanField;
+    @Id("hwSerialCodeField")
+    private Span hwSerialCodeField;
 
     /**
      * Creates a new SensorElDashboard.
@@ -190,9 +193,9 @@ public class SensorElectricDashboard extends LitTemplate {
 
 
     private void setTodayLimitBar() {
-        //TODO set localDate.now()
+        LocalDate date = LocalDate.now();
         List<DataElectric> todayData = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
-                LocalDate.of(2021, 8, 11), LocalDate.of(2021, 8, 11));
+                date, date);
         double price = 0.0;
         double consumption = 0.0;
         for (DataElectric data : todayData) {
@@ -269,7 +272,7 @@ public class SensorElectricDashboard extends LitTemplate {
     private void setConsumptionPricesChangerForChart() {
         consPricesRadioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         consPricesRadioButtonGroup.setItems("Consumption", "Prices");
-        consPricesRadioButtonGroup.setValue("Prices");
+        consPricesRadioButtonGroup.setValue("Consumption");
         consPricesRadioButtonGroup.addValueChangeListener(event -> {
             if (event.getValue().equals("Prices")) {
                 alterChartToPrices();
@@ -576,8 +579,8 @@ public class SensorElectricDashboard extends LitTemplate {
 
                 LocalDate firstOfMonth = dateFrom;
                 LocalDate firstOfFollowingMonth = dateTo;
-                System.out.println("Ted vypisuju dny od prvniho do posledniho pro datum: " + dateForChart);
-                firstOfMonth.datesUntil(firstOfFollowingMonth).forEach(System.out::println);
+//                System.out.println("Ted vypisuju dny od prvniho do posledniho pro datum: " + dateForChart);
+//                firstOfMonth.datesUntil(firstOfFollowingMonth).forEach(System.out::println);
 
                 XAxis x = new XAxis();
                 x.setCrosshair(new Crosshair());
@@ -686,9 +689,11 @@ public class SensorElectricDashboard extends LitTemplate {
     private void setHwInfoData() {
         Optional<Hardware> hw = hardwareService.getBySerialHW(sensor.getIdHw());
         if (hw.isPresent()) {
-            hwNameField.setText("HW serial code: " + hw.get().getName());
+            hwNameField.setText("HW name: " + hw.get().getName());
+            hwSerialCodeField.setText("HW serial code: " + hw.get().getSerial_HW());
         } else {
-            hwNameField.setText("HW serial code: ...");
+            hwNameField.setText("HW name: ...");
+            hwSerialCodeField.setText("HW serial code: ...");
         }
         associatedHwLive = hardwareLiveService.findByHardwareId(sensor.getIdHw());
         onlineStatusDiv.add(addOnlineStatusIcon());
@@ -701,29 +706,26 @@ public class SensorElectricDashboard extends LitTemplate {
 
     private Icon addOnlineStatusIcon() {
         NotificationLogHw logHw = notificationLogHwService.findBySerialHw(sensor.getIdHw());
-        Icon icon;
         if (logHw == null) {
-            icon = VaadinIcon.CIRCLE.create();
-            icon.setColor(Colors.GREEN.getRgb());
-            icon.setClassName("onlineIcon");
-            icon.setSize("20px");
+            onlineStatusIcon = VaadinIcon.CIRCLE.create();
+            onlineStatusIcon.setColor(Colors.GREEN.getRgb());
+            onlineStatusIcon.setClassName("onlineIcon");
+            onlineStatusIcon.setSize("20px");
         } else {
-            icon = VaadinIcon.CIRCLE.create();
-            icon.setColor(Colors.RED.getRgb());
-            icon.setClassName("onlineIcon");
-            icon.setSize("20px");
+            onlineStatusIcon = VaadinIcon.CIRCLE.create();
+            onlineStatusIcon.setColor(Colors.RED.getRgb());
+            onlineStatusIcon.setClassName("onlineIcon");
+            onlineStatusIcon.setSize("20px");
         }
-        return icon;
+        return onlineStatusIcon;
     }
 
     private void setConsumptionBar() {
         calculateConsumptionHighestValue();
         if (consumptionMaxValue == 0.0) {
-            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [W/h] -> <b>" +
-                    sensor.getConsumptionActual() + "%</b>");
+            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [W/h]");
         } else {
-            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + "</b> [W/h] -> <b>" +
-                    String.format("%.2f", (sensor.getConsumptionActual()/(consumptionMaxValue*1000))*100) + "%</b>");
+            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + "</b> [W/h]");
         }
         consumptionDivText.setText("");
         consumptionDivText.addComponentAtIndex(0, consumptionText);
@@ -768,6 +770,7 @@ public class SensorElectricDashboard extends LitTemplate {
                         refreshHardwareStatus();
                         refreshConsumptionText(refreshedSensor.get());
                         refreshConsumptionChart(refreshedSensor.get());
+                        refreshOnlineStatusIcon();
 
                         LocalDateTime now = LocalDateTime.now();
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -783,17 +786,17 @@ public class SensorElectricDashboard extends LitTemplate {
     }
 
     private void refreshHardwareStatus() {
-        try {
-            associatedHwLive = hardwareLiveService.findByHardwareId(sensor.getIdHw());
-            signalStrength = associatedHwLive != null ? associatedHwLive.getSignal_strength() : 0;
-            getUI().ifPresent(ui -> ui.access(() ->
-                    {
-                        SensorsUtil.updateSignalImage(associatedHwLive, signalImage);
-                        ui.push();
-                    }
-            ));
-        } catch (UIDetachedException exception) {
-            //ignore, harmless exception in this case
+        associatedHwLive = hardwareLiveService.findByHardwareId(sensor.getIdHw());
+        signalStrength = associatedHwLive != null ? associatedHwLive.getSignal_strength() : 0;
+        SensorsUtil.updateSignalImage(associatedHwLive, signalImage);
+    }
+
+    private void refreshOnlineStatusIcon() {
+        NotificationLogHw logHw = notificationLogHwService.findBySerialHw(sensor.getIdHw());
+        if (logHw == null) {
+            onlineStatusIcon.setColor(Colors.GREEN.getRgb());
+        } else {
+            onlineStatusIcon.setColor(Colors.RED.getRgb());
         }
     }
 
@@ -811,11 +814,9 @@ public class SensorElectricDashboard extends LitTemplate {
 
     private void refreshConsumptionText(Sensor sensor) {
         if (consumptionMaxValue == 0.0) {
-            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [W/h] -> <b>" +
-                    sensor.getConsumptionActual() + "%</b>");
+            consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [W/h]");
         } else {
-            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + "</b> [W/h] -> <b>" +
-                    String.format("%.2f",(sensor.getConsumptionActual()/(consumptionMaxValue*1000)*100)) + "%</b>");
+            consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue * 1000 + "</b> [W/h]");
         }
     }
 }
