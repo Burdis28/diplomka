@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-board/src/vaadin-board.js';
-import '@vaadin/vaadin-board/src/vaadin-board-row.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vaadin-board/src/vaadin-board-row.js';
 
 @customElement('sensor-wat-dashboard')
 export class SensorWatDashboard extends LitElement {
@@ -110,11 +110,6 @@ export class SensorWatDashboard extends LitElement {
      </vaadin-button>
     </vaadin-horizontal-layout>
    </div>
-  </div>
- </vaadin-board-row>
- <vaadin-board-row id="boardRowBottom">
-  <div id="scrollDownDiv">
-   Yo
   </div>
  </vaadin-board-row>
 </vaadin-board>

@@ -155,12 +155,6 @@ public class SensorWaterDashboard extends LitTemplate {
     private Span hwSerialCodeField;
     @Id("chartTitle")
     private H4 chartTitle;
-    @Id("boardRowBottom")
-    private Row boardRowBottom;
-    @Id("scrollDownDiv")
-    private Div scrollDownDiv;
-    @Id("boardLayout")
-    private Board boardLayout;
 
     /**
      * Creates a new SensorWatDashboard.
