@@ -1,86 +1,89 @@
 sensors-view {
-  background-color: var(--lumo-contrast-10pct);
-  display: block;
-  height: 100%;
-  overflow: auto;
-  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+    background-color: var(--lumo-contrast-10pct);
+    display: block;
+    height: 100%;
+    overflow: auto;
+    padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
 }
 
 sensors-view .overallDiv {
-  background-color: var(--lumo-base-color);
-  display: block;
-  margin: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s);
-  box-shadow: var(--lumo-box-shadow-l);
-  padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
-  max-height: min-content;
+    background-color: var(--lumo-base-color);
+    display: block;
+    margin: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s);
+    box-shadow: var(--lumo-box-shadow-l);
+    padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
+    min-height: 720px;
 }
 
 sensors-view vaadin-grid {
-  font-size: var(--lumo-font-size-l);
-  height: 100%;
+    font-size: var(--lumo-font-size-l);
+    height: 100%;
 }
 
 sensors-view vaadin-grid-filter,
 sensors-view vaadin-grid-filter > * {
-  width: 100%;
+    width: 100%;
 }
+
 sensors-view vaadin-grid vaadin-horizontal-layout {
-  align-items: center;
+    align-items: center;
 }
+
 sensors-view vaadin-grid img {
-  border-radius: 50%;
-  flex-shrink: 0;
-  height: var(--lumo-size-m);
-  width: var(--lumo-size-m);
+    border-radius: 50%;
+    flex-shrink: 0;
+    height: var(--lumo-size-m);
+    width: var(--lumo-size-m);
 }
 
 sensors-view .name {
-  overflow: hidden;
-  text-overflow: ellipsis;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 sensors-view .alignCenter {
-  margin-left: 40px;
+    margin-left: 40px;
 }
 
 sensors-view .alignLeft {
-  align-self: flex-start;
-  align-items: flex-start;
-  alignment: left;
-  margin-bottom: -5px;
-  margin-top: -5px;
-  margin-left: -15px;
+    align-self: flex-start;
+    align-items: flex-start;
+    alignment: left;
+    margin-bottom: -5px;
+    margin-top: -5px;
+    margin-left: -15px;
 }
 
 sensors-view .bottomMarginIcon {
-  margin-bottom: 3px;
+    margin-bottom: 3px;
 }
 
 sensors-view .onlineStatusIcon {
-  width: 9px;
-  height: 9px;
-  margin-left: 19px;
-  margin-bottom: 4px;
+    width: 9px;
+    height: 9px;
+    margin-left: 19px;
+    margin-bottom: 4px;
 }
 
 sensors-view .signalImage {
-  margin-left: 11px;
-  margin-bottom: -2px;
+    margin-left: 11px;
+    margin-bottom: -2px;
 }
 
 sensors-view .smallerFontSize {
-  margin-top: 1px;
-  margin-left: 1px;
-  margin-bottom: 1px;
-  font-size: 11px;
+    margin-top: 1px;
+    margin-left: 1px;
+    margin-bottom: 1px;
+    font-size: 11px;
 }
 
 sensors-view vaadin-grid.v-grid-select-all-checkbox {
-  display: none;
+    display: none;
 }
+
 sensors-view vaadin-grid span {
-  align-items: center;
-  text-align: center;
-  width: var(--lumo-size-m);
+    align-items: center;
+    text-align: center;
+    width: var(--lumo-size-m);
 }
 

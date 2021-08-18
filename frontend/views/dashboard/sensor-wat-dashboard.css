@@ -69,6 +69,10 @@ sensor-wat-dashboard vaadin-chart {
     padding-top: var(--lumo-space-s);
 }
 
+sensors-wat-dashboard .highcharts-legend-item {
+    color: ORANGE;
+}
+
 sensor-wat-dashboard .priceForADayOrMonthDiv {
     font-size: larger;
     align-items: center;

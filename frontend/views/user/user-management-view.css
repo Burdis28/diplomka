@@ -12,7 +12,7 @@ user-management-view .overallDiv {
     margin: var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s) var(--lumo-space-s);
     box-shadow: var(--lumo-box-shadow-l);
     padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-l);
-    max-height: min-content;
+    min-height: 720px;
 }
 
 user-management-view vaadin-grid {
