@@ -18,10 +18,7 @@ import com.vaadin.flow.component.charts.model.style.SolidColor;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
@@ -144,6 +141,8 @@ public class SensorElectricDashboard extends LitTemplate {
     private Span ownerSpanField;
     @Id("hwSerialCodeField")
     private Span hwSerialCodeField;
+    @Id("chartTitle")
+    private H4 chartTitle;
 
     /**
      * Creates a new SensorElDashboard.
@@ -170,6 +169,7 @@ public class SensorElectricDashboard extends LitTemplate {
         if (sensorId != -1) {
             this.sensorElectricService.get(sensorId).ifPresent(electric -> sensorElectric = electric);
             this.sensorService.get(sensorId).ifPresent(sensor -> this.sensor = sensor);
+            dateForChart = LocalDate.now();
 
             setInfoData();
             setConsumptionBar();
@@ -186,7 +186,6 @@ public class SensorElectricDashboard extends LitTemplate {
             dailyConsumptionDiv.add(mainChart);
             typeOfChartDiv.add(consPricesRadioButtonGroup);
             periodChangerChartDiv.add(periodRadioButtonGroup);
-            dateForChart = LocalDate.now();
             consumptionDatePicker.setValue(dateForChart);
         }
     }
@@ -250,7 +249,7 @@ public class SensorElectricDashboard extends LitTemplate {
                 updateMainChartData(dateForChart.withDayOfYear(1), LocalDate.of(dateForChart.getYear(), 12, 31), consPricesRadioButtonGroup.getValue().equals("Consumption"));
             }
         }
-        Notification.show("Teď jsem se posunul o něco dále").setPosition(Notification.Position.MIDDLE);
+        //Notification.show("Teď jsem se posunul o něco dále").setPosition(Notification.Position.MIDDLE);
     }
 
     private void updateChartToPreviousData() {
@@ -266,7 +265,7 @@ public class SensorElectricDashboard extends LitTemplate {
                 updateMainChartData(dateForChart.withDayOfYear(1), LocalDate.of(dateForChart.getYear(), 12, 31), consPricesRadioButtonGroup.getValue().equals("Consumption"));
             }
         }
-        Notification.show("Teď jsem se posunul o něco dřív").setPosition(Notification.Position.MIDDLE);
+        //Notification.show("Teď jsem se posunul o něco dřív").setPosition(Notification.Position.MIDDLE);
     }
 
     private void setConsumptionPricesChangerForChart() {
@@ -288,7 +287,7 @@ public class SensorElectricDashboard extends LitTemplate {
     }
 
     private void setPeriodChangerForChart() {
-        periodRadioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
+        //periodRadioButtonGroup.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
         periodRadioButtonGroup.setItems("Day", "Month", "Year");
         periodRadioButtonGroup.setValue("Day");
         periodRadioButtonGroup.addValueChangeListener(event -> {
@@ -394,7 +393,7 @@ public class SensorElectricDashboard extends LitTemplate {
             Month month = dateFrom.plusDays(3).getMonth();
             pricesDailyMap.forEach((localDate, aDouble) -> {
                 if(localDate.getMonth() == month) {
-                    configuration.setTitle(localDate.getMonth().name() + " of " + localDate.getYear());
+                    chartTitle.setText(localDate.getMonth().name() + " of " + localDate.getYear());
                     aggregatedPrices.add(new DataSeriesItem(localDate.format(DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy")), aDouble));
                 }
             });
@@ -495,6 +494,7 @@ public class SensorElectricDashboard extends LitTemplate {
         configuration.setTooltip(tooltip);
 
         configuration.getChart().setBackgroundColor(new SolidColor(255,255,255,0));
+        chartTitle.setText(dateForChart.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 
         consumptionDatePicker.addValueChangeListener(event -> {
             dateForChart = event.getValue();
@@ -514,6 +514,7 @@ public class SensorElectricDashboard extends LitTemplate {
             Tooltip tooltip = configuration.getTooltip();
             tooltip.setValueSuffix(" [kW/h]");
             configuration.setTooltip(tooltip);
+            configuration.getyAxis().setTitle("Consumption");
             if (periodRadioButtonGroup.getValue().equals("Day")) {
                 List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
                 Map<Integer, Number> highRates = new TreeMap<>();
@@ -534,7 +535,7 @@ public class SensorElectricDashboard extends LitTemplate {
                 Map<LocalDate, Number> lowRates = new TreeMap<>();
                 getHighLowRatesMonth(dataElectrics, highRates, lowRates);
 
-                configuration.setTitle(dateForChart.getMonth().name() + " of " + dateForChart.getYear());
+                chartTitle.setText(dateForChart.getMonth().name() + " of " + dateForChart.getYear());
                 LocalDate firstOfMonth = dateForChart.withDayOfMonth(1);
                 LocalDate firstOfFollowingMonth = dateForChart.plusMonths(1).withDayOfMonth(1);
 
@@ -565,7 +566,7 @@ public class SensorElectricDashboard extends LitTemplate {
             Tooltip tooltip = configuration.getTooltip();
             tooltip.setValueSuffix(" " + sensor.getCurrencyString());
             configuration.setTooltip(tooltip);
-
+            configuration.getyAxis().setTitle("Prices");
             DataSeries ds = new DataSeries();
             PlotOptionsColumn plotOpts = new PlotOptionsColumn();
             plotOpts.setColor(SolidColor.ORANGERED);
@@ -608,11 +609,11 @@ public class SensorElectricDashboard extends LitTemplate {
         try {
             getUI().ifPresent(ui -> ui.access(() -> {
                 if (periodRadioButtonGroup.getValue().equals("Day")) {
-                    configuration.setTitle(dateFrom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                    chartTitle.setText(dateFrom.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
                 } else if (periodRadioButtonGroup.getValue().equals("Month")) {
-                    configuration.setTitle(dateFrom.getMonth().name() + " " + dateFrom.getYear());
+                    chartTitle.setText(dateFrom.getMonth().name() + " " + dateFrom.getYear());
                 } else {
-                    configuration.setTitle("Year " + dateFrom.getYear());
+                    chartTitle.setText("Year " + dateFrom.getYear());
                 }
                 mainChart.setConfiguration(configuration);
                 Notification.show("Chart updated.");

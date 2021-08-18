@@ -1,10 +1,10 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-board/src/vaadin-board.js';
 import '@vaadin/vaadin-board/src/vaadin-board-row.js';
-import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
-import '@vaadin/vaadin-date-picker/src/vaadin-date-picker.js';
 import '@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vaadin-date-picker/src/vaadin-date-picker.js';
 
 @customElement('sensor-el-dashboard')
 export class SensorElDashboard extends LitElement {
@@ -90,10 +90,21 @@ export class SensorElDashboard extends LitElement {
  <vaadin-board-row>
   <div class="wrapper" style="flex-grow: 1;">
    <div class="card" id="dailyConsumptionDiv">
-    <vaadin-horizontal-layout id="horizontalLayoutAboveChart" style="justify-content: center; align-items: center; width: 100%;">
-     <div id="typeOfChartDiv"></div>
-     <div id="periodChangerChartDiv"></div>
-     <vaadin-date-picker id="consumptionDatePicker" style="margin: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding-left: var(--lumo-space-m); flex-shrink: 1;" label="Date" helper-text="Today's date chosen by default"></vaadin-date-picker>
+    <vaadin-horizontal-layout id="horizontalLayoutAboveChart" style="align-items: center; width: 100%;">
+     <vaadin-horizontal-layout theme="spacing" style="width: 33%; justify-content: flex-start;">
+      <div id="typeOfChartDiv" style="margin-left: var(--lumo-space-xl); margin-top: var(--lumo-space-m);"></div>
+     </vaadin-horizontal-layout>
+     <vaadin-horizontal-layout theme="spacing" style="width: 33%; justify-content: center;">
+      <div id="periodChangerChartDiv" style="margin-top: var(--lumo-space-m);"></div>
+     </vaadin-horizontal-layout>
+     <vaadin-horizontal-layout theme="spacing" style="width: 33%; justify-content: flex-end;">
+      <vaadin-date-picker id="consumptionDatePicker" style="flex-shrink: 1; margin-right: var(--lumo-space-xl);" label="Date"></vaadin-date-picker>
+     </vaadin-horizontal-layout>
+    </vaadin-horizontal-layout>
+    <vaadin-horizontal-layout theme="spacing" style="width: 100%; justify-content: center;">
+     <h4 id="chartTitle">Heading 4</h4>
+    </vaadin-horizontal-layout>
+    <vaadin-horizontal-layout theme="spacing" style="justify-content: center; width: 100%;">
      <vaadin-button id="previousButton" style="margin: var(--lumo-space-m); margin-top: var(--lumo-space-m); flex-shrink: 1; margin-right: var(--lumo-space-s);">
        Previous 
      </vaadin-button>
