@@ -15,6 +15,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
+import com.vaadin.flow.component.charts.model.style.Style;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -502,6 +503,13 @@ public class SensorElectricDashboard extends LitTemplate {
         });
     }
 
+    private void colorLegendToGray(Configuration configuration, XAxis x) {
+        Style gray = new Style();
+        gray.setColor(new SolidColor("#666666"));
+        x.getLabels().setStyle(gray);
+        configuration.getLegend().setItemStyle(gray);
+    }
+
     private double getNumberOfDecimalPrecision(Double number, int numberOfDecimalPlaces) {
         return BigDecimal.valueOf(number)
                 .setScale(numberOfDecimalPlaces, RoundingMode.HALF_UP)
@@ -515,6 +523,7 @@ public class SensorElectricDashboard extends LitTemplate {
             tooltip.setValueSuffix(" [kW/h]");
             configuration.setTooltip(tooltip);
             configuration.getyAxis().setTitle("Consumption");
+
             if (periodRadioButtonGroup.getValue().equals("Day")) {
                 List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
                 Map<Integer, Number> highRates = new TreeMap<>();
@@ -527,8 +536,8 @@ public class SensorElectricDashboard extends LitTemplate {
                 x.setCategories(PatternStringUtils.hoursOfDay);
                 configuration.removexAxes();
                 configuration.addxAxis(x);
-
                 setSeriesToConfiguration(configuration, lowRates.values(), highRates.values());
+                colorLegendToGray(configuration, x);
             } else if (periodRadioButtonGroup.getValue().equals("Month")) {
                 List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
                 Map<LocalDate, Number> highRates = new TreeMap<>();
@@ -548,6 +557,7 @@ public class SensorElectricDashboard extends LitTemplate {
                 configuration.removexAxes();
                 configuration.addxAxis(x);
                 setSeriesToConfiguration(configuration, lowRates.values(), highRates.values());
+                colorLegendToGray(configuration, x);
             } else {
                 List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
                 Map<Month, Number> highRates = new TreeMap<>();
@@ -561,6 +571,7 @@ public class SensorElectricDashboard extends LitTemplate {
                 configuration.removexAxes();
                 configuration.addxAxis(x);
                 setSeriesToConfiguration(configuration, lowRates.values(), highRates.values());
+                colorLegendToGray(configuration, x);
             }
         } else {
             Tooltip tooltip = configuration.getTooltip();
@@ -571,6 +582,7 @@ public class SensorElectricDashboard extends LitTemplate {
             PlotOptionsColumn plotOpts = new PlotOptionsColumn();
             plotOpts.setColor(SolidColor.ORANGERED);
             ds.setPlotOptions(plotOpts);
+            colorLegendToGray(configuration, configuration.getxAxis());
             if (periodRadioButtonGroup.getValue().equals("Day")) {
                 XAxis x = new XAxis();
                 x.setCrosshair(new Crosshair());

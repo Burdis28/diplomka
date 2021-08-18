@@ -13,6 +13,8 @@ import com.example.application.views.sensors.components.SensorsUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.UIDetachedException;
+import com.vaadin.flow.component.board.Board;
+import com.vaadin.flow.component.board.Row;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.*;
@@ -35,6 +37,8 @@ import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
+import elemental.json.Json;
+import elemental.json.JsonObject;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -49,6 +53,9 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -148,6 +155,12 @@ public class SensorWaterDashboard extends LitTemplate {
     private Span hwSerialCodeField;
     @Id("chartTitle")
     private H4 chartTitle;
+    @Id("boardRowBottom")
+    private Row boardRowBottom;
+    @Id("scrollDownDiv")
+    private Div scrollDownDiv;
+    @Id("boardLayout")
+    private Board boardLayout;
 
     /**
      * Creates a new SensorWatDashboard.
@@ -335,6 +348,7 @@ public class SensorWaterDashboard extends LitTemplate {
                 configuration.addxAxis(x);
 
                 setSeriesToConfiguration(configuration, consumptionMap.values());
+                colorLegendToGray(configuration, x);
             } else if (periodRadioButtonGroup.getValue().equals("Month")) {
                 List<DataWater> dataWater = dataWaterService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
                 Map<LocalDate, Number> consumptionMap = new TreeMap<>();
@@ -353,6 +367,7 @@ public class SensorWaterDashboard extends LitTemplate {
                 configuration.removexAxes();
                 configuration.addxAxis(x);
                 setSeriesToConfiguration(configuration, consumptionMap.values());
+                colorLegendToGray(configuration, x);
             } else {
                 List<DataWater> dataWater = dataWaterService.findAllBySensorIdAndDate(sensor.getId(), dateFrom, dateTo);
                 Map<Month, Number> consumptionMap = new TreeMap<>();
@@ -365,6 +380,7 @@ public class SensorWaterDashboard extends LitTemplate {
                 configuration.removexAxes();
                 configuration.addxAxis(x);
                 setSeriesToConfiguration(configuration, consumptionMap.values());
+                colorLegendToGray(configuration, x);
             }
         } else {
             Tooltip tooltip = configuration.getTooltip();
@@ -376,6 +392,7 @@ public class SensorWaterDashboard extends LitTemplate {
             PlotOptionsColumn plotOpts = new PlotOptionsColumn();
             plotOpts.setColor(SolidColor.ORANGERED);
             ds.setPlotOptions(plotOpts);
+            colorLegendToGray(configuration, configuration.getxAxis());
             if (periodRadioButtonGroup.getValue().equals("Day")) {
                 XAxis x = new XAxis();
                 x.setCrosshair(new Crosshair());
@@ -427,6 +444,13 @@ public class SensorWaterDashboard extends LitTemplate {
         } catch (UIDetachedException exception) {
             //ignore, harmless exception in this case of a push
         }
+    }
+
+    private void colorLegendToGray(Configuration configuration, XAxis x) {
+        Style gray = new Style();
+        gray.setColor(new SolidColor("#666666"));
+        x.getLabels().setStyle(gray);
+        configuration.getLegend().setItemStyle(gray);
     }
 
     private ArrayList<DataSeriesItem> getPricesForTime(Configuration configuration,
@@ -600,12 +624,28 @@ public class SensorWaterDashboard extends LitTemplate {
 
         previousButton.addClickListener(event -> {
             updateChartToPreviousData();
-            UI.getCurrent().getPage().executeJavaScript("window.scrollTo(0,50);");
+            super.getUI().get().getPage().executeJs("document.body.scrollTo(0,500);");
+            //UI.getCurrent().getPage().executeJs("window.scroll(0,500);");
+            //scrollDownDiv.getElement().callFunction("scrollIntoView(false)");
+//            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+//            executorService.schedule(this::scrollDown, 3000, TimeUnit.MILLISECONDS);
         });
 
         nextButton.addClickListener(event -> {
             updateChartToNextData();
-            UI.getCurrent().getPage().executeJavaScript("window.scrollTo(0,50);");
+            super.getUI().get().getPage().executeJs("document.body.scrollTo(0,500);");
+            //UI.getCurrent().getPage().executeJs("window.scroll(0,500);");
+            //scrollDownDiv.getElement().callFunction("scrollIntoView(false)");
+//            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+//            executorService.schedule(this::scrollDown, 3000, TimeUnit.MILLISECONDS);
+        });
+    }
+
+    private void scrollDown() {
+        UI.getCurrent().access(() -> {
+            JsonObject arg1 = Json.createObject();
+            arg1.put("alignToTop", false);
+            mainChart.getElement().executeJs("scrollIntoView", arg1);
         });
     }
 

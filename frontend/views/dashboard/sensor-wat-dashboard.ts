@@ -16,7 +16,7 @@ export class SensorWatDashboard extends LitElement {
 
   render() {
     return html`
-<vaadin-board>
+<vaadin-board id="boardLayout">
  <vaadin-board-row>
   <div class="wrapper">
    <div class="card space-m">
@@ -110,6 +110,11 @@ export class SensorWatDashboard extends LitElement {
      </vaadin-button>
     </vaadin-horizontal-layout>
    </div>
+  </div>
+ </vaadin-board-row>
+ <vaadin-board-row id="boardRowBottom">
+  <div id="scrollDownDiv">
+   Yo
   </div>
  </vaadin-board-row>
 </vaadin-board>
