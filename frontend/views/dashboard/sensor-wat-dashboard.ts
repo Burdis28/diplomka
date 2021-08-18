@@ -1,7 +1,7 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-board/src/vaadin-board.js';
-import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/vaadin-board/src/vaadin-board-row.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 
 @customElement('sensor-wat-dashboard')
 export class SensorWatDashboard extends LitElement {
@@ -87,10 +87,21 @@ export class SensorWatDashboard extends LitElement {
  <vaadin-board-row>
   <div class="wrapper" style="flex-grow: 1;">
    <div class="card" id="dailyConsumptionDiv">
-    <vaadin-horizontal-layout id="horizontalLayoutAboveChart" style="justify-content: center; align-items: center; width: 100%;">
-     <div id="typeOfChartDiv"></div>
-     <div id="periodChangerChartDiv"></div>
-     <vaadin-date-picker id="consumptionDatePicker" style="margin: var(--lumo-space-s); margin-left: var(--lumo-space-s); padding-left: var(--lumo-space-m); flex-shrink: 1;" label="Date" helper-text="Today's date chosen by default"></vaadin-date-picker>
+    <vaadin-horizontal-layout id="horizontalLayoutAboveChart" style="align-items: center; width: 100%; flex-direction: row-reverse;">
+     <vaadin-horizontal-layout theme="spacing" style="width: 33%; justify-content: flex-end;">
+      <vaadin-date-picker id="consumptionDatePicker" style="flex-shrink: 1; margin-right: var(--lumo-space-xl);" label="Date" helper-text=""></vaadin-date-picker>
+     </vaadin-horizontal-layout>
+     <vaadin-horizontal-layout theme="spacing" style="justify-content: center; width: 33%;">
+      <div id="periodChangerChartDiv" style="flex-shrink: 0; margin-left: var(--lumo-space-xl);"></div>
+     </vaadin-horizontal-layout>
+     <vaadin-horizontal-layout theme="spacing" style="width: 33%; justify-content: flex-start;">
+      <div id="typeOfChartDiv" style="flex-shrink: 0; margin-left: var(--lumo-space-xl); margin-top: var(--lumo-space-m);"></div>
+     </vaadin-horizontal-layout>
+    </vaadin-horizontal-layout>
+    <vaadin-horizontal-layout style="width: 100%; justify-content: center;">
+     <h4 id="chartTitle" style="align-self: center;">Heading 4</h4>
+    </vaadin-horizontal-layout>
+    <vaadin-horizontal-layout style="justify-content: center; align-items: center; width: 100%;">
      <vaadin-button id="previousButton" style="margin: var(--lumo-space-m); margin-top: var(--lumo-space-m); flex-shrink: 1; margin-right: var(--lumo-space-s);">
        Previous 
      </vaadin-button>
