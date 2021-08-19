@@ -1,9 +1,15 @@
 package com.example.application.views.sensors;
 
 import com.example.application.data.entity.*;
+import com.example.application.data.entity.data.DataElectric;
+import com.example.application.data.entity.data.DataWater;
 import com.example.application.data.service.*;
+import com.example.application.data.service.data.DataElectricService;
+import com.example.application.data.service.data.DataWaterService;
 import com.example.application.utils.Colors;
+import com.example.application.utils.MathUtils;
 import com.example.application.views.main.MainLayout;
+import com.example.application.views.sensors.components.MonthYearKey;
 import com.example.application.views.sensors.components.SensorsUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
@@ -11,6 +17,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -20,32 +27,44 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Header;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.model.StylesTable;
+import org.apache.poi.xssf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @JsModule("./views/sensors/sensors-view.ts")
 @CssImport("./views/sensors/sensors-view.css")
@@ -69,6 +88,8 @@ public class SensorsView extends LitTemplate {
     private Grid.Column<Sensor> pinIdColumn;
     private Grid.Column<Sensor> hardwareColumn;
     private Grid.Column<Sensor> toolsColumn;
+    private Grid.Column<Sensor> exportColumn;
+
 
     private TextField nameFilter;
     private ComboBox<String> typeFilter;
@@ -81,6 +102,8 @@ public class SensorsView extends LitTemplate {
     private final NotificationLogHwService notificationLogHwService;
     private final HardwareLiveService hardwareLiveService;
     private final HardwareService hardwareService;
+    private final DataWaterService dataWaterService;
+    private final DataElectricService dataElectricService;
     private final User loggedUser;
     @Id("createSensorButton")
     private Button createSensorButton;
@@ -90,6 +113,8 @@ public class SensorsView extends LitTemplate {
                        NotificationLogHwService notificationLogHwService,
                        HardwareLiveService hardwareLiveService,
                        HardwareService hardwareService,
+                       DataElectricService dataElectricService,
+                       DataWaterService dataWaterService,
                        @Value("${generateTestData}") boolean generateTestData) {
         this.sensorService = sensorService;
         this.sensorElectricService = sensorElectricService;
@@ -98,6 +123,8 @@ public class SensorsView extends LitTemplate {
         this.notificationLogHwService = notificationLogHwService;
         this.hardwareLiveService = hardwareLiveService;
         this.hardwareService = hardwareService;
+        this.dataElectricService = dataElectricService;
+        this.dataWaterService = dataWaterService;
 
         grid.setSelectionMode(SelectionMode.NONE);
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
@@ -105,7 +132,7 @@ public class SensorsView extends LitTemplate {
         grid.addThemeVariants(GridVariant.MATERIAL_COLUMN_DIVIDERS);
         grid.setColumnReorderingAllowed(true);
 
-        createSensorButton.addClickListener(event ->  UI.getCurrent().navigate("create-sensor"));
+        createSensorButton.addClickListener(event -> UI.getCurrent().navigate("create-sensor"));
 
         createGrid();
 
@@ -142,7 +169,7 @@ public class SensorsView extends LitTemplate {
 
 
     private List<Sensor> getSensors() {
-        if(loggedUser.getAdmin()) {
+        if (loggedUser.getAdmin()) {
             return sensorService.findAll();
         } else {
             return sensorService.findAllByOwner(loggedUser.getId());
@@ -150,7 +177,7 @@ public class SensorsView extends LitTemplate {
     }
 
     @Scheduled(fixedDelay = 30000)
-    public void refreshGrid(){
+    public void refreshGrid() {
         try {
             getUI().ifPresent(ui -> ui.access(() -> {
                 grid.setItems(getSensors());
@@ -165,7 +192,7 @@ public class SensorsView extends LitTemplate {
     private void createDeleteContextMenu(GridContextMenu<Sensor> contextMenu) {
         contextMenu.addItem("Delete", event -> {
             Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
-            if(sensor != null) {
+            if (sensor != null) {
                 createDeleteSensorDialog(sensor);
             }
         });
@@ -178,7 +205,8 @@ public class SensorsView extends LitTemplate {
         dialog.setCancelable(true);
         dialog.setCancelText("Cancel");
         dialog.setConfirmText("Delete");
-        dialog.addCancelListener(event1 -> {});
+        dialog.addCancelListener(event1 -> {
+        });
         dialog.addConfirmListener(event1 -> {
             sensorService.delete(sensor.getId(), SensorTypes.valueOf(sensor.getType()));
             gridListDataView.removeItem(sensor);
@@ -191,13 +219,13 @@ public class SensorsView extends LitTemplate {
     private void createContextMenu(GridContextMenu<Sensor> contextMenu) {
         contextMenu.addItem("View & edit", event -> {
             Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
-            if(sensor != null) {
+            if (sensor != null) {
                 SensorsUtil.navigateToSensorDetail(sensor);
             }
         });
         contextMenu.addItem("Go to dashboard", event -> {
             Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
-            if(sensor != null) {
+            if (sensor != null) {
                 if (sensor.getType().equals(SensorTypes.g.name())) {
                     Dialog dialog = new Dialog();
                     dialog.add("Dashboard for Gas type sensors are not yet available in this version of the application.");
@@ -236,6 +264,7 @@ public class SensorsView extends LitTemplate {
         createHardwareColumn();
         createPidIdColumn();
         createToolsColumn();
+        createExportColumn();
     }
 
     private void createNameColumn() {
@@ -361,7 +390,7 @@ public class SensorsView extends LitTemplate {
                     stateIcon.setClassName("bottomMarginIcon");
                     stateIcon.setColor(Colors.GREEN.getRgb());
                     text.setText(" Valve open");
-                } else if(state.getState().equals("close_confirm")) {
+                } else if (state.getState().equals("close_confirm")) {
                     stateIcon = new Icon(VaadinIcon.CLOSE_CIRCLE_O);
                     stateIcon.setClassName("bottomMarginIcon");
                     stateIcon.setColor(Colors.RED.getRgb());
@@ -386,21 +415,21 @@ public class SensorsView extends LitTemplate {
             toolboxIcon.getElement().setAttribute("theme", "badge secondary");
             Icon dasboardIcon = new Icon(VaadinIcon.DASHBOARD);
             dasboardIcon.addClickListener(event ->
-                {
-                    if (sensor.getType().equals(SensorTypes.g.name())) {
-                        Dialog dialog = new Dialog();
-                        dialog.add("Dashboard for Gas type sensors are not yet available in this version of the application.");
-                        dialog.open();
-                    } else {
-                        navigateToSensorDashboard(sensor);
-                    }
-                });
+            {
+                if (sensor.getType().equals(SensorTypes.g.name())) {
+                    Dialog dialog = new Dialog();
+                    dialog.add("Dashboard for Gas type sensors are not yet available in this version of the application.");
+                    dialog.open();
+                } else {
+                    navigateToSensorDashboard(sensor);
+                }
+            });
             dasboardIcon.getElement().setAttribute("theme", "badge secondary");
             Icon trashCanIcon = new Icon(VaadinIcon.TRASH);
             trashCanIcon.addClickListener(event -> createDeleteSensorDialog(sensor));
             trashCanIcon.getElement().setAttribute("theme", "badge error secondary");
 
-            return new HorizontalLayout(){
+            return new HorizontalLayout() {
                 {
                     addComponentAsFirst(toolboxIcon);
                     addComponentAtIndex(1, dasboardIcon);
@@ -408,7 +437,290 @@ public class SensorsView extends LitTemplate {
                     addComponentAtIndex(2, trashCanIcon);
                 }
             };
-        }).setHeader("Tools").setWidth("150px");
+        }).setHeader("Tools").setWidth("150px").setFlexGrow(0);
+    }
+
+    private void createExportColumn() {
+        exportColumn = grid.addComponentColumn(sensor -> {
+            Icon exportIcon = new Icon(VaadinIcon.CLOUD_DOWNLOAD);
+            Button exportBtn = new Button();
+            exportIcon.setSize("35px");
+            exportBtn.setIcon(exportIcon);
+            exportBtn.setThemeName("secondary");
+            exportBtn.setText("Export data");
+            exportBtn.addClickListener(event ->
+            {
+                if (sensor.getType().equals(SensorTypes.g.name())) {
+                    Dialog dialog = new Dialog();
+                    dialog.add("Export for Gas sensors is not available in this version of the app.");
+                    dialog.setModal(true);
+                    dialog.open();
+                } else {
+                    createExportDialog(sensor);
+                }
+            });
+            return new HorizontalLayout() {
+                {
+                    addComponentAsFirst(exportBtn);
+                }
+            };
+        }).setHeader("Export").setWidth("150px");
+    }
+
+    private void createExportDialog(Sensor sensor) {
+        Dialog dialog = new Dialog();
+        VerticalLayout layout = new VerticalLayout();
+        H3 title = new H3("Export " + sensor.getName() + " to excel file.");
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
+        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
+        radioButtonGroup.setItems("Daily", "Monthly", "Yearly");
+        radioButtonGroup.setValue("Daily");
+        DatePicker pickerFrom = new DatePicker();
+        pickerFrom.setLabel("Date from");
+        pickerFrom.setValue(LocalDate.now().minusDays(1));
+        DatePicker pickerTo = new DatePicker();
+        pickerTo.setLabel("Date to");
+        pickerTo.setValue(LocalDate.now());
+        Icon exportIcon = new Icon(VaadinIcon.CLOUD_DOWNLOAD);
+        Button exportBtn = new Button();
+        exportIcon.setSize("35px");
+        exportBtn.setIcon(exportIcon);
+        exportBtn.setThemeName("primary");
+        exportBtn.setText("Export to Excel");
+        Anchor download;
+
+        if (sensor.getType().equals(SensorTypes.w.name())) {
+            StreamResource streamResource = new StreamResource(
+                    "Export-" + sensor.getName() + ".xlsx", () -> {
+                XSSFWorkbook workbook = new XSSFWorkbook();
+                XSSFSheet sheet = workbook.createSheet("Data of " + sensor.getName());
+
+                getHeaderRow(sensor, sheet, workbook);
+                getSecondHeaderRow(sensor, sheet, workbook, pickerFrom.getValue(), pickerTo.getValue());
+
+                createWaterExcelWorkBook(sensor, sheet, radioButtonGroup.getValue(), pickerFrom.getValue(), pickerTo.getValue());
+                return getByteArrayInputStream(workbook);
+            });
+            download = new Anchor(streamResource, "");
+
+            download.add(exportBtn);
+            layout.add(download);
+        } else if (sensor.getType().equals(SensorTypes.e.name())) {
+            StreamResource streamResource = new StreamResource(
+                    "Export-" + sensor.getName() + ".xlsx", () -> {
+                XSSFWorkbook workbook = new XSSFWorkbook();
+                XSSFSheet sheet = workbook.createSheet("Data of " + sensor.getName());
+
+                getHeaderRow(sensor, sheet, workbook);
+                getSecondHeaderRow(sensor, sheet, workbook, pickerFrom.getValue(), pickerTo.getValue());
+
+                createElectricExcelWorkBook(sensor, sheet, radioButtonGroup.getValue(), pickerFrom.getValue(), pickerTo.getValue());
+                return getByteArrayInputStream(workbook);
+            });
+            download = new Anchor(streamResource, "");
+
+            download.add(exportBtn);
+            layout.add(download);
+        } else {
+            download = new Anchor();
+        }
+
+        layout.add(title);
+        layout.add(radioButtonGroup);
+        layout.add(pickerFrom);
+        layout.add(pickerTo);
+        layout.add(download);
+        dialog.add(layout);
+        dialog.open();
+    }
+
+    private InputStream getByteArrayInputStream(XSSFWorkbook workbook) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try {
+            workbook.write(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        byte[] bytes = bos.toByteArray();
+        return new ByteArrayInputStream(bytes);
+    }
+
+    private void getHeaderRow(Sensor sensor, XSSFSheet sheet, XSSFWorkbook workbook) {
+        XSSFRow row = sheet.createRow(0);
+        CellStyle style = workbook.createCellStyle();//Create style
+        Font font = workbook.createFont();//Create font
+        font.setBold(true);//Make font bold
+        style.setFont(font);//set it to bold
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setBorderTop(BorderStyle.MEDIUM);
+        style.setBorderBottom(BorderStyle.MEDIUM);
+        style.setBorderLeft(BorderStyle.MEDIUM);
+        style.setBorderRight(BorderStyle.MEDIUM);
+
+
+        if (sensor.getType().equals(SensorTypes.e.name())) {
+            createCellWithStyle(row, style, 0, "Data of " + sensor.getName());
+            createCellWithStyle(row, style, 1, "Data of " + sensor.getName());
+            createCellWithStyle(row, style, 2, "Data of " + sensor.getName());
+            createCellWithStyle(row, style, 3, "Data of " + sensor.getName());
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 3));
+        } else {
+            createCellWithStyle(row, style, 0, "Data of " + sensor.getName());
+            createCellWithStyle(row, style, 1, "Data of " + sensor.getName());
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 1));
+        }
+        //row.getCell(0).setCellStyle(style);
+    }
+
+    private void getSecondHeaderRow(Sensor sensor, XSSFSheet sheet, XSSFWorkbook workbook, LocalDate from, LocalDate to) {
+        XSSFRow row = sheet.createRow(1);
+        CellStyle style = workbook.createCellStyle();//Create style
+        Font font = workbook.createFont();//Create font
+        font.setBold(true);//Make font bold
+        style.setFont(font);//set it to bold
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setBorderTop(BorderStyle.MEDIUM);
+        style.setBorderBottom(BorderStyle.MEDIUM);
+        style.setBorderLeft(BorderStyle.MEDIUM);
+        style.setBorderRight(BorderStyle.MEDIUM);
+
+        Cell cellHeader = row.createCell(0);
+        cellHeader.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(from) + " - "
+                + DateTimeFormatter.ofPattern("dd.MM.yyyy").format(to));
+        cellHeader.setCellStyle(style);
+        if (sensor.getType().equals(SensorTypes.w.name())) {
+            Cell cellHeader2 = row.createCell(1);
+            cellHeader2.setCellValue(sensor.getType().equals(SensorTypes.w.name()) ? "m3" : "kWh");
+            cellHeader2.setCellStyle(style);
+        } else {
+            createCellWithStyle(row, style, 1, "Low rate");
+            createCellWithStyle(row, style, 2, "High rate");
+            createCellWithStyle(row, style, 3, "Sum of both");
+        }
+    }
+
+    private void createCellWithStyle(XSSFRow row, CellStyle style, int i, String s) {
+        Cell cellHeader = row.createCell(i);
+        cellHeader.setCellValue(s);
+        cellHeader.setCellStyle(style);
+    }
+
+    private void createWaterExcelWorkBook(Sensor sensor, XSSFSheet sheet, String value, LocalDate from, LocalDate to) {
+        List<DataWater> data = dataWaterService.findAllBySensorIdAndDate(sensor.getId(), from, to);
+        switch (value) {
+            case "Daily": {
+                Map<LocalDate, Double> dataDailyMap = new HashMap<>();
+                getConsumptionM3Daily(data, dataDailyMap, from, to);
+
+                int rowNum = 2;
+                for (LocalDate date : dataDailyMap.keySet().stream().sorted().collect(Collectors.toList())) {
+                    XSSFRow row = sheet.createRow(rowNum++);
+                    Cell cellDate = row.createCell(0);
+                    cellDate.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date));
+                    Cell cellValue = row.createCell(1);
+                    cellValue.setCellValue(MathUtils.round(dataDailyMap.get(date), 3));
+                }
+                return;
+            }
+            case "Monthly": {
+                Map<LocalDate, Double> dataDailyMap = new HashMap<>();
+                getConsumptionM3Monthly(data, dataDailyMap, from, to);
+
+                int rowNum = 2;
+                for (LocalDate month : dataDailyMap.keySet().stream().sorted().collect(Collectors.toList())) {
+                    XSSFRow row = sheet.createRow(rowNum++);
+                    Cell cellDate = row.createCell(0);
+                    cellDate.setCellValue(month.getMonth().name().toLowerCase(Locale.ROOT) + "|" + month.getYear());
+                    Cell cellValue = row.createCell(1);
+                    cellValue.setCellValue(MathUtils.round(dataDailyMap.get(month), 3));
+                }
+                return;
+            }
+            case "Yearly": {
+                Map<Integer, Double> dataDailyMap = new HashMap<>();
+                getConsumptionM3Yearly(data, dataDailyMap, from, to);
+
+                int rowNum = 2;
+                for (Integer year : dataDailyMap.keySet()) {
+                    XSSFRow row = sheet.createRow(rowNum++);
+                    Cell cellDate = row.createCell(0);
+                    cellDate.setCellValue(year);
+                    Cell cellValue = row.createCell(1);
+                    cellValue.setCellValue(MathUtils.round(dataDailyMap.get(year), 3));
+                }
+                return;
+            }
+        }
+    }
+
+    private void createElectricExcelWorkBook(Sensor sensor, XSSFSheet sheet, String value, LocalDate from, LocalDate to) {
+        List<DataElectric> data = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), from, to);
+        switch (value) {
+            case "Daily": {
+                Map<LocalDate, Double> lowRates = new HashMap<>();
+                Map<LocalDate, Double> highRates = new HashMap<>();
+                getConsumptionElectricDaily(data, lowRates, highRates, from, to);
+
+                int rowNum = 2;
+                for (LocalDate date : lowRates.keySet().stream().sorted().collect(Collectors.toList())) {
+                    XSSFRow row = sheet.createRow(rowNum++);
+                    Cell cellDate = row.createCell(0);
+                    cellDate.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date));
+                    Cell cellLowRate = row.createCell(1);
+                    cellLowRate.setCellValue(MathUtils.round(lowRates.get(date), 3));
+                    Cell cellHighRate = row.createCell(2);
+                    cellHighRate.setCellValue(MathUtils.round(highRates.get(date), 3));
+                    Cell cellSums = row.createCell(3);
+                    cellSums.setCellValue(MathUtils.round((highRates.get(date) + lowRates.get(date)), 3));
+                }
+                return;
+            }
+            case "Monthly": {
+                Map<LocalDate, Double> lowRates = new HashMap<>();
+                Map<LocalDate, Double> highRates = new HashMap<>();
+                getConsumptionElectricMonthly(data, lowRates, highRates, from, to);
+
+                int rowNum = 2;
+                for (LocalDate month : lowRates.keySet().stream().sorted().collect(Collectors.toList())) {
+                    XSSFRow row = sheet.createRow(rowNum++);
+                    Cell cellDate = row.createCell(0);
+                    cellDate.setCellValue(month.getMonth().name().toLowerCase(Locale.ROOT) + "|" + month.getYear());
+                    Cell cellLowRate = row.createCell(1);
+                    cellLowRate.setCellValue(MathUtils.round(lowRates.get(month), 3));
+                    Cell cellHighRate = row.createCell(2);
+                    cellHighRate.setCellValue(MathUtils.round(highRates.get(month), 3));
+                    Cell cellSums = row.createCell(3);
+                    cellSums.setCellValue(MathUtils.round((highRates.get(month) + lowRates.get(month)), 3));
+                }
+                return;
+            }
+            case "Yearly": {
+                Map<Integer, Double> lowRates = new HashMap<>();
+                Map<Integer, Double> highRates = new HashMap<>();
+
+                getConsumptionElectricYearly(data, lowRates, highRates, from, to);
+
+                int rowNum = 2;
+                for (Integer year : lowRates.keySet()) {
+                    XSSFRow row = sheet.createRow(rowNum++);
+                    Cell cellDate = row.createCell(0);
+                    cellDate.setCellValue(year);
+                    Cell cellLowRate = row.createCell(1);
+                    cellLowRate.setCellValue(MathUtils.round(lowRates.get(year), 3));
+                    Cell cellHighRate = row.createCell(2);
+                    cellHighRate.setCellValue(MathUtils.round(highRates.get(year), 3));
+                    Cell cellSums = row.createCell(3);
+                    cellSums.setCellValue(MathUtils.round((highRates.get(year) + lowRates.get(year)), 3));
+                }
+                return;
+            }
+        }
     }
 
     private void addFiltersToGrid() {
@@ -469,5 +781,92 @@ public class SensorsView extends LitTemplate {
             return StringUtils.equals(SensorTypes.valueOf(sensor.getType()).toString(), statusFilterValue);
         }
         return true;
+    }
+
+
+    private void getConsumptionM3Monthly(List<DataWater> dataWaterList, Map<LocalDate, Double> consumptionMap, LocalDate from, LocalDate to) {
+        List<LocalDate> listOfDates = from.datesUntil(to).sorted().collect(Collectors.toList());
+        for (LocalDate date : listOfDates) {
+            consumptionMap.putIfAbsent(date.withDayOfMonth(1), 0.0);
+        }
+
+        for (DataWater data : dataWaterList) {
+            LocalDate date = data.getTime().toLocalDateTime().toLocalDate();
+            consumptionMap.replace(date.withDayOfMonth(1), consumptionMap.get(date.withDayOfMonth(1)) + data.getM3());
+        }
+    }
+//
+//    private MonthYearKey getMonthYear(LocalDate date) {
+//        return new MonthYearKey(date.withDayOfMonth(1), date.getMonth().name().toLowerCase(Locale.ROOT) + "|" + date.getYear());
+//    }
+
+    private void getConsumptionM3Daily(List<DataWater> dataWaterList, Map<LocalDate, Double> consumptionMap, LocalDate from, LocalDate to) {
+        for (LocalDate date : from.datesUntil(to).sorted().collect(Collectors.toList())) {
+            consumptionMap.putIfAbsent(date, 0.0);
+        }
+
+        for (DataWater data : dataWaterList) {
+            LocalDate day = data.getTime().toLocalDateTime().toLocalDate();
+            consumptionMap.replace(day, consumptionMap.get(day) == null ? 0.0 : consumptionMap.get(day) + data.getM3());
+        }
+    }
+
+    private void getConsumptionM3Yearly(List<DataWater> dataWaterList, Map<Integer, Double> consumptionMap, LocalDate from, LocalDate to) {
+        for (LocalDate date : from.datesUntil(to).sorted().collect(Collectors.toList())) {
+            consumptionMap.putIfAbsent(date.getYear(), 0.0);
+        }
+
+        for (DataWater data : dataWaterList) {
+            Integer year = data.getTime().toLocalDateTime().toLocalDate().getYear();
+            consumptionMap.replace(year, consumptionMap.get(year) == null ? 0.0 : consumptionMap.get(year) + data.getM3());
+        }
+    }
+
+    private void getConsumptionElectricMonthly(List<DataElectric> dataElectrics, Map<LocalDate, Double> lowRates,
+                                               Map<LocalDate, Double> highRates, LocalDate from, LocalDate to) {
+        List<LocalDate> listOfDates = from.datesUntil(to).sorted().collect(Collectors.toList());
+        for (LocalDate date : listOfDates) {
+            lowRates.putIfAbsent(date.withDayOfMonth(1), 0.0);
+            highRates.putIfAbsent(date.withDayOfMonth(1), 0.0);
+        }
+
+        for (DataElectric data : dataElectrics) {
+            LocalDate date = data.getTime().toLocalDateTime().toLocalDate();
+            lowRates.replace(date.withDayOfMonth(1), lowRates.get(date.withDayOfMonth(1)) + data.getLowRate());
+            highRates.replace(date.withDayOfMonth(1), highRates.get(date.withDayOfMonth(1)) + data.getHighRate());
+        }
+    }
+//
+//    private MonthYearKey getMonthYear(LocalDate date) {
+//        return new MonthYearKey(date.withDayOfMonth(1), date.getMonth().name().toLowerCase(Locale.ROOT) + "|" + date.getYear());
+//    }
+
+    private void getConsumptionElectricDaily(List<DataElectric> dataElectrics, Map<LocalDate, Double> lowRate,
+                                             Map<LocalDate, Double> highRates, LocalDate from, LocalDate to) {
+        for (LocalDate date : from.datesUntil(to).sorted().collect(Collectors.toList())) {
+            lowRate.putIfAbsent(date, 0.0);
+            highRates.putIfAbsent(date, 0.0);
+        }
+
+        for (DataElectric data : dataElectrics) {
+            LocalDate day = data.getTime().toLocalDateTime().toLocalDate();
+            lowRate.replace(day, lowRate.get(day) == null ? 0.0 : lowRate.get(day) + data.getLowRate());
+            highRates.replace(day, highRates.get(day) == null ? 0.0 : highRates.get(day) + data.getHighRate());
+
+        }
+    }
+
+    private void getConsumptionElectricYearly(List<DataElectric> dataElectrics, Map<Integer, Double> lowRates,
+                                              Map<Integer, Double> highRates, LocalDate from, LocalDate to) {
+        for (LocalDate date : from.datesUntil(to).sorted().collect(Collectors.toList())) {
+            lowRates.putIfAbsent(date.getYear(), 0.0);
+            highRates.putIfAbsent(date.getYear(), 0.0);
+        }
+
+        for (DataElectric data : dataElectrics) {
+            Integer year = data.getTime().toLocalDateTime().toLocalDate().getYear();
+            lowRates.replace(year, lowRates.get(year) == null ? 0.0 : lowRates.get(year) + data.getLowRate());
+            highRates.replace(year, highRates.get(year) == null ? 0.0 : highRates.get(year) + data.getHighRate());
+        }
     }
 }
