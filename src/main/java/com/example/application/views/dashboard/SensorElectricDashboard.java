@@ -6,6 +6,7 @@ import com.example.application.data.entity.data.DataElectric;
 import com.example.application.data.service.*;
 import com.example.application.data.service.data.DataElectricService;
 import com.example.application.utils.Colors;
+import com.example.application.utils.MathUtils;
 import com.example.application.utils.PatternStringUtils;
 import com.example.application.views.main.MainLayout;
 import com.example.application.views.sensors.components.SensorsUtil;
@@ -25,10 +26,12 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -144,6 +147,14 @@ public class SensorElectricDashboard extends LitTemplate {
     private Span hwSerialCodeField;
     @Id("chartTitle")
     private H4 chartTitle;
+    @Id("todayConsumptionDiv")
+    private Div todayConsumptionDiv;
+    @Id("monthlyConsumptionDiv")
+    private Div monthlyConsumptionDiv;
+    @Id("gaugeLayout")
+    private VerticalLayout gaugeLayout;
+    @Id("gaugeMonthLayout")
+    private VerticalLayout gaugeMonthLayout;
 
     /**
      * Creates a new SensorElDashboard.
@@ -202,9 +213,8 @@ public class SensorElectricDashboard extends LitTemplate {
             price += data.getHighRate() * sensorElectric.getPricePerKwHigh() + data.getLowRate() * sensorElectric.getPricePerKwLow();
             consumption += data.getHighRate() + data.getLowRate();
         }
-        consumptionTodayText = new StyledTextComponent("Today consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + "</b> [kW] -> <b>" +
-                String.format("%.2f", (consumption/sensor.getLimit_day())*100) + "%</b>");
+        consumptionTodayText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
+                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + "</b> [kW]");
         priceTodayText = new StyledTextComponent("Price so far: <b>" + PatternStringUtils.formatNumberToText(
                 getNumberOfDecimalPrecision(price, 3))
                 + " " + sensor.getCurrencyString() + "</b>");
@@ -219,8 +229,65 @@ public class SensorElectricDashboard extends LitTemplate {
         } else {
             todayLimitProgressBar.setValue(consumption);
         }
+        gaugeLayout.add(createConsumptionGauge(consumption, sensor.getLimit_day()));
         todayLimitProgressBar.setHeight("15px");
-        todayLimitProgressBar.setVisible(true);
+        todayLimitProgressBar.setVisible(false);
+    }
+
+    private Chart createConsumptionGauge(double consumption, double consumptionMaxValue) {
+        Chart chart = new Chart(ChartType.SOLIDGAUGE);
+        chart.setClassName("gauge");
+
+        Configuration configuration = chart.getConfiguration();
+
+        Pane pane = configuration.getPane();
+        pane.setCenter(new String[] {"50%", "50%"});
+        pane.setStartAngle(-140);
+        pane.setEndAngle(140);
+        chart.setHeight("250px");
+        chart.setWidth("300px");
+
+        Background paneBackground = new Background();
+        paneBackground.setInnerRadius("60%");
+        paneBackground.setOuterRadius("100%");
+        paneBackground.setShape(BackgroundShape.ARC);
+        pane.setBackground(paneBackground);
+
+        YAxis yAxis = configuration.getyAxis();
+        yAxis.setTickAmount(2);
+        //yAxis.setTitle("Consumption");
+        yAxis.setMinorTickInterval("null");
+        yAxis.getTitle().setY(-50);
+        yAxis.getLabels().setEnabled(false);
+        //yAxis.getLabels().setY(16);
+        yAxis.setMin(0);
+        yAxis.setMax(100);
+
+        PlotOptionsSolidgauge plotOptionsSolidgauge = new PlotOptionsSolidgauge();
+
+        DataLabels dataLabels = plotOptionsSolidgauge.getDataLabels();
+        dataLabels.setY(0);
+        dataLabels.setUseHTML(true);
+
+        configuration.setPlotOptions(plotOptionsSolidgauge);
+
+        DataSeries series = new DataSeries("Consumption");
+
+        DataSeriesItem item = new DataSeriesItem();
+        item.setY(MathUtils.round(((consumption/consumptionMaxValue) * 100), 2));
+        item.setColor(new SolidColor(Colors.CEZ_TYPE_ORANGE.getRgb()));
+        item.setClassName("myClassName");
+        DataLabels dataLabelsSeries = new DataLabels();
+        dataLabelsSeries.setFormat("<div style=\"text-align:center \"><span style=\"font-size:16px;"
+                + "color: #666666;' + '\">{y} %</span><br/>"
+                + "<span style=\"text-align:center font-size:12px;color:silver\">kWh</span></div>");
+        dataLabelsSeries.setY(-25);
+        configuration.getChart().setBackgroundColor(new SolidColor(255,255,255,0.0));
+        item.setDataLabels(dataLabelsSeries);
+
+        series.add(item);
+        configuration.addSeries(series);
+        return chart;
     }
 
     private void setMainChartControlButtons() {
@@ -356,8 +423,7 @@ public class SensorElectricDashboard extends LitTemplate {
             consumption += data.getHighRate() + data.getLowRate();
         }
         consumptionMonthText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_month() + "</b> [kW] -> <b>" +
-                String.format("%.2f", (consumption/sensor.getLimit_month())*100) + "%</b>");
+                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_month() + "</b> [kW]");
         priceMonthText = new StyledTextComponent("Monthly price so far: <b>" + PatternStringUtils.formatNumberToText(
                 getNumberOfDecimalPrecision(price, 3))
                 + " " + sensor.getCurrencyString() + "</b>");
@@ -373,7 +439,8 @@ public class SensorElectricDashboard extends LitTemplate {
             monthLimitProgressBar.setValue(consumption);
         }
         monthLimitProgressBar.setHeight("15px");
-        monthLimitProgressBar.setVisible(true);
+        monthLimitProgressBar.setVisible(false);
+        gaugeMonthLayout.add(createConsumptionGauge(consumption, sensor.getLimit_month()));
     }
 
 

@@ -1,10 +1,11 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-board/src/vaadin-board.js';
 import '@vaadin/vaadin-board/src/vaadin-board-row.js';
-import '@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/vaadin-date-picker/src/vaadin-date-picker.js';
+import '@vaadin/vaadin-progress-bar/src/vaadin-progress-bar.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 
 @customElement('sensor-el-dashboard')
 export class SensorElDashboard extends LitElement {
@@ -63,27 +64,37 @@ export class SensorElDashboard extends LitElement {
  </vaadin-board-row>
  <vaadin-board-row>
   <div class="wrapper">
-   <div class="card space-m">
+   <div class="card space-m" id="todayConsumptionDiv">
     <span style="width: 100%;" theme="badge success">Today consumption</span>
-    <div id="consumptionTodayDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
-      Today consumption 
-    </div>
     <vaadin-progress-bar id="todayLimitProgressBar" max="10" value="6"></vaadin-progress-bar>
-    <div id="priceTodayDiv">
-      Div 
-    </div>
+    <vaadin-horizontal-layout>
+     <vaadin-vertical-layout id="gaugeLayout"></vaadin-vertical-layout>
+     <vaadin-vertical-layout style="justify-content: center; align-items: flex-start; width: 100%;">
+      <div id="consumptionTodayDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
+        Today consumption 
+      </div>
+      <div id="priceTodayDiv">
+        Div 
+      </div>
+     </vaadin-vertical-layout>
+    </vaadin-horizontal-layout>
    </div>
   </div>
   <div class="wrapper">
-   <div class="card space-m">
+   <div class="card space-m" id="monthlyConsumptionDiv">
     <span style="width: 100%;" theme="badge success">Monthly consumption</span>
-    <div id="consumptionMonthDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
-      This month consumption 
-    </div>
     <vaadin-progress-bar id="monthLimitProgressBar" max="20" value="12"></vaadin-progress-bar>
-    <div id="priceThisMonthDiv">
-      Price: 
-    </div>
+    <vaadin-horizontal-layout>
+     <vaadin-vertical-layout id="gaugeMonthLayout"></vaadin-vertical-layout>
+     <vaadin-vertical-layout style="width: 100%; align-items: center; justify-content: center;">
+      <div id="consumptionMonthDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
+        This month consumption 
+      </div>
+      <div id="priceThisMonthDiv">
+        Price: 
+      </div>
+     </vaadin-vertical-layout>
+    </vaadin-horizontal-layout>
    </div>
   </div>
  </vaadin-board-row>
