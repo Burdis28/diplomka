@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * A Designer generated component for the water-sensor template.
- *
+ * <p>
  * Designer will add and remove fields with @Id mappings but
  * does not overwrite or otherwise change this file.
  */
@@ -91,8 +91,6 @@ public class ElectricSensorView extends LitTemplate {
     private Binder<SensorElectric> sensorElectricBinder = new Binder<>();
     private List<Hardware> hardwareList;
 
-    private boolean pinAlreadyInUse;
-
     public ElectricSensorView(SensorElectricService sensorElectricService,
                               SensorService sensorService, HardwareService hardwareService) {
         this.sensorElectricService = sensorElectricService;
@@ -118,18 +116,18 @@ public class ElectricSensorView extends LitTemplate {
         editButton.addClickListener(buttonClickEvent -> {
             setReadOnlyFields(false);
 
-            setButton(saveButton,true);
+            setButton(saveButton, true);
             setButton(returnButton, false);
-            setButton(editButton,false);
+            setButton(editButton, false);
             setButton(cancelButton, true);
 
         });
 
         cancelButton.addClickListener(buttonClickEvent -> {
             // do nothing, maybe reload forms
-            setButton(saveButton,false);
+            setButton(saveButton, false);
             setButton(returnButton, true);
-            setButton(editButton,true);
+            setButton(editButton, true);
             setButton(cancelButton, false);
 
             setReadOnlyFields(true);
@@ -137,38 +135,37 @@ public class ElectricSensorView extends LitTemplate {
             sensorBinder.readBean(sensor);
             sensorElectricBinder.readBean(sensorElectric);
             setAttachedHardwareValue();
+            sensorInfo.getPinIdField().setValue(sensor.getPinId());
         });
 
         saveButton.addClickListener(buttonClickEvent -> {
             try {
-                    sensorElectricBinder.writeBean(sensorElectric);
-                    sensorBinder.writeBean(sensor);
+                sensorElectricBinder.writeBean(sensorElectric);
+                sensorBinder.writeBean(sensor);
 
-                    sensorElectricService.update(sensorElectric);
+                validatePinOnNewHardware();
+                sensorElectricService.update(sensorElectric);
+                sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
+                sensorService.update(sensor);
+                pricePerKwLowField.setInvalid(false);
+                pricePerKwHighField.setInvalid(false);
 
-                    validatePinOnNewHardware();
-                    sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
-                    sensorService.update(sensor);
-                    pricePerKwLowField.setInvalid(false);
-                    pricePerKwHighField.setInvalid(false);
+                setButton(saveButton, false);
+                setButton(returnButton, true);
+                setButton(cancelButton, false);
+                setButton(editButton, true);
 
-                    setButton(saveButton, false);
-                    setButton(returnButton, true);
-                    setButton(cancelButton, false);
-                    setButton(editButton, true);
-
-                    setReadOnlyFields(true);
+                setReadOnlyFields(true);
 
                 sensorBinder.readBean(sensor);
                 sensorElectricBinder.readBean(sensorElectric);
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                if (pinAlreadyInUse) {
+                if (e.getMessage().equals("Sensor pin")) {
                     error.setErrorText("Pin is already in use on new selected HW.");
                 } else {
                     error.setErrorText("Wrong form data input.");
                 }
-                pinAlreadyInUse = false;
                 error.open();
             }
         });
@@ -184,14 +181,23 @@ public class ElectricSensorView extends LitTemplate {
                 .findFirst()
                 .orElse(null)
         );
+
+        sensorInfo.getAttachToHardwareSelect().addValueChangeListener(event -> {
+            if (event.getValue().getSerial_HW().equals(this.sensor.getIdHw())) {
+                sensorInfo.getPinIdField().setReadOnly(true);
+                sensorInfo.getPinIdField().setValue(sensor.getPinId());
+            } else {
+                sensorInfo.getPinIdField().setReadOnly(false);
+            }
+        });
     }
 
     private void validatePinOnNewHardware() throws Exception {
         List<Sensor> sensors = sensorService.findSensorByIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
-        for(Sensor sensor : sensors) {
-            if (sensor != this.sensor && sensor.getPinId() == sensorInfo.getPinIdField().getValue()) {
-                pinAlreadyInUse = true;
-                throw new Exception("Sensor");
+        sensors.removeIf(sensor1 -> sensor1.getId() == this.sensor.getId());
+        for (Sensor sensor : sensors) {
+            if (sensor.getType().equals(this.sensor.getType()) && sensor.getPinId() == sensorInfo.getPinIdField().getValue()) {
+                throw new Exception("Sensor pin");
             }
         }
     }
@@ -199,7 +205,7 @@ public class ElectricSensorView extends LitTemplate {
     public void setSensor() {
         int sensorId = -1;
         sensorId = (int) VaadinSession.getCurrent().getAttribute("sensorId");
-        if(sensorId != -1) {
+        if (sensorId != -1) {
             this.sensorElectricService.get(sensorId).ifPresent(electric -> sensorElectric = electric);
             this.sensorService.get(sensorId).ifPresent(sensor -> this.sensor = sensor);
         }

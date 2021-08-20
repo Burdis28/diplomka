@@ -69,7 +69,7 @@ export class SensorElDashboard extends LitElement {
     <vaadin-progress-bar id="todayLimitProgressBar" max="10" value="6"></vaadin-progress-bar>
     <vaadin-horizontal-layout>
      <vaadin-vertical-layout id="gaugeLayout"></vaadin-vertical-layout>
-     <vaadin-vertical-layout style="justify-content: center; align-items: flex-start; width: 100%;">
+     <vaadin-vertical-layout style="justify-content: center; align-items: center; width: 100%;">
       <div id="consumptionTodayDivText" style="margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-xs);">
         Today consumption 
       </div>

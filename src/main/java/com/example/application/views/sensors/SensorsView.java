@@ -176,7 +176,7 @@ public class SensorsView extends LitTemplate {
         }
     }
 
-    @Scheduled(fixedDelay = 30000)
+    @Scheduled(fixedDelay = 60000)
     public void refreshGrid() {
         try {
             getUI().ifPresent(ui -> ui.access(() -> {

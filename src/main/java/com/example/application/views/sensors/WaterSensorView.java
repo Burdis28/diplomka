@@ -74,8 +74,6 @@ public class WaterSensorView extends LitTemplate {
     private TextField startNightField;
     @Id("endNightField")
     private TextField endNightField;
-    @Id("stateSelect")
-    private Select<StateValve> stateSelect;
 
     private Binder<Sensor> sensorBinder = new Binder<>();
     private Binder<SensorWater> sensorWaterBinder = new Binder<>();
@@ -91,8 +89,10 @@ public class WaterSensorView extends LitTemplate {
     private User loggedUser;
     private int initialStateId;
     private List<Hardware> hardwareList;
-
-    private boolean pinAlreadyInUse;
+    @Id("stateTextField")
+    private TextField stateTextField;
+    @Id("openCloseValveButton")
+    private Button openCloseValveButton;
 
     /**
      * Creates a new WaterSensorView.
@@ -111,15 +111,16 @@ public class WaterSensorView extends LitTemplate {
         this.userService = userService;
         this.hardwareService = hardwareService;
         hardwareList = hardwareService.findAll();
+        states = stateValveService.listAll();
 
         cancelButton.setIcon(new Icon(VaadinIcon.CLOSE_CIRCLE_O));
         saveButton.setIcon(new Icon(VaadinIcon.CHECK_CIRCLE));
         returnButton.setIcon(new Icon(VaadinIcon.REPLY));
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
 
-        fillStateSelect();
         setSensor();
         setReadOnlyFields(true);
+        stateTextField.setReadOnly(true);
         attachListeners();
 
         setButton(editButton, true);
@@ -149,6 +150,8 @@ public class WaterSensorView extends LitTemplate {
             sensorBinder.readBean(sensor);
             sensorWaterBinder.readBean(sensorWater);
             setAttachedHardwareValue();
+            setStateFields(sensorWater);
+            sensorInfo.getPinIdField().setValue(sensor.getPinId());
         });
 
         saveButton.addClickListener(buttonClickEvent -> {
@@ -156,10 +159,10 @@ public class WaterSensorView extends LitTemplate {
                 sensorWaterBinder.writeBean(sensorWater);
                 sensorBinder.writeBean(sensor);
                 updateNightTimeFields(sensorWater);
+                validatePinOnNewHardware();
+                setState();
 
                 sensorWaterService.update(sensorWater);
-
-                validatePinOnNewHardware();
                 sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
                 sensorService.update(sensor);
                 setStateValveFields(sensorWater);
@@ -175,12 +178,11 @@ public class WaterSensorView extends LitTemplate {
                 sensorWaterBinder.readBean(sensorWater);
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                if (pinAlreadyInUse) {
+                if (e.getMessage().equals("Sensor pin")) {
                     error.setErrorText("Pin is already in use on new selected HW.");
                 } else {
                     error.setErrorText("Wrong form data input.");
                 }
-                pinAlreadyInUse = false;
                 error.open();
             }
         });
@@ -188,6 +190,37 @@ public class WaterSensorView extends LitTemplate {
         {
             UI.getCurrent().navigate("sensors");
         });
+
+        openCloseValveButton.addClickListener(event -> {
+            Optional<StateValve> state = states.stream().filter(stateValve -> stateValve.getId() == sensorWater.getState()).findFirst();
+            if (state.isPresent()) {
+                if (stateTextField.getValue().equals("Opened") || stateTextField.getValue().equals("Request to open")) {
+                    stateTextField.setValue("Request to close");
+                    openCloseValveButton.setText("Open valve");
+                } else {
+                    stateTextField.setValue("Request to open");
+                    openCloseValveButton.setText("Close valve");
+                }
+            }
+        });
+    }
+
+    private void setState() {
+        if (stateTextField.getValue().equals("Request to open")) {
+            if (sensorWater.getState() == 1) {
+                sensorWater.setState(1);
+                stateTextField.setValue("Opened");
+            } else {
+                sensorWater.setState(2);
+            }
+        } else if (stateTextField.getValue().equals("Request to close")) {
+            if (sensorWater.getState() == 3) {
+                sensorWater.setState(3);
+                stateTextField.setValue("Closed");
+            } else {
+                sensorWater.setState(4);
+            }
+        }
     }
 
     private void setAttachedHardwareValue() {
@@ -196,6 +229,15 @@ public class WaterSensorView extends LitTemplate {
                 .findFirst()
                 .orElse(null)
         );
+
+        sensorInfo.getAttachToHardwareSelect().addValueChangeListener(event -> {
+            if (event.getValue().getSerial_HW().equals(this.sensor.getIdHw())) {
+                sensorInfo.getPinIdField().setReadOnly(true);
+                sensorInfo.getPinIdField().setValue(sensor.getPinId());
+            } else {
+                sensorInfo.getPinIdField().setReadOnly(false);
+            }
+        });
     }
 
     public void setSensor() {
@@ -212,22 +254,15 @@ public class WaterSensorView extends LitTemplate {
         firstLayout.addComponentAsFirst(sensorInfo);
 
         setSensorFields(sensorWater);
-
     }
 
-    private void fillStateSelect() {
-        states = stateValveService.listAll();
-        stateSelect.removeAll();
-        stateSelect.setItems(states);
-        stateSelect.setTextRenderer(StateValve::getState);
-    }
 
     private void validatePinOnNewHardware() throws Exception {
         List<Sensor> sensors = sensorService.findSensorByIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
-        for(Sensor sensor : sensors) {
-            if (sensor != this.sensor && sensor.getPinId() == sensorInfo.getPinIdField().getValue()) {
-                pinAlreadyInUse = true;
-                throw new Exception("Sensor");
+        sensors.removeIf(sensor1 -> sensor1.getId() == this.sensor.getId());
+        for (Sensor sensor : sensors) {
+            if (sensor.getType().equals(this.sensor.getType()) && sensor.getPinId() == sensorInfo.getPinIdField().getValue()) {
+                throw new Exception("Sensor pin");
             }
         }
     }
@@ -239,18 +274,7 @@ public class WaterSensorView extends LitTemplate {
         sensorWaterBinder.forField(implPerLitField).asRequired("Required field.")
                 .withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getImplPerLit, SensorWater::setImplPerLit);
-        sensorWaterBinder.forField(stateSelect).asRequired("Required field.")
-                .bind(sensorWater1 -> {
-                    Optional<StateValve> state = states.stream().filter(stateValve -> stateValve.getId() == sensorWater1.getState()).findFirst();
-                            return state.orElse(null);
-                        },
-                (sensorWater1, stateValve) -> {
-                    if (initialStateId != stateSelect.getValue().getId()) {
-                        sensorWater1.setStateModifiedDate(Timestamp.valueOf(LocalDateTime.now()));
-                        sensorWater1.setStateModifierUserId(loggedUser.getId());
-                        sensorWater1.setState(stateValve.getId());
-                    }
-                });
+        setStateFields(sensorWater);
 
         setStateValveFields(sensorWater);
 
@@ -287,10 +311,29 @@ public class WaterSensorView extends LitTemplate {
         sensorBinder.readBean(sensor);
     }
 
+    private void setStateFields(SensorWater sensorWater) {
+        Optional<StateValve> state = states.stream().filter(stateValve -> stateValve.getId() == sensorWater.getState()).findFirst();
+        if (state.isPresent()) {
+            if (state.get().getId() == 1) {
+                stateTextField.setValue("Opened");
+                openCloseValveButton.setText("Close valve");
+            } else if (state.get().getId() == 2) {
+                stateTextField.setValue("Request to open");
+                openCloseValveButton.setText("Close valve");
+            } else if (state.get().getId() == 3) {
+                stateTextField.setValue("Closed");
+                openCloseValveButton.setText("Open valve");
+            } else if (state.get().getId() == 4) {
+                stateTextField.setValue("Request to close");
+                openCloseValveButton.setText("Open valve");
+            }
+        }
+    }
+
     private void setStateValveFields(SensorWater sensorWater) {
         stateModifiedDateField.setReadOnly(true);
         stateModifiedDateField.setValue(sensorWater.getStateModifiedDate() == null ? "" : sensorWater.getStateModifiedDate()
-                        .toLocalDateTime().format(DateTimeFormatter.ofPattern("HH:mm:ss yyyy-MM-dd")));
+                .toLocalDateTime().format(DateTimeFormatter.ofPattern("HH:mm:ss yyyy-MM-dd")));
 
         Optional<User> user = userService.get(sensorWater.getStateModifierUserId());
         user.ifPresent(value -> stateModifiedBy.setValue(value.getFullName()));
@@ -336,12 +379,12 @@ public class WaterSensorView extends LitTemplate {
         pricePerM3Field.setReadOnly(b);
         countStopField.setReadOnly(b);
         implPerLitField.setReadOnly(b);
-        stateSelect.setReadOnly(b);
         countStopNightField.setReadOnly(b);
         countStopField.setReadOnly(b);
         startNightField.setReadOnly(b);
         endNightField.setReadOnly(b);
         timeBetweenImplField.setReadOnly(b);
+        openCloseValveButton.setVisible(!b);
 
         sensorInfo.getSensorName().setReadOnly(b);
         sensorInfo.getLimitDay().setReadOnly(b);
