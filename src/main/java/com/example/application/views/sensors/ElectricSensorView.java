@@ -156,6 +156,7 @@ public class ElectricSensorView extends LitTemplate {
                 setButton(editButton, true);
 
                 setReadOnlyFields(true);
+                sensorInfo.getPinIdField().setReadOnly(true);
 
                 sensorBinder.readBean(sensor);
                 sensorElectricBinder.readBean(sensorElectric);

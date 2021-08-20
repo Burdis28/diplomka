@@ -174,6 +174,7 @@ public class WaterSensorView extends LitTemplate {
                 setButton(editButton, true);
 
                 setReadOnlyFields(true);
+                sensorInfo.getPinIdField().setReadOnly(true);
                 sensorBinder.readBean(sensor);
                 sensorWaterBinder.readBean(sensorWater);
             } catch (Exception e) {
