@@ -2,7 +2,7 @@ import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
 import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
-import '@vaadin/vaadin-select/src/vaadin-select.js';
+import '@vaadin/vaadin-button/src/vaadin-button.js';
 
 @customElement('water-sensor-view')
 export class WaterSensorView extends LitElement {
@@ -28,8 +28,13 @@ export class WaterSensorView extends LitElement {
      <vaadin-text-field label="Impl per liter" id="implPerLitField" required clear-button-visible invalid></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
-     <vaadin-select id="stateSelect" label="State"></vaadin-select>
+     <vaadin-text-field label="Current state" id="stateTextField" required></vaadin-text-field>
      <vaadin-text-field label="Time between impl" id="timeBetweenImplField" required invalid></vaadin-text-field>
+    </vaadin-horizontal-layout>
+    <vaadin-horizontal-layout style="width: 100%; justify-content: center; align-items: center;" theme="spacing">
+     <vaadin-button id="openCloseValveButton" style="align-self: center;" theme="primary">
+      Open valve
+     </vaadin-button>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
      <vaadin-text-field label="State last modified by" id="stateModifiedBy" readonly helper-text="If not filled - state wasn't changed yet."></vaadin-text-field>

@@ -30,10 +30,12 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -155,6 +157,10 @@ public class SensorWaterDashboard extends LitTemplate {
     private Span hwSerialCodeField;
     @Id("chartTitle")
     private H4 chartTitle;
+    @Id("gaugeMonthLayout")
+    private VerticalLayout gaugeMonthLayout;
+    @Id("gaugeLayout")
+    private VerticalLayout gaugeLayout;
 
     /**
      * Creates a new SensorWatDashboard.
@@ -222,10 +228,9 @@ public class SensorWaterDashboard extends LitTemplate {
             price += data.getM3() * sensorWater.getPrice_per_m3();
             consumption += data.getM3();
         }
-        consumptionTodayText = new StyledTextComponent("Today consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + " [m3] -> <b>" +
-                String.format("%.2f", (consumption/sensor.getLimit_day())*100) + "%</b>");
-        priceTodayText = new StyledTextComponent("Price so far: <b>" + PatternStringUtils.formatNumberToText(
+        consumptionTodayText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
+                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + " [m3]");
+        priceTodayText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
                 getNumberOfDecimalPrecision(price, 3))
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionTodayDivText.setText("");
@@ -239,8 +244,9 @@ public class SensorWaterDashboard extends LitTemplate {
         } else {
             todayLimitProgressBar.setValue(consumption);
         }
+        gaugeLayout.add(DashBoardUtils.createConsumptionGauge(consumption, sensor.getLimit_day(), false));
         todayLimitProgressBar.setHeight("15px");
-        todayLimitProgressBar.setVisible(true);
+        todayLimitProgressBar.setVisible(false);
     }
 
     private void setConsumptionPricesChangerForChart() {
@@ -690,9 +696,8 @@ public class SensorWaterDashboard extends LitTemplate {
             consumption += data.getM3();
         }
         consumptionMonthText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_month() + " [m3] -> <b>" +
-                String.format("%.2f", (consumption/sensor.getLimit_month())*100) + "%</b>");
-        priceMonthText = new StyledTextComponent("Monthly price so far: <b>" + PatternStringUtils.formatNumberToText(
+                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_month() + " [m3]");
+        priceMonthText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
                 getNumberOfDecimalPrecision(price, 3))
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionMonthDivText.setText("");
@@ -706,8 +711,9 @@ public class SensorWaterDashboard extends LitTemplate {
         } else {
             monthLimitProgressBar.setValue(consumption);
         }
+        gaugeMonthLayout.add(DashBoardUtils.createConsumptionGauge(consumption, sensor.getLimit_month(), false));
         monthLimitProgressBar.setHeight("15px");
-        monthLimitProgressBar.setVisible(true);
+        monthLimitProgressBar.setVisible(false);
     }
 
        private void setInfoData() {

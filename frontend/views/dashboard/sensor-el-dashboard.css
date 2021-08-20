@@ -89,4 +89,5 @@ sensor-el-dashboard .statusImage {
 }
 
 sensor-el-dashboard .gauge {
+    padding-bottom: -10px;
 }
