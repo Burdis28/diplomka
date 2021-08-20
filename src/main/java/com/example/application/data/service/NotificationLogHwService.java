@@ -20,11 +20,12 @@ public class NotificationLogHwService extends CrudService<NotificationLogHw, Int
     }
 
     public void deleteBySerialHW(String serialHw) {
-        notificationLogHwRepository.deleteBySerialHw(serialHw);
+        this.notificationLogHwRepository.deleteBySerialHw(serialHw);
     }
 
     @Override
     protected JpaRepository<NotificationLogHw, Integer> getRepository() {
         return notificationLogHwRepository;
     }
+
 }

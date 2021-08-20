@@ -726,7 +726,7 @@ public class SensorElectricDashboard extends LitTemplate {
         signalStrength = associatedHwLive != null ? associatedHwLive.getSignal_strength() : 0;
 
         //signalPowerHwField.setText("Signal power: ");
-        SensorsUtil.setSignalImage(associatedHwLive, signalPowerHwField, signalImage);
+        SensorsUtil.setSignalImage(signalStrength, signalPowerHwField, signalImage);
         signalImage.setClassName("statusImage");
     }
 

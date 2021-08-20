@@ -110,13 +110,17 @@ public class WaterSensorView extends LitTemplate {
         this.stateValveService = stateValveService;
         this.userService = userService;
         this.hardwareService = hardwareService;
-        hardwareList = hardwareService.findAll();
+        User loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
+        if (loggedUser.getAdmin()) {
+            hardwareList = hardwareService.findAll();
+        } else {
+            hardwareList = hardwareService.findByOwner(loggedUser.getId());
+        }
         states = stateValveService.listAll();
 
         cancelButton.setIcon(new Icon(VaadinIcon.CLOSE_CIRCLE_O));
         saveButton.setIcon(new Icon(VaadinIcon.CHECK_CIRCLE));
         returnButton.setIcon(new Icon(VaadinIcon.REPLY));
-        loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
 
         setSensor();
         setReadOnlyFields(true);
@@ -161,6 +165,7 @@ public class WaterSensorView extends LitTemplate {
                 updateNightTimeFields(sensorWater);
                 validatePinOnNewHardware();
                 setState();
+                setPin();
 
                 sensorWaterService.update(sensorWater);
                 sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
@@ -204,6 +209,10 @@ public class WaterSensorView extends LitTemplate {
                 }
             }
         });
+    }
+
+    private void setPin() {
+        sensor.setPinId(sensorInfo.getPinIdField().getValue());
     }
 
     private void setState() {

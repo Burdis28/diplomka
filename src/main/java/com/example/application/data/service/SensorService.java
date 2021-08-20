@@ -56,4 +56,12 @@ public class SensorService extends CrudService<Sensor, Integer> {
     public List<Sensor> findByType(String type) {
         return sensorRepository.findAllByType(type);
     }
+
+    public List<SensorGridRepresentation> findAllForGrid() {
+        return sensorRepository.findAllForGrid();
+    }
+
+    public List<SensorGridRepresentation> findAllByOwnerForGrid(int ownerId) {
+        return this.sensorRepository.findAllByOwnerForGrid(ownerId);
+    }
 }

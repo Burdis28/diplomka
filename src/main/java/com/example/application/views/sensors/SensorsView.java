@@ -9,7 +9,6 @@ import com.example.application.data.service.data.DataWaterService;
 import com.example.application.utils.Colors;
 import com.example.application.utils.MathUtils;
 import com.example.application.views.main.MainLayout;
-import com.example.application.views.sensors.components.MonthYearKey;
 import com.example.application.views.sensors.components.SensorsUtil;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
@@ -44,12 +43,11 @@ import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.Header;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.model.StylesTable;
-import org.apache.poi.xssf.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -60,8 +58,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -75,20 +71,18 @@ import java.util.stream.Collectors;
 public class SensorsView extends LitTemplate {
 
     @Id("grid")
-    private Grid<Sensor> grid;
-    private GridListDataView<Sensor> gridListDataView;
+    private Grid<SensorGridRepresentation> grid;
+    private GridListDataView<SensorGridRepresentation> gridListDataView;
 
-    private Grid.Column<Sensor> typeColumn;
-    private Grid.Column<Sensor> nameColumn;
-    private Grid.Column<Sensor> onlineColumn;
-    private Grid.Column<Sensor> signalColumn;
-    private Grid.Column<Sensor> infoColumn;
-    private Grid.Column<Sensor> tarifColumn;
-    private Grid.Column<Sensor> valveColumn;
-    private Grid.Column<Sensor> pinIdColumn;
-    private Grid.Column<Sensor> hardwareColumn;
-    private Grid.Column<Sensor> toolsColumn;
-    private Grid.Column<Sensor> exportColumn;
+    private Grid.Column<SensorGridRepresentation> typeColumn;
+    private Grid.Column<SensorGridRepresentation> nameColumn;
+    private Grid.Column<SensorGridRepresentation> onlineColumn;
+    private Grid.Column<SensorGridRepresentation> signalColumn;
+    private Grid.Column<SensorGridRepresentation> infoColumn;
+    private Grid.Column<SensorGridRepresentation> pinIdColumn;
+    private Grid.Column<SensorGridRepresentation> hardwareColumn;
+    private Grid.Column<SensorGridRepresentation> toolsColumn;
+    private Grid.Column<SensorGridRepresentation> exportColumn;
 
 
     private TextField nameFilter;
@@ -155,24 +149,24 @@ public class SensorsView extends LitTemplate {
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
         grid.setHeight("100%");
 
-        List<Sensor> sensors = getSensors();
+        List<SensorGridRepresentation> sensors = getSensors();
         grid.addItemClickListener(event -> {
             grid.select(event.getItem());
         });
 
         gridListDataView = grid.setItems(sensors);
-        GridContextMenu<Sensor> contextMenu = grid.addContextMenu();
+        GridContextMenu<SensorGridRepresentation> contextMenu = grid.addContextMenu();
         createContextMenu(contextMenu);
         contextMenu.add(new Hr());
         createDeleteContextMenu(contextMenu);
     }
 
 
-    private List<Sensor> getSensors() {
+    private List<SensorGridRepresentation> getSensors() {
         if (loggedUser.getAdmin()) {
-            return sensorService.findAll();
+            return sensorService.findAllForGrid();
         } else {
-            return sensorService.findAllByOwner(loggedUser.getId());
+            return sensorService.findAllByOwnerForGrid(loggedUser.getId());
         }
     }
 
@@ -189,16 +183,16 @@ public class SensorsView extends LitTemplate {
         }
     }
 
-    private void createDeleteContextMenu(GridContextMenu<Sensor> contextMenu) {
+    private void createDeleteContextMenu(GridContextMenu<SensorGridRepresentation> contextMenu) {
         contextMenu.addItem("Delete", event -> {
-            Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
+            SensorGridRepresentation sensor = event.getItem().isPresent() ? event.getItem().get() : null;
             if (sensor != null) {
                 createDeleteSensorDialog(sensor);
             }
         });
     }
 
-    private void createDeleteSensorDialog(Sensor sensor) {
+    private void createDeleteSensorDialog(SensorGridRepresentation sensor) {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setHeader("Confirm delete");
         dialog.setText("Are you sure you want to delete \"" + sensor.getName() + "\" sensor?");
@@ -216,41 +210,25 @@ public class SensorsView extends LitTemplate {
         gridListDataView.refreshAll();
     }
 
-    private void createContextMenu(GridContextMenu<Sensor> contextMenu) {
+    private void createContextMenu(GridContextMenu<SensorGridRepresentation> contextMenu) {
         contextMenu.addItem("View & edit", event -> {
-            Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
+            SensorGridRepresentation sensor = event.getItem().isPresent() ? event.getItem().get() : null;
             if (sensor != null) {
                 SensorsUtil.navigateToSensorDetail(sensor);
             }
         });
         contextMenu.addItem("Go to dashboard", event -> {
-            Sensor sensor = event.getItem().isPresent() ? event.getItem().get() : null;
+            SensorGridRepresentation sensor = event.getItem().isPresent() ? event.getItem().get() : null;
             if (sensor != null) {
                 if (sensor.getType().equals(SensorTypes.g.name())) {
                     Dialog dialog = new Dialog();
                     dialog.add("Dashboard for Gas type sensors are not yet available in this version of the application.");
                     dialog.open();
                 } else {
-                    navigateToSensorDashboard(sensor);
+                    SensorsUtil.navigateToSensorDashboard(sensor);
                 }
             }
         });
-    }
-
-    private void navigateToSensorDashboard(Sensor sensor) {
-        VaadinSession.getCurrent().setAttribute("sensorId", sensor.getId());
-        switch (sensor.getType()) {
-            case "e":
-                UI.getCurrent().navigate("sensor-el-dashboard");
-                return;
-            case "w":
-                UI.getCurrent().navigate("sensor-wat-dashboard");
-                return;
-            case "g":
-                UI.getCurrent().navigate("sensor-gas-dashboard");
-                return;
-            default:
-        }
     }
 
     private void addColumnsToGrid() {
@@ -287,22 +265,22 @@ public class SensorsView extends LitTemplate {
             }
             verticalLayout.addComponentAsFirst(nameText);
             return verticalLayout;
-        }).setHeader("Name").setWidth("300px").setComparator(Sensor::getName).setFlexGrow(0);
+        }).setHeader("Name").setWidth("300px").setComparator(SensorGridRepresentation::getName).setFlexGrow(0);
     }
 
     private void createPidIdColumn() {
-        pinIdColumn = grid.addColumn(Sensor::getPinId, "pin").setHeader("Pin")
-                .setComparator(Sensor::getPinId).setWidth("100px").setFlexGrow(0);
+        pinIdColumn = grid.addColumn(SensorGridRepresentation::getPinId, "pin").setHeader("Pin")
+                .setComparator(SensorGridRepresentation::getPinId).setWidth("100px").setFlexGrow(0);
     }
 
     private void createSignalColumn() {
         signalColumn = grid.addComponentColumn(sensor -> {
-            HardwareLive live = hardwareLiveService.findByHardwareId(sensor.getIdHw());
+            Integer signalStrenght = hardwareLiveService.getSignalStrenght(sensor.getIdHw());
             Div span = new Div();
             span.setWidthFull();
             span.addClassName("signalImage");
             Image image = new Image();
-            SensorsUtil.setSignalImage(live, span, image);
+            SensorsUtil.setSignalImage(signalStrenght, span, image);
             return span;
         }).setHeader("Signal").setWidth("90px").setFlexGrow(0);
     }
@@ -330,9 +308,9 @@ public class SensorsView extends LitTemplate {
 
     private void createHardwareColumn() {
         hardwareColumn = grid.addComponentColumn(sensor -> {
-            Hardware hw = hardwareService.getBySerialHW(sensor.getIdHw()).get();
+            String hw = hardwareService.getHardwareName(sensor.getIdHw());
             Span hwName = new Span();
-            hwName.add(hw.getName());
+            hwName.add(hw);
             return hwName;
         }).setHeader("Hardware").setWidth("250px").setFlexGrow(0);
     }
@@ -361,16 +339,16 @@ public class SensorsView extends LitTemplate {
             }
             span.setWidthFull();
             return span;
-        }).setHeader("Type").setWidth("140px").setComparator(Sensor::getType).setFlexGrow(0);
+        }).setHeader("Type").setWidth("140px").setComparator(SensorGridRepresentation::getType).setFlexGrow(0);
     }
 
     private void createInfoColumn() {
         infoColumn = grid.addComponentColumn(sensor -> {
             Span span = new Span();
             if (sensor.getType().equals(SensorTypes.e.name())) {
-                SensorElectric sensorElectric = sensorElectricService.get(sensor.getId()).get();
+                boolean isHighRate = sensorElectricService.getHighRate(sensor.getId());
                 Icon tarifIcon;
-                if (sensorElectric.isHighRate()) {
+                if (isHighRate) {
                     tarifIcon = new Icon(VaadinIcon.ANGLE_DOUBLE_UP);
                     tarifIcon.setColor(Colors.BLACK.getRgb());
                     span.setText(" High rate");
@@ -381,8 +359,8 @@ public class SensorsView extends LitTemplate {
                 }
                 span.addComponentAsFirst(tarifIcon);
             } else if (sensor.getType().equals(SensorTypes.w.name())) {
-                SensorWater sensorWater = sensorWaterService.get(sensor.getId()).get();
-                StateValve state = stateValveService.get(sensorWater.getState()).get();
+                int stateId = sensorWaterService.getState(sensor.getId());
+                StateValve state = stateValveService.get(stateId).get();
                 Icon stateIcon;
                 Text text = new Text("");
                 if (state.getState().equals("open_confirm")) {
@@ -421,7 +399,7 @@ public class SensorsView extends LitTemplate {
                     dialog.add("Dashboard for Gas type sensors are not yet available in this version of the application.");
                     dialog.open();
                 } else {
-                    navigateToSensorDashboard(sensor);
+                    SensorsUtil.navigateToSensorDashboard(sensor);
                 }
             });
             dasboardIcon.getElement().setAttribute("theme", "badge secondary");
@@ -467,7 +445,7 @@ public class SensorsView extends LitTemplate {
         }).setHeader("Export").setWidth("150px");
     }
 
-    private void createExportDialog(Sensor sensor) {
+    private void createExportDialog(SensorGridRepresentation sensor) {
         Dialog dialog = new Dialog();
         VerticalLayout layout = new VerticalLayout();
         H3 title = new H3("Export " + sensor.getName() + " to excel file.");
@@ -551,18 +529,13 @@ public class SensorsView extends LitTemplate {
         return new ByteArrayInputStream(bytes);
     }
 
-    private void getHeaderRow(Sensor sensor, XSSFSheet sheet, XSSFWorkbook workbook) {
+    private void getHeaderRow(SensorGridRepresentation sensor, XSSFSheet sheet, XSSFWorkbook workbook) {
         XSSFRow row = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();//Create style
         Font font = workbook.createFont();//Create font
         font.setBold(true);//Make font bold
         style.setFont(font);//set it to bold
         style.setAlignment(HorizontalAlignment.CENTER);
-        style.setBorderTop(BorderStyle.MEDIUM);
-        style.setBorderBottom(BorderStyle.MEDIUM);
-        style.setBorderLeft(BorderStyle.MEDIUM);
-        style.setBorderRight(BorderStyle.MEDIUM);
-
 
         if (sensor.getType().equals(SensorTypes.e.name())) {
             createCellWithStyle(row, style, 0, "Data of " + sensor.getName());
@@ -578,17 +551,14 @@ public class SensorsView extends LitTemplate {
         //row.getCell(0).setCellStyle(style);
     }
 
-    private void getSecondHeaderRow(Sensor sensor, XSSFSheet sheet, XSSFWorkbook workbook, LocalDate from, LocalDate to) {
+    private void getSecondHeaderRow(SensorGridRepresentation sensor, XSSFSheet sheet, XSSFWorkbook workbook, LocalDate from, LocalDate to) {
         XSSFRow row = sheet.createRow(1);
-        CellStyle style = workbook.createCellStyle();//Create style
-        Font font = workbook.createFont();//Create font
-        font.setBold(true);//Make font bold
-        style.setFont(font);//set it to bold
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
         style.setAlignment(HorizontalAlignment.CENTER);
-        style.setBorderTop(BorderStyle.MEDIUM);
         style.setBorderBottom(BorderStyle.MEDIUM);
-        style.setBorderLeft(BorderStyle.MEDIUM);
-        style.setBorderRight(BorderStyle.MEDIUM);
 
         Cell cellHeader = row.createCell(0);
         cellHeader.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(from) + " - "
@@ -611,7 +581,7 @@ public class SensorsView extends LitTemplate {
         cellHeader.setCellStyle(style);
     }
 
-    private void createWaterExcelWorkBook(Sensor sensor, XSSFSheet sheet, String value, LocalDate from, LocalDate to) {
+    private void createWaterExcelWorkBook(SensorGridRepresentation sensor, XSSFSheet sheet, String value, LocalDate from, LocalDate to) {
         List<DataWater> data = dataWaterService.findAllBySensorIdAndDate(sensor.getId(), from, to);
         switch (value) {
             case "Daily": {
@@ -659,7 +629,7 @@ public class SensorsView extends LitTemplate {
         }
     }
 
-    private void createElectricExcelWorkBook(Sensor sensor, XSSFSheet sheet, String value, LocalDate from, LocalDate to) {
+    private void createElectricExcelWorkBook(SensorGridRepresentation sensor, XSSFSheet sheet, String value, LocalDate from, LocalDate to) {
         List<DataElectric> data = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), from, to);
         switch (value) {
             case "Daily": {
@@ -775,7 +745,7 @@ public class SensorsView extends LitTemplate {
         return pinIdFilter;
     }
 
-    private boolean areTypesEqual(Sensor sensor, ComboBox<String> statusFilter) {
+    private boolean areTypesEqual(SensorGridRepresentation sensor, ComboBox<String> statusFilter) {
         String statusFilterValue = statusFilter.getValue();
         if (statusFilterValue != null) {
             return StringUtils.equals(SensorTypes.valueOf(sensor.getType()).toString(), statusFilterValue);
@@ -795,10 +765,6 @@ public class SensorsView extends LitTemplate {
             consumptionMap.replace(date.withDayOfMonth(1), consumptionMap.get(date.withDayOfMonth(1)) + data.getM3());
         }
     }
-//
-//    private MonthYearKey getMonthYear(LocalDate date) {
-//        return new MonthYearKey(date.withDayOfMonth(1), date.getMonth().name().toLowerCase(Locale.ROOT) + "|" + date.getYear());
-//    }
 
     private void getConsumptionM3Daily(List<DataWater> dataWaterList, Map<LocalDate, Double> consumptionMap, LocalDate from, LocalDate to) {
         for (LocalDate date : from.datesUntil(to).sorted().collect(Collectors.toList())) {

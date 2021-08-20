@@ -13,4 +13,7 @@ public interface SensorElectricRepository extends JpaRepository<SensorElectric, 
     @Modifying
     @Query("DELETE FROM SensorElectric where sensor_id=:sensorId")
     void deleteBySensorId(@Param("sensorId") int sensorId);
+
+    @Query("SELECT isHighRate FROM SensorElectric where sensor_id=:sensorId")
+    boolean getHighRateOfSensor(@Param("sensorId") int sensorId);
 }
