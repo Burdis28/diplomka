@@ -42,12 +42,16 @@ public class AuthService {
     public void authenticate(String username, String password) throws AuthException {
         User user = userRepository.getByLogin(username);
 
-        if (user != null && passwordEncoder.matches(password, user.getPasswordHash())) {
-            VaadinSession.getCurrent().setAttribute(User.class, user);
-            if (RouteConfiguration.forSessionScope().getAvailableRoutes().size() < 3) {
-                createRoutes(user.getAdmin());
+        try {
+            if (user != null && passwordEncoder.matches(password, user.getPasswordHash())) {
+                VaadinSession.getCurrent().setAttribute(User.class, user);
+                if (RouteConfiguration.forSessionScope().getAvailableRoutes().size() < 3) {
+                    createRoutes(user.getAdmin());
+                }
+            } else {
+                throw new AuthException();
             }
-        } else {
+        } catch (Exception e) {
             throw new AuthException();
         }
     }

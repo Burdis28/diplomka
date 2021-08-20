@@ -15,4 +15,7 @@ public interface SensorWaterRepository extends JpaRepository<SensorWater, Intege
     @Modifying
     @Query("DELETE FROM SensorWater where sensor_id=:sensorId")
     void deleteBySensorId(@Param("sensorId") int sensorId);
+
+    @Query("SELECT state FROM SensorWater where sensor_id=:sensorId")
+    int getState(@Param("sensorId") int sensorId);
 }

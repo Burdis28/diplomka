@@ -21,4 +21,7 @@ public interface HardwareLiveRepository extends JpaRepository<HardwareLive, Inte
     @Modifying
 //    @Query("delete from UserHW where hwid=:hwId")
     void deleteByHwId(String hwId);
+
+    @Query("select signal_strength from HardwareLive where hwId=:hwId")
+    Integer getSignalStrenght(@Param("hwId") String hwId);
 }

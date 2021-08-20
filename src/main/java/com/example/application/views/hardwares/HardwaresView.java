@@ -217,12 +217,12 @@ public class HardwaresView extends LitTemplate {
 
     private void createSignalColumn() {
         signalColumn = grid.addComponentColumn(hardware -> {
-            HardwareLive live = hardwareLiveService.findByHardwareId(hardware.getSerial_HW());
+            Integer signalStrength = hardwareLiveService.getSignalStrenght(hardware.getSerial_HW());
             Div span = new Div();
             span.setWidthFull();
             span.addClassName("signalImage");
             Image image = new Image();
-            SensorsUtil.setSignalImage(live, span, image);
+            SensorsUtil.setSignalImage(signalStrength, span, image);
             return span;
         }).setHeader("Signal").setWidth("90px").setFlexGrow(0);
     }

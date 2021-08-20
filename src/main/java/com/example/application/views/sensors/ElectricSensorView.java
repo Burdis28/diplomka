@@ -4,6 +4,7 @@ import com.example.application.components.notifications.ErrorNotification;
 import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorElectric;
+import com.example.application.data.entity.User;
 import com.example.application.data.service.HardwareService;
 import com.example.application.data.service.SensorElectricService;
 import com.example.application.data.service.SensorService;
@@ -96,7 +97,12 @@ public class ElectricSensorView extends LitTemplate {
         this.sensorElectricService = sensorElectricService;
         this.sensorService = sensorService;
         this.hardwareService = hardwareService;
-        hardwareList = hardwareService.findAll();
+        User loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
+        if (loggedUser.getAdmin()) {
+            hardwareList = hardwareService.findAll();
+        } else {
+            hardwareList = hardwareService.findByOwner(loggedUser.getId());
+        }
 
         cancelButton.setIcon(new Icon(VaadinIcon.CLOSE_CIRCLE_O));
         saveButton.setIcon(new Icon(VaadinIcon.CHECK_CIRCLE));
@@ -142,8 +148,9 @@ public class ElectricSensorView extends LitTemplate {
             try {
                 sensorElectricBinder.writeBean(sensorElectric);
                 sensorBinder.writeBean(sensor);
-
                 validatePinOnNewHardware();
+                setPin();
+
                 sensorElectricService.update(sensorElectric);
                 sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
                 sensorService.update(sensor);
@@ -174,6 +181,10 @@ public class ElectricSensorView extends LitTemplate {
         returnButton.addClickListener(buttonClickEvent -> {
             UI.getCurrent().navigate("sensors");
         });
+    }
+
+    private void setPin() {
+        sensor.setPinId(sensorInfo.getPinIdField().getValue());
     }
 
     private void setAttachedHardwareValue() {

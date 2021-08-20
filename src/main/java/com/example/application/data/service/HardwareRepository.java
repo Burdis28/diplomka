@@ -30,4 +30,7 @@ public interface HardwareRepository extends JpaRepository<Hardware, Integer> {
     @Modifying
     @Query(value = "insert into userhw (userId, hwId) VALUES (:userId,:serial_hw)", nativeQuery = true)
     void createBindingTableEntry(String serial_hw, int userId);
+
+    @Query("SELECT name from Hardware where serial_HW=:serialHw")
+    String getHardwareName(@Param("serialHw") String serialHw);
 }

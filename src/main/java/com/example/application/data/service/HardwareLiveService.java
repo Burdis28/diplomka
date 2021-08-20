@@ -46,4 +46,8 @@ public class HardwareLiveService extends CrudService<HardwareLive, Integer> {
             return null;
         }
     }
+
+    public Integer getSignalStrenght(String hwId) {
+        return hardwareLiveRepository.getSignalStrenght(hwId);
+    }
 }

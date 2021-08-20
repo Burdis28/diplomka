@@ -17,6 +17,10 @@ public class SensorWaterService extends CrudService<SensorWater, Integer> {
         this.sensorWaterRepository = sensorWaterRepository;
     }
 
+    public int getState(int id){
+        return sensorWaterRepository.getState(id);
+    }
+
     @Override
     protected JpaRepository<SensorWater, Integer> getRepository() {
         return sensorWaterRepository;

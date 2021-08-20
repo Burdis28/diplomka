@@ -63,4 +63,8 @@ public class HardwareService extends CrudService<Hardware, Integer> {
     public Optional<Hardware> getBySerialHW(String serialHw) {
         return hardwareRepository.getBySerialHW(serialHw);
     }
+
+    public String getHardwareName(String serialHw) {
+        return hardwareRepository.getHardwareName(serialHw);
+    }
 }

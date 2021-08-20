@@ -2,6 +2,7 @@ package com.example.application.views.sensors.components;
 
 import com.example.application.data.entity.HardwareLive;
 import com.example.application.data.entity.Sensor;
+import com.example.application.data.service.SensorGridRepresentation;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.Chart;
@@ -13,8 +14,16 @@ import com.vaadin.flow.server.VaadinSession;
 public class SensorsUtil {
 
     public static void navigateToSensorDetail(Sensor sensor) {
-        VaadinSession.getCurrent().setAttribute("sensorId", sensor.getId());
-        switch (sensor.getType()) {
+        navigateToSensorDetailInternal(sensor.getId(), sensor.getType());
+    }
+
+    public static void navigateToSensorDetail(SensorGridRepresentation sensor) {
+        navigateToSensorDetailInternal(sensor.getId(), sensor.getType());
+    }
+
+    private static void navigateToSensorDetailInternal(int id, String type) {
+        VaadinSession.getCurrent().setAttribute("sensorId", id);
+        switch (type) {
             case "e":
                 UI.getCurrent().navigate("sensor-el-detail");
                 return;
@@ -28,19 +37,42 @@ public class SensorsUtil {
         }
     }
 
+    public static void navigateToSensorDashboard(SensorGridRepresentation sensor) {
+        navigateToSensorDashBoardInternal(sensor.getType(), sensor.getId());
+    }
+
+    private static void navigateToSensorDashBoardInternal(String type, int id) {
+        VaadinSession.getCurrent().setAttribute("sensorId", id);
+        switch (type) {
+            case "e":
+                UI.getCurrent().navigate("sensor-el-dashboard");
+                return;
+            case "w":
+                UI.getCurrent().navigate("sensor-wat-dashboard");
+                return;
+            case "g":
+                UI.getCurrent().navigate("sensor-gas-dashboard");
+                return;
+            default:
+        }
+    }
+
+    public static void navigateToSensorDashboard(Sensor sensor) {
+        navigateToSensorDashBoardInternal(sensor.getType(), sensor.getId());
+    }
 
     public static Component createConsumptionChart(Sensor sensor, Chart consumptionChart, String height,
                                                    String width, String title, String paneSize) {
         Configuration configuration = consumptionChart.getConfiguration();
-        if(title != null) configuration.setTitle(title);
+        if (title != null) configuration.setTitle(title);
         consumptionChart.setClassName("solidGaugeConsumption");
         consumptionChart.setHeight(height);
         consumptionChart.setWidth(width);
-        String unit = sensor.getType().equals("e") ? "kWh": "m³";
+        String unit = sensor.getType().equals("e") ? "kWh" : "m³";
 
         Pane pane = configuration.getPane();
         pane.setSize(paneSize);
-        pane.setCenter(new String[] {"50%", "70%"});
+        pane.setCenter(new String[]{"50%", "70%"});
         pane.setStartAngle(-90);
         pane.setEndAngle(90);
 
@@ -72,7 +104,7 @@ public class SensorsUtil {
         DataLabels dataLabelsSeries = new DataLabels();
         dataLabelsSeries.setFormat("<div style=\"text-align:center\"><span style=\"font-size:25px;"
                 + "color:black' + '\">{y}</span><br/>"
-                + "<span style=\"font-size:12px;color:silver\">" + unit +"</span></div>");
+                + "<span style=\"font-size:12px;color:silver\">" + unit + "</span></div>");
 
         item.setDataLabels(dataLabelsSeries);
 
@@ -83,24 +115,24 @@ public class SensorsUtil {
         return consumptionChart;
     }
 
-    public static void setSignalImage(HardwareLive live, Div span, Image image) {
-        if(live!= null) {
-            if (live.getSignal_strength() >= 75) {
+    public static void setSignalImage(Integer signalStrenght, Div span, Image image) {
+        if (signalStrenght != null) {
+            if (signalStrenght >= 75) {
                 image.setSrc("images/signal_100.png");
                 image.setHeight("30px");
                 image.setWidth("30px");
                 span.add(image);
-            } else if (live.getSignal_strength() >= 50) {
+            } else if (signalStrenght >= 50) {
                 image.setSrc("images/signal_75.png");
                 image.setHeight("30px");
                 image.setWidth("30px");
                 span.add(image);
-            } else if (live.getSignal_strength() >= 25) {
+            } else if (signalStrenght >= 25) {
                 image.setSrc("images/signal_50.png");
                 image.setHeight("30px");
                 image.setWidth("30px");
                 span.add(image);
-            } else if (live.getSignal_strength() < 25 && live.getSignal_strength() != 0){
+            } else if (signalStrenght != 0) {
                 image.setSrc("images/signal_25.png");
                 image.setHeight("30px");
                 image.setWidth("30px");
@@ -120,14 +152,14 @@ public class SensorsUtil {
     }
 
     public static void updateSignalImage(HardwareLive live, Image image) {
-        if(live!= null) {
+        if (live != null) {
             if (live.getSignal_strength() >= 75) {
                 image.setSrc("images/signal_100.png");
             } else if (live.getSignal_strength() >= 50) {
                 image.setSrc("images/signal_75.png");
             } else if (live.getSignal_strength() >= 25) {
                 image.setSrc("images/signal_50.png");
-            } else if (live.getSignal_strength() < 25 && live.getSignal_strength() != 0){
+            } else if (live.getSignal_strength() < 25 && live.getSignal_strength() != 0) {
                 image.setSrc("images/signal_25.png");
             } else {
                 image.setSrc("images/signal_0.png");
@@ -139,10 +171,13 @@ public class SensorsUtil {
 
     public static String getBadgeType(Sensor sensor) {
         switch (sensor.getType()) {
-            case "w": return "badge primary";
+            case "w":
+                return "badge primary";
             //case "e": return "badge error primary";
-            case "g": return "badge success primary";
-            default: return "";
+            case "g":
+                return "badge success primary";
+            default:
+                return "";
         }
     }
 }
