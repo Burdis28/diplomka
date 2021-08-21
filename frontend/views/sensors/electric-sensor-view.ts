@@ -33,11 +33,6 @@ export class ElectricSensorView extends LitElement {
        Kč 
      </div>
     </vaadin-big-decimal-field>
-    <vaadin-big-decimal-field label="Impl per KW" style="align-self: stretch; padding: var(--lumo-space-m); width: 90%;" id="implPerKWField" tag="vaadin-big-decimal-field">
-     <div id="implPerKwSuffix" slot="suffix">
-       Kč 
-     </div>
-    </vaadin-big-decimal-field>
     <vaadin-big-decimal-field label="Price service" style="align-self: stretch; padding: var(--lumo-space-m); width: 90%;" id="priceServiceField" tag="vaadin-big-decimal-field">
      <div slot="suffix" id="priceServiceSuffix">
        Kč 
@@ -45,6 +40,12 @@ export class ElectricSensorView extends LitElement {
     </vaadin-big-decimal-field>
     <vaadin-big-decimal-field label="Price fixed" style="align-self: stretch; padding: var(--lumo-space-m); width: 90%;" id="priceFixedField" tag="vaadin-big-decimal-field">
      <div slot="suffix" id="priceFixedSuffix">
+       Kč 
+     </div>
+    </vaadin-big-decimal-field>
+    <h3 id="configurationTitle" style="align-self: flex-start;">Electric configuration</h3>
+    <vaadin-big-decimal-field label="Impulse per KW" style="align-self: stretch; padding: var(--lumo-space-m); width: 90%;" id="implPerKWField" tag="vaadin-big-decimal-field">
+     <div id="implPerKwSuffix" slot="suffix">
        Kč 
      </div>
     </vaadin-big-decimal-field>

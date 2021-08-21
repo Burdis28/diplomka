@@ -214,9 +214,9 @@ public class SensorElectricDashboard extends LitTemplate {
             consumption += data.getHighRate() + data.getLowRate();
         }
         consumptionTodayText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + "</b> [kW]");
+                getNumberOfDecimalPrecision(consumption, 1)) + " / " + sensor.getLimit_day() + "</b> [kW]");
         priceTodayText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(price, 3))
+                getNumberOfDecimalPrecision(price, 1))
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionTodayDivText.setText("");
         consumptionTodayDivText.add(consumptionTodayText);
@@ -367,9 +367,9 @@ public class SensorElectricDashboard extends LitTemplate {
             consumption += data.getHighRate() + data.getLowRate();
         }
         consumptionMonthText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_month() + "</b> [kW]");
+                getNumberOfDecimalPrecision(consumption, 1)) + " / " + sensor.getLimit_month() + "</b> [kW]");
         priceMonthText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(price, 3))
+                getNumberOfDecimalPrecision(price, 1))
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionMonthDivText.setText("");
         consumptionMonthDivText.add(consumptionMonthText);
@@ -602,16 +602,10 @@ public class SensorElectricDashboard extends LitTemplate {
                 configuration.removexAxes();
                 configuration.addxAxis(x);
             } else if (periodRadioButtonGroup.getValue().equals("Month")) {
-
-                LocalDate firstOfMonth = dateFrom;
-                LocalDate firstOfFollowingMonth = dateTo;
-//                System.out.println("Ted vypisuju dny od prvniho do posledniho pro datum: " + dateForChart);
-//                firstOfMonth.datesUntil(firstOfFollowingMonth).forEach(System.out::println);
-
                 XAxis x = new XAxis();
                 x.setCrosshair(new Crosshair());
                 x.setTitle("Day");
-                x.setCategories(firstOfMonth.datesUntil(firstOfFollowingMonth).map(date ->
+                x.setCategories(dateFrom.datesUntil(dateTo).map(date ->
                                 date.format(DateTimeFormatter.ofPattern("EEE, dd.MM.yyyy")))
                         .toArray(String[]::new));
                 configuration.removexAxes();

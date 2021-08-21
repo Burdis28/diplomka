@@ -17,11 +17,11 @@ export class LoginView extends LitElement {
         return html`
 <vaadin-vertical-layout style="width: 100%; height: 100%; align-items: center; justify-content: center;" id="vaadinVerticalLayout">
  <vaadin-horizontal-layout style="width: 370px; height: 250px; justify-content: center; align-items: flex-end; align-self: center;">
-  <div id="imageDiv" style="width: 370px; height: 250px; align-self: center;"></div>
+  <div id="imageDiv" style="width: 370px; height: 250px; align-self: center; margin-left: var(--lumo-space-s);"></div>
  </vaadin-horizontal-layout>
  <vaadin-form-layout id="vaadinFormLayout" style="align-self: center;">
   <vaadin-vertical-layout theme="spacing" id="vaadinVerticalLayout1">
-   <h3 id="loginTitleH3" style="align-self: flex-start; margin-top: var(--lumo-space-l); margin-bottom: var(--lumo-space-xs);">Log in</h3>
+   <h3 id="loginTitleH3" style="align-self: flex-start; margin-top: var(--lumo-space-l); margin-bottom: var(--lumo-space-xs);">Login</h3>
    <vaadin-text-field label="Username" placeholder="username" id="username" style="align-self: center; margin-top: var(--lumo-space-xs);" required invalid></vaadin-text-field>
    <vaadin-password-field label="Password" id="password" style="align-self: center;" required has-value invalid></vaadin-password-field>
    <vaadin-horizontal-layout theme="spacing">
@@ -29,7 +29,7 @@ export class LoginView extends LitElement {
       Log in 
     </vaadin-button>
     <vaadin-button id="registerButton">
-      Register 
+     Forgot password?
     </vaadin-button>
    </vaadin-horizontal-layout>
   </vaadin-vertical-layout>

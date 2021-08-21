@@ -29,6 +29,7 @@ import com.vaadin.flow.server.VaadinSession;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,6 +49,7 @@ public class UserManagementView extends LitTemplate {
 
     private GridListDataView<User> gridListDataView;
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
     private Grid.Column<User> idColumn;
     private Grid.Column<User> nameColumn;
@@ -72,8 +74,9 @@ public class UserManagementView extends LitTemplate {
     /**
      * Creates a new UserManagementView.
      */
-    public UserManagementView(@Autowired UserService userService) {
+    public UserManagementView(@Autowired UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         createGrid();
 
@@ -248,7 +251,7 @@ public class UserManagementView extends LitTemplate {
         dialog.setCancelable(true);
         dialog.setCancelText("Cancel");
         dialog.setCancelButtonTheme("primary error");
-        CreateUserForm createUserForm = new CreateUserForm();
+        CreateUserForm createUserForm = new CreateUserForm(passwordEncoder);
         dialog.add(createUserForm);
         Button btn = new Button();
         btn.setThemeName("primary");
@@ -257,6 +260,7 @@ public class UserManagementView extends LitTemplate {
             if (createUserForm.areFieldsValid() && createUserForm.arePasswordsValid()) {
                 userService.update(createUserForm.createUser());
                 Notification.show("New user created.");
+                refreshGrid();
                 dialog.close();
             } else {
                 if (!createUserForm.arePasswordsValid()) {
@@ -269,6 +273,12 @@ public class UserManagementView extends LitTemplate {
         });
         dialog.setConfirmButton(btn);
         dialog.open();
+    }
+
+    private void refreshGrid() {
+        List<User> sensors = getUsers();
+        gridListDataView = grid.setItems(sensors);
+        gridListDataView.refreshAll();
     }
 
     private void openModalWindow(String s) {

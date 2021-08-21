@@ -48,11 +48,11 @@ export class HardwareDetail extends LitElement {
     <label slot="label">Version</label>
     <vaadin-text-field id="versionField" readonly></vaadin-text-field>
    </vaadin-form-item>
-   <vaadin-form-item>
+   <vaadin-form-item id="attachedSensorsFormItem">
     <label slot="label">Attached sensors </label>
     <vaadin-select id="attachedSensorsSelect"></vaadin-select>
    </vaadin-form-item>
-   <vaadin-form-item>
+   <vaadin-form-item id="ownersFormItem">
     <label slot="label">Owners</label>
     <vaadin-select id="ownersSelect"></vaadin-select>
    </vaadin-form-item>
@@ -61,10 +61,10 @@ export class HardwareDetail extends LitElement {
      <iron-icon icon="lumo:edit" slot="prefix"></iron-icon> Edit 
     </vaadin-button>
     <vaadin-button theme="primary" id="saveButton">
-     Save
+      Save 
     </vaadin-button>
     <vaadin-button id="cancelButton">
-     Cancel
+      Cancel 
     </vaadin-button>
    </vaadin-horizontal-layout>
   </vaadin-vertical-layout>

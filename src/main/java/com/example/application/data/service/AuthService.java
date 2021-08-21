@@ -90,9 +90,9 @@ public class AuthService {
         } else {
             //routes.add(new AuthorizedRoute("dashboard", "Dashboard", DashboardView.class, VaadinIcon.BAR_CHART_H));
             routes.add(new AuthorizedRouteData("sensors", "Sensors management", SensorsView.class, VaadinIcon.LIST));
-            routes.add(new AuthorizedRouteData("create-sensor", "Create sensor", CreatesensorView.class, VaadinIcon.FORM));
+            //routes.add(new AuthorizedRouteData("create-sensor", "Create sensor", CreatesensorView.class, VaadinIcon.FORM));
             routes.add(new AuthorizedRouteData("hardwares", "Hardware management", HardwaresView.class, VaadinIcon.SERVER));
-            routes.add(new AuthorizedRouteData("create-hardware", "Create hardware", CreateHardwareView.class, VaadinIcon.HARDDRIVE_O));
+            //routes.add(new AuthorizedRouteData("create-hardware", "Create hardware", CreateHardwareView.class, VaadinIcon.HARDDRIVE_O));
             routes.add(new AuthorizedRouteData("user", "My profile", UserView.class, VaadinIcon.USER));
             routes.add(new AuthorizedRouteData("logout", "Logout", LogoutView.class, VaadinIcon.OUT));
         }

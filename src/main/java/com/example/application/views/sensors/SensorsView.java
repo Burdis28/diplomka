@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -101,6 +102,8 @@ public class SensorsView extends LitTemplate {
     private final User loggedUser;
     @Id("createSensorButton")
     private Button createSensorButton;
+    @Id("lastUpdateText")
+    private H5 lastUpdateText;
 
     public SensorsView(@Autowired SensorService sensorService, SensorElectricService sensorElectricService,
                        SensorWaterService sensorWaterService, StateValveService stateValveService,
@@ -119,6 +122,7 @@ public class SensorsView extends LitTemplate {
         this.hardwareService = hardwareService;
         this.dataElectricService = dataElectricService;
         this.dataWaterService = dataWaterService;
+        lastUpdateText.setText("Updated on: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
         grid.setSelectionMode(SelectionMode.NONE);
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
@@ -129,6 +133,9 @@ public class SensorsView extends LitTemplate {
         createSensorButton.addClickListener(event -> UI.getCurrent().navigate("create-sensor"));
 
         createGrid();
+        if(!loggedUser.getAdmin()) {
+            createSensorButton.setVisible(false);
+        }
 
 //        //TEST DATA
 //        if(generateTestData) {
@@ -176,10 +183,11 @@ public class SensorsView extends LitTemplate {
             getUI().ifPresent(ui -> ui.access(() -> {
                 grid.setItems(getSensors());
                 gridListDataView.refreshAll();
+                lastUpdateText.setText("Updated on: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                 ui.push();
             }));
         } catch (Exception e) {
-            // UI Detach exception - do nuthin
+            // UI Detach exception - do nothing, its harmless
         }
     }
 
@@ -412,7 +420,9 @@ public class SensorsView extends LitTemplate {
                     addComponentAsFirst(toolboxIcon);
                     addComponentAtIndex(1, dasboardIcon);
                     setSpacing(true);
-                    addComponentAtIndex(2, trashCanIcon);
+                    if(loggedUser.getAdmin()) {
+                        addComponentAtIndex(2, trashCanIcon);
+                    }
                 }
             };
         }).setHeader("Tools").setWidth("150px").setFlexGrow(0);
@@ -483,6 +493,9 @@ public class SensorsView extends LitTemplate {
 
             download.add(exportBtn);
             layout.add(download);
+            exportBtn.addClickListener(event -> {
+                dialog.close();
+            });
         } else if (sensor.getType().equals(SensorTypes.e.name())) {
             StreamResource streamResource = new StreamResource(
                     "Export-" + sensor.getName() + ".xlsx", () -> {
@@ -499,6 +512,9 @@ public class SensorsView extends LitTemplate {
 
             download.add(exportBtn);
             layout.add(download);
+            exportBtn.addClickListener(event -> {
+                dialog.close();
+            });
         } else {
             download = new Anchor();
         }
@@ -564,6 +580,7 @@ public class SensorsView extends LitTemplate {
         cellHeader.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(from) + " - "
                 + DateTimeFormatter.ofPattern("dd.MM.yyyy").format(to));
         cellHeader.setCellStyle(style);
+        //sheet.setColumnWidth(cellHeader.getColumnIndex(),500);
         if (sensor.getType().equals(SensorTypes.w.name())) {
             Cell cellHeader2 = row.createCell(1);
             cellHeader2.setCellValue(sensor.getType().equals(SensorTypes.w.name()) ? "m3" : "kWh");
@@ -573,6 +590,10 @@ public class SensorsView extends LitTemplate {
             createCellWithStyle(row, style, 2, "High rate");
             createCellWithStyle(row, style, 3, "Sum of both");
         }
+        sheet.autoSizeColumn(0);
+        sheet.autoSizeColumn(1);
+        sheet.autoSizeColumn(2);
+        sheet.autoSizeColumn(3);
     }
 
     private void createCellWithStyle(XSSFRow row, CellStyle style, int i, String s) {

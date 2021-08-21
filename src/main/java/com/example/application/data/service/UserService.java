@@ -27,7 +27,6 @@ public class UserService extends CrudService<User, Integer> {
         return userRepository.findAll();
     }
 
-    // TODO ask for HW owned by multiple users
     public List<User> getHardwareOwner(String serialHW) {
         return userRepository.getHardwareOwner(serialHW);
     }
@@ -40,5 +39,9 @@ public class UserService extends CrudService<User, Integer> {
 
     public boolean userOwnsAnyHW(Integer userId) {
         return userRepository.checkIfUserOwnsHW(userId) > 0;
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }

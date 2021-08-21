@@ -3,6 +3,7 @@ package com.example.application.views.sensors.components;
 import com.example.application.data.entity.Hardware;
 import com.example.application.data.entity.Sensor;
 import com.example.application.data.entity.SensorTypes;
+import com.example.application.data.entity.User;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
@@ -13,6 +14,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.server.VaadinSession;
 
 import java.math.BigDecimal;
 import java.time.ZoneOffset;
@@ -33,12 +35,18 @@ public class SensorInfoComponent extends VerticalLayout {
     private Select<Hardware> attachToHardwareSelect = new Select<>();
     private IntegerField pinIdField = new IntegerField();
     private TextField currency = new TextField();
+    private VerticalLayout layoutConfiguration;
+    private final H3 configurationAttributesTitle = new H3();
 
     public SensorInfoComponent(Sensor sensor, List<Hardware> hardwares) {
         layout = getLayout();
         if(layout == null) {
             layout = new VerticalLayout();
         }
+        if(layoutConfiguration == null) {
+            layoutConfiguration = new VerticalLayout();
+        }
+
 
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
         layout.setId("sensorInfoLayout");
@@ -60,10 +68,6 @@ public class SensorInfoComponent extends VerticalLayout {
         currency.setValue(sensor.getCurrencyString());
         currency.setWidthFull();
         add(currency);
-        consumptionCorrelation.setLabel("Consumption correlation");
-        consumptionCorrelation.setValue(BigDecimal.valueOf(sensor.getConsumptionCorrelation()));
-        consumptionCorrelation.setWidthFull();
-        add(consumptionCorrelation);
         limitDay.setLabel("Limit day");
         limitDay.setValue(BigDecimal.valueOf(sensor.getLimit_day()));
         limitDay.setWidthFull();
@@ -72,16 +76,25 @@ public class SensorInfoComponent extends VerticalLayout {
         limitMonth.setValue(BigDecimal.valueOf(sensor.getLimit_month()));
         limitMonth.setWidthFull();
         add(limitMonth);
-        attachToHardwareSelect.setLabel("Attached to hardware");
-        attachToHardwareSelect.setItems(hardwares);
-        attachToHardwareSelect.setTextRenderer(item -> item.getName() + " [" + item.getSerial_HW() + "]");
-        attachToHardwareSelect.setWidthFull();
-        add(attachToHardwareSelect);
-        pinIdField.setLabel("Pin ID");
-        pinIdField.setValue(sensor.getPinId());
-        pinIdField.setReadOnly(true);
-        pinIdField.setWidthFull();
-        add(pinIdField);
+
+        if (VaadinSession.getCurrent().getAttribute(User.class).getAdmin()) {
+            configurationAttributesTitle.setText("Sensor configuration");
+            add(configurationAttributesTitle);
+            consumptionCorrelation.setLabel("Consumption correlation");
+            consumptionCorrelation.setValue(BigDecimal.valueOf(sensor.getConsumptionCorrelation()));
+            consumptionCorrelation.setWidthFull();
+            add(consumptionCorrelation);
+            attachToHardwareSelect.setLabel("Attached to hardware");
+            attachToHardwareSelect.setItems(hardwares);
+            attachToHardwareSelect.setTextRenderer(item -> item.getName() + " [" + item.getSerial_HW() + "]");
+            attachToHardwareSelect.setWidthFull();
+            add(attachToHardwareSelect);
+            pinIdField.setLabel("Pin ID");
+            pinIdField.setValue(sensor.getPinId());
+            pinIdField.setReadOnly(true);
+            pinIdField.setWidthFull();
+            add(pinIdField);
+        }
     }
 
     private Span getTypeBadge(Sensor sensor) {
