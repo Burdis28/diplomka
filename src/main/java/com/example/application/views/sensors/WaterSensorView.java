@@ -11,6 +11,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.littemplate.LitTemplate;
@@ -68,8 +69,6 @@ public class WaterSensorView extends LitTemplate {
     private TextField stateModifiedBy;
     @Id("pricePerM3Field")
     private TextField pricePerM3Field;
-    @Id("timeBetweenImplField")
-    private TextField timeBetweenImplField;
     @Id("startNightField")
     private TextField startNightField;
     @Id("endNightField")
@@ -93,6 +92,10 @@ public class WaterSensorView extends LitTemplate {
     private TextField stateTextField;
     @Id("openCloseValveButton")
     private Button openCloseValveButton;
+    @Id("configurationTitle")
+    private H3 configurationTitle;
+    @Id("configurationLayout")
+    private HorizontalLayout configurationLayout;
 
     /**
      * Creates a new WaterSensorView.
@@ -110,11 +113,14 @@ public class WaterSensorView extends LitTemplate {
         this.stateValveService = stateValveService;
         this.userService = userService;
         this.hardwareService = hardwareService;
-        User loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
+        loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
         if (loggedUser.getAdmin()) {
             hardwareList = hardwareService.findAll();
         } else {
             hardwareList = hardwareService.findByOwner(loggedUser.getId());
+            configurationLayout.setVisible(false);
+            configurationTitle.setVisible(false);
+
         }
         states = stateValveService.listAll();
 
@@ -163,9 +169,11 @@ public class WaterSensorView extends LitTemplate {
                 sensorWaterBinder.writeBean(sensorWater);
                 sensorBinder.writeBean(sensor);
                 updateNightTimeFields(sensorWater);
-                validatePinOnNewHardware();
+                if (loggedUser.getAdmin()) {
+                    validatePinOnNewHardware();
+                    setPin();
+                }
                 setState();
-                setPin();
 
                 sensorWaterService.update(sensorWater);
                 sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
@@ -184,8 +192,10 @@ public class WaterSensorView extends LitTemplate {
                 sensorWaterBinder.readBean(sensorWater);
             } catch (Exception e) {
                 ErrorNotification error = new ErrorNotification();
-                if (e.getMessage().equals("Sensor pin")) {
-                    error.setErrorText("Pin is already in use on new selected HW.");
+                if (e.getMessage() != null) {
+                    if (e.getMessage().equals("Sensor pin")) {
+                        error.setErrorText("Pin is already in use on new selected HW.");
+                    }
                 } else {
                     error.setErrorText("Wrong form data input.");
                 }
@@ -288,9 +298,6 @@ public class WaterSensorView extends LitTemplate {
 
         setStateValveFields(sensorWater);
 
-        sensorWaterBinder.forField(timeBetweenImplField).asRequired("Required field.")
-                .withConverter(Integer::valueOf, String::valueOf)
-                .bind(SensorWater::getTimeBtwImpl, SensorWater::setTimeBtwImpl);
         sensorWaterBinder.forField(countStopField).asRequired("Required field.")
                 .withConverter(Integer::valueOf, String::valueOf)
                 .bind(SensorWater::getCountStop, SensorWater::setCountStop);
@@ -393,7 +400,6 @@ public class WaterSensorView extends LitTemplate {
         countStopField.setReadOnly(b);
         startNightField.setReadOnly(b);
         endNightField.setReadOnly(b);
-        timeBetweenImplField.setReadOnly(b);
         openCloseValveButton.setVisible(!b);
 
         sensorInfo.getSensorName().setReadOnly(b);

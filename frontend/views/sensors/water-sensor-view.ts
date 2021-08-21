@@ -1,8 +1,8 @@
 import { LitElement, html, css, customElement } from 'lit-element';
 import '@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js';
-import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
-import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
 import '@vaadin/vaadin-button/src/vaadin-button.js';
+import '@vaadin/vaadin-ordered-layout/src/vaadin-horizontal-layout.js';
+import '@vaadin/vaadin-text-field/src/vaadin-text-field.js';
 
 @customElement('water-sensor-view')
 export class WaterSensorView extends LitElement {
@@ -23,17 +23,13 @@ export class WaterSensorView extends LitElement {
    <vaadin-horizontal-layout theme="spacing" id="firstLayout"></vaadin-horizontal-layout>
    <vaadin-vertical-layout style="width: 100%; height: 100%; align-items: center; justify-content: center;" theme="spacing-s" id="verticalLayoutElectric">
     <h3 id="electricAttributesTitle" style="align-self: flex-start;">Water attributes</h3>
-    <vaadin-horizontal-layout theme="spacing">
+    <vaadin-horizontal-layout theme="spacing" style="align-self: stretch;">
      <vaadin-text-field label="Price per m3" id="pricePerM3Field" required clear-button-visible invalid></vaadin-text-field>
-     <vaadin-text-field label="Impl per liter" id="implPerLitField" required clear-button-visible invalid></vaadin-text-field>
     </vaadin-horizontal-layout>
-    <vaadin-horizontal-layout theme="spacing">
+    <vaadin-horizontal-layout theme="spacing" style="width: 100%;">
      <vaadin-text-field label="Current state" id="stateTextField" required></vaadin-text-field>
-     <vaadin-text-field label="Time between impl" id="timeBetweenImplField" required invalid></vaadin-text-field>
-    </vaadin-horizontal-layout>
-    <vaadin-horizontal-layout style="width: 100%; justify-content: center; align-items: center;" theme="spacing">
-     <vaadin-button id="openCloseValveButton" style="align-self: center;" theme="primary">
-      Open valve
+     <vaadin-button id="openCloseValveButton" style="align-self: center; margin-top: 2.2em; margin-left: var(--lumo-space-xl);" theme="primary">
+       Open valve 
      </vaadin-button>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
@@ -41,12 +37,16 @@ export class WaterSensorView extends LitElement {
      <vaadin-text-field label="State modified date" id="stateModifiedDateField" readonly></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
-     <vaadin-text-field label="Count stop" id="countStopField" required invalid></vaadin-text-field>
-     <vaadin-text-field label="Count stop at night" id="countStopNightField" required invalid></vaadin-text-field>
+     <vaadin-text-field label="Time[min] to stop" id="countStopField" required invalid></vaadin-text-field>
+     <vaadin-text-field label="Time[min] to stop at night" id="countStopNightField" required invalid></vaadin-text-field>
     </vaadin-horizontal-layout>
     <vaadin-horizontal-layout theme="spacing">
      <vaadin-text-field id="startNightField" required label="Time of start at night" helper-text="Valid input format: HH:MM"></vaadin-text-field>
      <vaadin-text-field id="endNightField" required label="Time of end at night" helper-text="Valid input format: HH:MM"></vaadin-text-field>
+    </vaadin-horizontal-layout>
+    <h3 id="configurationTitle" style="align-self: flex-start;">Water configuration</h3>
+    <vaadin-horizontal-layout id="configurationLayout" style="align-self: stretch;" theme="spacing">
+     <vaadin-text-field label="Impulse per liter" id="implPerLitField" required clear-button-visible invalid></vaadin-text-field>
     </vaadin-horizontal-layout>
    </vaadin-vertical-layout>
   </vaadin-horizontal-layout>

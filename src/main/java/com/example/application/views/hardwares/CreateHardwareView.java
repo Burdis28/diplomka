@@ -106,6 +106,12 @@ public class CreateHardwareView extends LitTemplate {
         notificationLogHw.setLastSent(timeNow);
         notificationLogHw.setNotificationType("");
         notificationLogHwService.update(notificationLogHw);
+
+        Notification notification = new Notification();
+        notification.setPosition(Notification.Position.MIDDLE);
+        notification.setDuration(2000);
+        notification.setText("HW created");
+        notification.open();
     }
 
     private void clearForm() {

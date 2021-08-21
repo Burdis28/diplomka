@@ -229,9 +229,9 @@ public class SensorWaterDashboard extends LitTemplate {
             consumption += data.getM3();
         }
         consumptionTodayText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_day() + " [m3]");
+                getNumberOfDecimalPrecision(consumption, 1)) + " / " + sensor.getLimit_day() + " [m3]");
         priceTodayText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(price, 3))
+                getNumberOfDecimalPrecision(price, 1))
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionTodayDivText.setText("");
         consumptionTodayDivText.add(consumptionTodayText);
@@ -275,7 +275,7 @@ public class SensorWaterDashboard extends LitTemplate {
                     sensor.getConsumptionActual() + "%</b>");
         } else {
             consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue  + "</b> [m3/h] -> <b>" +
-                    String.format("%.2f",(sensor.getConsumptionActual()/(consumptionMaxValue*1000)*100)) + "%</b>");
+                    String.format("%.1f",(sensor.getConsumptionActual()/(consumptionMaxValue*1000)*100)) + "%</b>");
         }
         consumptionDivText.setText("");
         consumptionDivText.addComponentAtIndex(0, consumptionText);
@@ -624,18 +624,18 @@ public class SensorWaterDashboard extends LitTemplate {
 
         previousButton.addClickListener(event -> {
             updateChartToPreviousData();
-            super.getUI().get().getPage().executeJs("document.body.scrollTo(0,500);");
-            //UI.getCurrent().getPage().executeJs("window.scroll(0,500);");
-            //scrollDownDiv.getElement().callFunction("scrollIntoView(false)");
+//            super.getUI().get().getPage().executeJs("document.body.scrollTo(0,500);");
+//            UI.getCurrent().getPage().executeJs("window.scroll(0,500);");
+//            scrollDownDiv.getElement().callFunction("scrollIntoView(false)");
 //            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 //            executorService.schedule(this::scrollDown, 3000, TimeUnit.MILLISECONDS);
         });
 
         nextButton.addClickListener(event -> {
             updateChartToNextData();
-            super.getUI().get().getPage().executeJs("document.body.scrollTo(0,500);");
-            //UI.getCurrent().getPage().executeJs("window.scroll(0,500);");
-            //scrollDownDiv.getElement().callFunction("scrollIntoView(false)");
+//            super.getUI().get().getPage().executeJs("document.body.scrollTo(0,500);");
+//            UI.getCurrent().getPage().executeJs("window.scroll(0,500);");
+//            scrollDownDiv.getElement().callFunction("scrollIntoView(false)");
 //            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 //            executorService.schedule(this::scrollDown, 3000, TimeUnit.MILLISECONDS);
         });
@@ -696,9 +696,9 @@ public class SensorWaterDashboard extends LitTemplate {
             consumption += data.getM3();
         }
         consumptionMonthText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 3)) + " / " + sensor.getLimit_month() + " [m3]");
+                getNumberOfDecimalPrecision(consumption, 1)) + " / " + sensor.getLimit_month() + " [m3]");
         priceMonthText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(price, 3))
+                getNumberOfDecimalPrecision(price, 1))
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionMonthDivText.setText("");
         consumptionMonthDivText.add(consumptionMonthText);
@@ -790,7 +790,6 @@ public class SensorWaterDashboard extends LitTemplate {
         onlineStatusDiv.add(addOnlineStatusIcon());
         signalStrength = associatedHwLive != null ? associatedHwLive.getSignal_strength() : 0;
 
-        //signalPowerHwField.setText("Signal power: ");
         SensorsUtil.setSignalImage(signalStrength, signalPowerHwField, signalImage);
         signalImage.setClassName("statusImage");
     }
@@ -820,18 +819,9 @@ public class SensorWaterDashboard extends LitTemplate {
     }
 
     private void refreshHardwareStatus() {
-        try {
             associatedHwLive = hardwareLiveService.findByHardwareId(sensor.getIdHw());
             signalStrength = associatedHwLive != null ? associatedHwLive.getSignal_strength() : 0;
-            getUI().ifPresent(ui -> ui.access(() ->
-                    {
-                        SensorsUtil.updateSignalImage(associatedHwLive, signalImage);
-                        ui.push();
-                    }
-            ));
-        } catch (UIDetachedException exception) {
-            //ignore, harmless exception in this case
-        }
+            SensorsUtil.updateSignalImage(associatedHwLive, signalImage);
     }
 
     private void refreshConsumptionText(Sensor sensor) {

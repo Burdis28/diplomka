@@ -76,6 +76,10 @@ public class HardwareDetailView extends LitTemplate {
     private Icon onlineIcon;
     private List<Sensor> attachedSensors;
     private List<User> owners;
+    @Id("ownersFormItem")
+    private FormItem ownersFormItem;
+    @Id("attachedSensorsFormItem")
+    private FormItem attachedSensorsFormItem;
 
     /**
      * Creates a new HardwareDetail.
@@ -99,6 +103,11 @@ public class HardwareDetailView extends LitTemplate {
 
         setButton(saveButton,false);
         setButton(cancelButton, false);
+
+        if (!VaadinSession.getCurrent().getAttribute(User.class).getAdmin()) {
+            attachedSensorsFormItem.setVisible(false);
+            ownersFormItem.setVisible(false);
+        }
 
         editButton.addClickListener(buttonClickEvent -> {
             setReadOnlyFields(false);

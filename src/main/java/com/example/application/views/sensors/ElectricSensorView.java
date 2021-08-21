@@ -85,23 +85,29 @@ public class ElectricSensorView extends LitTemplate {
     private final SensorElectricService sensorElectricService;
     private final HardwareService hardwareService;
     private SensorElectric sensorElectric;
+    private User loggedUser;
     private Sensor sensor;
     private SensorInfoComponent sensorInfo;
 
     private Binder<Sensor> sensorBinder = new Binder<>();
     private Binder<SensorElectric> sensorElectricBinder = new Binder<>();
     private List<Hardware> hardwareList;
+    @Id("configurationTitle")
+    private H3 configurationTitle;
 
     public ElectricSensorView(SensorElectricService sensorElectricService,
                               SensorService sensorService, HardwareService hardwareService) {
         this.sensorElectricService = sensorElectricService;
         this.sensorService = sensorService;
         this.hardwareService = hardwareService;
-        User loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
+        loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
         if (loggedUser.getAdmin()) {
             hardwareList = hardwareService.findAll();
         } else {
             hardwareList = hardwareService.findByOwner(loggedUser.getId());
+            configurationTitle.setVisible(false);
+            implPerKWField.setVisible(false);
+            implPerKwSuffix.setVisible(false);
         }
 
         cancelButton.setIcon(new Icon(VaadinIcon.CLOSE_CIRCLE_O));
@@ -148,8 +154,10 @@ public class ElectricSensorView extends LitTemplate {
             try {
                 sensorElectricBinder.writeBean(sensorElectric);
                 sensorBinder.writeBean(sensor);
-                validatePinOnNewHardware();
-                setPin();
+                if (loggedUser.getAdmin()) {
+                    validatePinOnNewHardware();
+                    setPin();
+                }
 
                 sensorElectricService.update(sensorElectric);
                 sensor.setIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());

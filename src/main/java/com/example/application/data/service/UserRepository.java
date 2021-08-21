@@ -23,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT COUNT(id) FROM UserHW WHERE userid = :userId")
     int checkIfUserOwnsHW(@Param("userId") Integer userId);
+
+    User findByEmail(String email);
 }

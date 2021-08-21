@@ -21,6 +21,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -40,6 +41,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,6 +77,8 @@ public class HardwaresView extends LitTemplate {
     private Element gridLayout;
     @Id("createHwButton")
     private Button createHwButton;
+    @Id("lastUpdateText")
+    private H5 lastUpdateText;
 
 
     public HardwaresView(@Autowired HardwareService hardwareService, HardwareLiveService hardwareLiveService,
@@ -85,6 +90,7 @@ public class HardwaresView extends LitTemplate {
         this.userService = userService;
         this.notificationLogHwService = notificationLogHwService;
         loggedUser = VaadinSession.getCurrent().getAttribute(User.class);
+        lastUpdateText.setText("Updated on: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
         grid.setSelectionMode(Grid.SelectionMode.NONE);
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
@@ -95,6 +101,9 @@ public class HardwaresView extends LitTemplate {
 
         createGrid();
         createTiles();
+        if(!loggedUser.getAdmin()) {
+            createHwButton.setVisible(false);
+        }
     }
 
     private void createGrid() {
@@ -128,12 +137,13 @@ public class HardwaresView extends LitTemplate {
         }
     }
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 45000)
     public void refreshGrid() {
         try {
             getUI().ifPresent(ui -> ui.access(() -> {
                 grid.setItems(getAllHardware());
                 gridListDataView.refreshAll();
+                lastUpdateText.setText("Updated on: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                 ui.push();
             }));
         } catch (UIDetachedException ex) {
@@ -279,7 +289,9 @@ public class HardwaresView extends LitTemplate {
                 {
                     addComponentAsFirst(toolboxIcon);
                     setSpacing(true);
-                    addComponentAtIndex(1, trashCanIcon);
+                    if(loggedUser.getAdmin()) {
+                        addComponentAtIndex(1, trashCanIcon);
+                    }
                 }
             };
         }).setHeader("Tools").setWidth("150px");

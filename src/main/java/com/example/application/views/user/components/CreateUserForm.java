@@ -18,10 +18,11 @@ public class CreateUserForm extends VerticalLayout {
     private final TextField emailField = new TextField();
     private final PasswordField passwordField = new PasswordField();
     private final PasswordField passwordField2 = new PasswordField();
-    @Autowired
+
     private PasswordEncoder passwordEncoder;
 
-    public CreateUserForm() {
+    public CreateUserForm(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
         setLabels();
         setPatterns();
         add(title, loginField, firstNameField, lastNameFieldField, emailField, passwordField, passwordField2);
@@ -93,7 +94,7 @@ public class CreateUserForm extends VerticalLayout {
         newUser.setPasswordHash(passwordEncoder.encode(passwordField.getValue()));
         newUser.setActive(true);
         newUser.setPushToken("");
-        newUser.setPhone("...");
+        newUser.setPhone(" ");
         return newUser;
     }
 }
