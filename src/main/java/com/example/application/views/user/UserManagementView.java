@@ -258,10 +258,20 @@ public class UserManagementView extends LitTemplate {
         btn.setText("Create user");
         btn.addClickListener(event -> {
             if (createUserForm.areFieldsValid() && createUserForm.arePasswordsValid()) {
-                userService.update(createUserForm.createUser());
-                Notification.show("New user created.");
-                refreshGrid();
-                dialog.close();
+                User newUser = createUserForm.createUser();
+                User potentionalUser = userService.findByEmail(newUser.getEmail());
+                if(potentionalUser != null) {
+                    openModalWindow("Email is already in use.");
+                    createUserForm.getEmailField().setInvalid(true);
+                } else if(userService.findByLogin(newUser.getLogin()) != null) {
+                    openModalWindow("Login is already in use.");
+                    createUserForm.getLoginField().setInvalid(true);
+                } else {
+                    userService.update(newUser);
+                    Notification.show("New user created.");
+                    refreshGrid();
+                    dialog.close();
+                }
             } else {
                 if (!createUserForm.arePasswordsValid()) {
                     openModalWindow("New passwords do not match. Try again.");

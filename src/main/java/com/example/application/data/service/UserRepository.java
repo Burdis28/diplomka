@@ -25,4 +25,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     int checkIfUserOwnsHW(@Param("userId") Integer userId);
 
     User findByEmail(String email);
+    User findByLogin(String login);
 }
