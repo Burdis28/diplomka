@@ -21,15 +21,15 @@ export class LoginView extends LitElement {
  </vaadin-horizontal-layout>
  <vaadin-form-layout id="vaadinFormLayout" style="align-self: center;">
   <vaadin-vertical-layout theme="spacing" id="vaadinVerticalLayout1">
-   <h3 id="loginTitleH3" style="align-self: flex-start; margin-top: var(--lumo-space-l); margin-bottom: var(--lumo-space-xs);">Login</h3>
+   <h3 id="loginTitleH3" style="align-self: flex-start; margin-top: var(--lumo-space-l); margin-bottom: var(--lumo-space-xs); margin-left: var(--lumo-space-l);">Login</h3>
    <vaadin-text-field label="Username" placeholder="username" id="username" style="align-self: center; margin-top: var(--lumo-space-xs);" required invalid></vaadin-text-field>
    <vaadin-password-field label="Password" id="password" style="align-self: center;" required has-value invalid></vaadin-password-field>
    <vaadin-horizontal-layout theme="spacing">
-    <vaadin-button id="loginButton" style="align-self: flex-start;">
+    <vaadin-button id="loginButton" style="align-self: flex-start; margin-left: var(--lumo-space-xl); margin-top: var(--lumo-space-m); margin-bottom: var(--lumo-space-m);" theme="primary">
       Log in 
     </vaadin-button>
-    <vaadin-button id="registerButton">
-     Forgot password?
+    <vaadin-button id="registerButton" style="margin-right: var(--lumo-space-l); margin-bottom: var(--lumo-space-m); margin-top: var(--lumo-space-m);">
+      Forgot password? 
     </vaadin-button>
    </vaadin-horizontal-layout>
   </vaadin-vertical-layout>

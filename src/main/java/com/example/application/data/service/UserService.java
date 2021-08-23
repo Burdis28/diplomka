@@ -44,4 +44,7 @@ public class UserService extends CrudService<User, Integer> {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+    public User findByLogin(String login) {
+        return userRepository.findByLogin(login);
+    }
 }

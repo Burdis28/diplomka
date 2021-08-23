@@ -125,15 +125,13 @@ public class UserView extends LitTemplate {
             passwordField2.setInvalid(false);
             passwordField2.setReadOnly(true);
 
-            setUserFields(user);
+            //setUserFields(user);
+            userBinder.readBean(user);
         });
 
         saveButton.addClickListener(buttonClickEvent -> {
             if (isEverythingValid()) {
                 try {
-                    userBinder.writeBean(user);
-                    user.setFullName(user.getFirstName() + " " + user.getSurname());
-
                     if(passwordChangeForm1.isVisible()) {
                         String pw1 = passwordField1.getValue();
                         String pw2 = passwordField2.getValue();
@@ -147,7 +145,17 @@ public class UserView extends LitTemplate {
                             user.setPasswordHash(passwordEncoder.encode(pw1));
                         }
                     }
+                    User potentionalUser = userRepository.findByEmail(emailField.getValue());
+                    if(potentionalUser != null && !potentionalUser.getEmail().equals(user.getEmail()) ) {
+                        Dialog dialog = new Dialog();
+                        dialog.setModal(true);
+                        dialog.add("Email is already in use.");
+                        dialog.open();
+                        throw new Exception();
+                    }
 
+                    userBinder.writeBean(user);
+                    user.setFullName(user.getFirstName() + " " + user.getSurname());
                     userRepository.save(user);
                     VaadinSession.getCurrent().setAttribute(User.class, user);
 
