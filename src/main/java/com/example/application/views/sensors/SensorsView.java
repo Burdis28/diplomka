@@ -621,30 +621,30 @@ public class SensorsView extends LitTemplate {
                 return;
             }
             case "Monthly": {
-                Map<LocalDate, Double> dataDailyMap = new HashMap<>();
-                getConsumptionM3Monthly(data, dataDailyMap, from, to);
+                Map<LocalDate, Double> dataMonthlyMap = new HashMap<>();
+                getConsumptionM3Monthly(data, dataMonthlyMap, from, to);
 
                 int rowNum = 2;
-                for (LocalDate month : dataDailyMap.keySet().stream().sorted().collect(Collectors.toList())) {
+                for (LocalDate month : dataMonthlyMap.keySet().stream().sorted().collect(Collectors.toList())) {
                     XSSFRow row = sheet.createRow(rowNum++);
                     Cell cellDate = row.createCell(0);
                     cellDate.setCellValue(month.getMonth().name().toLowerCase(Locale.ROOT) + "|" + month.getYear());
                     Cell cellValue = row.createCell(1);
-                    cellValue.setCellValue(MathUtils.round(dataDailyMap.get(month), 3));
+                    cellValue.setCellValue(MathUtils.round(dataMonthlyMap.get(month), 3));
                 }
                 return;
             }
             case "Yearly": {
-                Map<Integer, Double> dataDailyMap = new HashMap<>();
-                getConsumptionM3Yearly(data, dataDailyMap, from, to);
+                Map<Integer, Double> dataYearlyMap = new HashMap<>();
+                getConsumptionM3Yearly(data, dataYearlyMap, from, to);
 
                 int rowNum = 2;
-                for (Integer year : dataDailyMap.keySet()) {
+                for (Integer year : dataYearlyMap.keySet()) {
                     XSSFRow row = sheet.createRow(rowNum++);
                     Cell cellDate = row.createCell(0);
                     cellDate.setCellValue(year);
                     Cell cellValue = row.createCell(1);
-                    cellValue.setCellValue(MathUtils.round(dataDailyMap.get(year), 3));
+                    cellValue.setCellValue(MathUtils.round(dataYearlyMap.get(year), 3));
                 }
                 return;
             }
