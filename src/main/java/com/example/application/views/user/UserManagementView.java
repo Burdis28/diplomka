@@ -107,7 +107,7 @@ public class UserManagementView extends LitTemplate {
     }
 
     private void addColumnsToGrid() {
-        createIdColumn();
+        //createIdColumn();
         createNameColumn();
         createAdminColumn();
         createPhoneColumn();
@@ -301,8 +301,8 @@ public class UserManagementView extends LitTemplate {
     private void addFiltersToGrid() {
         HeaderRow filterRow = grid.appendHeaderRow();
 
-        TextField idFilter = getIdFilter();
-        filterRow.getCell(idColumn).setComponent(idFilter);
+//        TextField idFilter = getIdFilter();
+//        filterRow.getCell(idColumn).setComponent(idFilter);
 
         TextField nameFilter = getNameFilter();
         filterRow.getCell(nameColumn).setComponent(nameFilter);
