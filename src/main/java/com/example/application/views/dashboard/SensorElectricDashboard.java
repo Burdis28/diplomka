@@ -216,7 +216,7 @@ public class SensorElectricDashboard extends LitTemplate {
         consumptionTodayText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
                 getNumberOfDecimalPrecision(consumption, 1)) + " / " + sensor.getLimit_day() + "</b> [kW]");
         priceTodayText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(price, 1))
+                getNumberOfDecimalPrecision(price, 1), "###,###,###,###,##0.0")
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionTodayDivText.setText("");
         consumptionTodayDivText.add(consumptionTodayText);
@@ -367,9 +367,9 @@ public class SensorElectricDashboard extends LitTemplate {
             consumption += data.getHighRate() + data.getLowRate();
         }
         consumptionMonthText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 1)) + " / " + sensor.getLimit_month() + "</b> [kW]");
+                getNumberOfDecimalPrecision(consumption, 1), "###,###,###,###,##0.0") + " / " + sensor.getLimit_month() + "</b> [kW]");
         priceMonthText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(price, 1))
+                getNumberOfDecimalPrecision(price, 1), "###,###,###,###,##0.0")
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionMonthDivText.setText("");
         consumptionMonthDivText.add(consumptionMonthText);

@@ -41,5 +41,13 @@ public class PatternStringUtils {
         return df.format(number);
     }
 
-
+    public static String formatNumberToText(Double number, String format) {
+        if (number == 0) {
+            return "0.0";
+        }
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setGroupingSeparator(' ');
+        DecimalFormat df = new DecimalFormat(format, symbols);
+        return df.format(number);
+    }
 }

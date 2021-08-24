@@ -229,9 +229,9 @@ public class SensorWaterDashboard extends LitTemplate {
             consumption += data.getM3();
         }
         consumptionTodayText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 1)) + " / " + sensor.getLimit_day() + " [m3]");
+                getNumberOfDecimalPrecision(consumption, 1), "###,###,###,###,##0.0") + " / " + sensor.getLimit_day() + " [m3]");
         priceTodayText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(price, 1))
+                getNumberOfDecimalPrecision(price, 1), "###,###,###,###,##0.0")
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionTodayDivText.setText("");
         consumptionTodayDivText.add(consumptionTodayText);
@@ -274,7 +274,7 @@ public class SensorWaterDashboard extends LitTemplate {
             consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [m3/h] -> <b>" +
                     sensor.getConsumptionActual() + "%</b>");
         } else {
-            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue  + "</b> [m3/h] -> <b>" +
+            consumptionText = new StyledTextComponent("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + String.format("%.1f",consumptionMaxValue)  + "</b> [m3/h] -> <b>" +
                     String.format("%.1f",(sensor.getConsumptionActual()/(consumptionMaxValue*1000)*100)) + "%</b>");
         }
         consumptionDivText.setText("");
@@ -696,9 +696,9 @@ public class SensorWaterDashboard extends LitTemplate {
             consumption += data.getM3();
         }
         consumptionMonthText = new StyledTextComponent("Consumption: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(consumption, 1)) + " / " + sensor.getLimit_month() + " [m3]");
+                getNumberOfDecimalPrecision(consumption, 1), "###,###,###,###,##0.0") + " / " + sensor.getLimit_month() + " [m3]");
         priceMonthText = new StyledTextComponent("Price: <b>" + PatternStringUtils.formatNumberToText(
-                getNumberOfDecimalPrecision(price, 1))
+                getNumberOfDecimalPrecision(price, 1), "###,###,###,###,##0.0")
                 + " " + sensor.getCurrencyString() + "</b>");
         consumptionMonthDivText.setText("");
         consumptionMonthDivText.add(consumptionMonthText);
@@ -747,8 +747,6 @@ public class SensorWaterDashboard extends LitTemplate {
     }
 
     private void setDailyConsumptionChart() {
-        //consumptionDatePicker.setValue(dateForChart);
-
         Configuration configuration = mainChart.getConfiguration();
 
         XAxis x = new XAxis();
@@ -828,7 +826,7 @@ public class SensorWaterDashboard extends LitTemplate {
         if (consumptionMaxValue == 0.0) {
             consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + 0.0 + "</b> [m3/h]");
         } else {
-            consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + consumptionMaxValue + "</b> [m3/h]");
+            consumptionText.setText("Current consumption: <b>" + sensor.getConsumptionActual() + " / " + String.format("%.1f",consumptionMaxValue) + "</b> [m3/h]");
         }
     }
 
