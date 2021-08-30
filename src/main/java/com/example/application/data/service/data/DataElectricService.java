@@ -63,7 +63,7 @@ public class DataElectricService extends CrudService<DataElectric, Integer> {
 
         for (DataElectric dataElectric : list) {
             cal.setTimeInMillis(dataElectric.getTime().getTime());
-            cal.add(Calendar.HOUR, +2);
+            cal.add(Calendar.HOUR, 2);
             dataElectric.setTime(new Timestamp(cal.getTime().getTime()));
         }
 

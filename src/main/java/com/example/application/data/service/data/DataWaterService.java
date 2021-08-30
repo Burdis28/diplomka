@@ -61,7 +61,7 @@ public class DataWaterService extends CrudService<DataWater, Integer> {
 
         for (DataWater dataWater : list) {
             cal.setTimeInMillis(dataWater.getTime().getTime());
-            cal.add(Calendar.HOUR, +2);
+            cal.add(Calendar.HOUR, 2);
             dataWater.setTime(new Timestamp(cal.getTime().getTime()));
         }
 
