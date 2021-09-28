@@ -9,6 +9,9 @@ import org.vaadin.artur.helpers.CrudService;
 
 import java.util.List;
 
+/**
+ * Service class for User.
+ */
 @Service
 public class UserService extends CrudService<User, Integer> {
 

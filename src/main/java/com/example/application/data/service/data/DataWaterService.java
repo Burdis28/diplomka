@@ -41,6 +41,13 @@ public class DataWaterService extends CrudService<DataWater, Integer> {
         return this.dataWaterRepository.findAllBySensorId(sensorId);
     }
 
+    /**
+     * Method that finds and returns list of data for a specific sensor and range of dates.
+     * @param sensorId ID of sensor
+     * @param dateFrom start of range date, included
+     * @param dateTo end of range date, excluded
+     * @return list of DataElectric objects
+     */
     public List<DataWater> findAllBySensorIdAndDate(int sensorId, LocalDate dateFrom, LocalDate dateTo) {
         Calendar cal = Calendar.getInstance();
 
@@ -61,7 +68,7 @@ public class DataWaterService extends CrudService<DataWater, Integer> {
 
         for (DataWater dataWater : list) {
             cal.setTimeInMillis(dataWater.getTime().getTime());
-            cal.add(Calendar.HOUR, +2);
+            cal.add(Calendar.HOUR, 2);
             dataWater.setTime(new Timestamp(cal.getTime().getTime()));
         }
 

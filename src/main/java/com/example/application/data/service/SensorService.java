@@ -10,6 +10,9 @@ import org.vaadin.artur.helpers.CrudService;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Service class for Sensor.
+ */
 @Service
 public class SensorService extends CrudService<Sensor, Integer> {
 

@@ -114,6 +114,15 @@ public class LoginView extends LitTemplate {
         imageDiv.setClassName("alignCenter");
     }
 
+    @Override
+    public void onAttach(AttachEvent event){
+        User user = VaadinSession.getCurrent().getAttribute(User.class);
+        if (user != null) {
+            UI.getCurrent().navigate("sensors");
+            //UI.getCurrent().addAfterNavigationListener(event -> UI.getCurrent().navigate("sensors"));
+        }
+    }
+
     private void showRegisterNotification() {
         String code = RandomStringUtils.randomAlphanumeric(30);
         Dialog popUpDialog = new Dialog();
@@ -255,7 +264,7 @@ public class LoginView extends LitTemplate {
         if (username.isEmpty() || password.isEmpty()) {
             Notification notification = new Notification();
             notification.setThemeName(NotificationVariant.LUMO_ERROR.getVariantName());
-            notification.setText("Musíš zadat přístupové údaje.");
+            notification.setText("Please enter a valid login.");
             notification.setDuration(3000);
             notification.setPosition(Notification.Position.MIDDLE);
             notification.open();
@@ -267,7 +276,7 @@ public class LoginView extends LitTemplate {
             } catch (AuthException e) {
                 Notification notification = new Notification();
                 notification.setThemeName(NotificationVariant.LUMO_ERROR.getVariantName());
-                notification.setText("Špatně zadané přístupové údaje.");
+                notification.setText("Wrong username of password.");
                 notification.setDuration(3000);
                 notification.setPosition(Notification.Position.MIDDLE);
                 notification.open();

@@ -7,6 +7,9 @@ import org.vaadin.artur.helpers.CrudService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Service class for password resetting logic representation.
+ */
 @Service
 public class UserPasswordResetService extends CrudService<UserPasswordReset, Integer> {
 

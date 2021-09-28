@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+/**
+ * Service class for Smart Plugs.
+ */
 @Service
 public class SmartPlugService extends CrudService<SmartPlug, Integer> {
 

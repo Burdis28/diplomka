@@ -8,6 +8,9 @@ import org.vaadin.artur.helpers.CrudService;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service class for HardwareLive representation.
+ */
 @Service
 public class HardwareLiveService extends CrudService<HardwareLive, Integer> {
 

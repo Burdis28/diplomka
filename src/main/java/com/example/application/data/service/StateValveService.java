@@ -8,7 +8,9 @@ import org.vaadin.artur.helpers.CrudService;
 
 import java.util.List;
 
-
+/**
+ * Service class for representation of state of a sensor.
+ */
 @Service
 public class StateValveService extends CrudService<StateValve, Integer> {
 

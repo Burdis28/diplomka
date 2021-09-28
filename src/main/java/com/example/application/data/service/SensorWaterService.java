@@ -8,6 +8,9 @@ import org.vaadin.artur.helpers.CrudService;
 
 import java.util.List;
 
+/**
+ * Service class for Water Sensor details.
+ */
 @Service
 public class SensorWaterService extends CrudService<SensorWater, Integer> {
 

@@ -193,12 +193,14 @@ public class SensorsView extends LitTemplate {
     }
 
     private void createDeleteContextMenu(GridContextMenu<SensorGridRepresentation> contextMenu) {
-        contextMenu.addItem("Delete", event -> {
-            SensorGridRepresentation sensor = event.getItem().isPresent() ? event.getItem().get() : null;
-            if (sensor != null) {
-                createDeleteSensorDialog(sensor);
-            }
-        });
+        if (loggedUser.getAdmin()) {
+            contextMenu.addItem("Delete", event -> {
+                SensorGridRepresentation sensor = event.getItem().isPresent() ? event.getItem().get() : null;
+                if (sensor != null) {
+                    createDeleteSensorDialog(sensor);
+                }
+            });
+        }
     }
 
     private void createDeleteSensorDialog(SensorGridRepresentation sensor) {
@@ -548,10 +550,10 @@ public class SensorsView extends LitTemplate {
 
     private void getHeaderRow(SensorGridRepresentation sensor, XSSFSheet sheet, XSSFWorkbook workbook) {
         XSSFRow row = sheet.createRow(0);
-        CellStyle style = workbook.createCellStyle();//Create style
-        Font font = workbook.createFont();//Create font
-        font.setBold(true);//Make font bold
-        style.setFont(font);//set it to bold
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
         style.setAlignment(HorizontalAlignment.CENTER);
 
         if (sensor.getType().equals(SensorTypes.e.name())) {
@@ -605,112 +607,119 @@ public class SensorsView extends LitTemplate {
 
     private void createWaterExcelWorkBook(SensorGridRepresentation sensor, XSSFSheet sheet, String value, LocalDate from, LocalDate to) {
         List<DataWater> data = dataWaterService.findAllBySensorIdAndDate(sensor.getId(), from, to);
-        switch (value) {
-            case "Daily": {
-                Map<LocalDate, Double> dataDailyMap = new HashMap<>();
-                getConsumptionM3Daily(data, dataDailyMap, from, to);
+        if (from.isBefore(to)) {
+            switch (value) {
+                case "Daily": {
+                    Map<LocalDate, Double> dataDailyMap = new HashMap<>();
+                    getConsumptionM3Daily(data, dataDailyMap, from, to);
 
-                int rowNum = 2;
-                for (LocalDate date : dataDailyMap.keySet().stream().sorted().collect(Collectors.toList())) {
-                    XSSFRow row = sheet.createRow(rowNum++);
-                    Cell cellDate = row.createCell(0);
-                    cellDate.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date));
-                    Cell cellValue = row.createCell(1);
-                    cellValue.setCellValue(MathUtils.round(dataDailyMap.get(date), 3));
+                    int rowNum = 2;
+                    for (LocalDate date : dataDailyMap.keySet().stream().sorted().collect(Collectors.toList())) {
+                        XSSFRow row = sheet.createRow(rowNum++);
+                        Cell cellDate = row.createCell(0);
+                        cellDate.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date));
+                        Cell cellValue = row.createCell(1);
+                        cellValue.setCellValue(MathUtils.round(dataDailyMap.get(date), 3));
+                    }
+                    return;
                 }
-                return;
-            }
-            case "Monthly": {
-                Map<LocalDate, Double> dataMonthlyMap = new HashMap<>();
-                getConsumptionM3Monthly(data, dataMonthlyMap, from, to);
+                case "Monthly": {
+                    Map<LocalDate, Double> dataMonthlyMap = new HashMap<>();
+                    getConsumptionM3Monthly(data, dataMonthlyMap, from, to);
 
-                int rowNum = 2;
-                for (LocalDate month : dataMonthlyMap.keySet().stream().sorted().collect(Collectors.toList())) {
-                    XSSFRow row = sheet.createRow(rowNum++);
-                    Cell cellDate = row.createCell(0);
-                    cellDate.setCellValue(month.getMonth().name().toLowerCase(Locale.ROOT) + "|" + month.getYear());
-                    Cell cellValue = row.createCell(1);
-                    cellValue.setCellValue(MathUtils.round(dataMonthlyMap.get(month), 3));
+                    int rowNum = 2;
+                    for (LocalDate month : dataMonthlyMap.keySet()
+                            .stream().sorted().collect(Collectors.toList())) {
+                        XSSFRow row = sheet.createRow(rowNum++);
+                        Cell cellDate = row.createCell(0);
+                        cellDate.setCellValue(month.getMonth().name()
+                                .toLowerCase(Locale.ROOT) + "|" + month.getYear());
+                        Cell cellValue = row.createCell(1);
+                        cellValue.setCellValue(
+                                MathUtils.round(dataMonthlyMap.get(month), 3));
+                    }
+                    return;
                 }
-                return;
-            }
-            case "Yearly": {
-                Map<Integer, Double> dataYearlyMap = new HashMap<>();
-                getConsumptionM3Yearly(data, dataYearlyMap, from, to);
+                case "Yearly": {
+                    Map<Integer, Double> dataYearlyMap = new HashMap<>();
+                    getConsumptionM3Yearly(data, dataYearlyMap, from, to);
 
-                int rowNum = 2;
-                for (Integer year : dataYearlyMap.keySet()) {
-                    XSSFRow row = sheet.createRow(rowNum++);
-                    Cell cellDate = row.createCell(0);
-                    cellDate.setCellValue(year);
-                    Cell cellValue = row.createCell(1);
-                    cellValue.setCellValue(MathUtils.round(dataYearlyMap.get(year), 3));
+                    int rowNum = 2;
+                    for (Integer year : dataYearlyMap.keySet()) {
+                        XSSFRow row = sheet.createRow(rowNum++);
+                        Cell cellDate = row.createCell(0);
+                        cellDate.setCellValue(year);
+                        Cell cellValue = row.createCell(1);
+                        cellValue.setCellValue(MathUtils.round(dataYearlyMap.get(year), 3));
+                    }
+                    return;
                 }
-                return;
             }
         }
     }
 
     private void createElectricExcelWorkBook(SensorGridRepresentation sensor, XSSFSheet sheet, String value, LocalDate from, LocalDate to) {
         List<DataElectric> data = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), from, to);
-        switch (value) {
-            case "Daily": {
-                Map<LocalDate, Double> lowRates = new HashMap<>();
-                Map<LocalDate, Double> highRates = new HashMap<>();
-                getConsumptionElectricDaily(data, lowRates, highRates, from, to);
+        if (from.isBefore(to)) {
+            switch (value) {
+                case "Daily": {
+                    Map<LocalDate, Double> lowRates = new HashMap<>();
+                    Map<LocalDate, Double> highRates = new HashMap<>();
+                    getConsumptionElectricDaily(data, lowRates, highRates, from, to);
 
-                int rowNum = 2;
-                for (LocalDate date : lowRates.keySet().stream().sorted().collect(Collectors.toList())) {
-                    XSSFRow row = sheet.createRow(rowNum++);
-                    Cell cellDate = row.createCell(0);
-                    cellDate.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date));
-                    Cell cellLowRate = row.createCell(1);
-                    cellLowRate.setCellValue(MathUtils.round(lowRates.get(date), 3));
-                    Cell cellHighRate = row.createCell(2);
-                    cellHighRate.setCellValue(MathUtils.round(highRates.get(date), 3));
-                    Cell cellSums = row.createCell(3);
-                    cellSums.setCellValue(MathUtils.round((highRates.get(date) + lowRates.get(date)), 3));
+                    int rowNum = 2;
+                    for (LocalDate date : lowRates.keySet().stream().sorted().collect(Collectors.toList())) {
+                        XSSFRow row = sheet.createRow(rowNum++);
+                        Cell cellDate = row.createCell(0);
+                        cellDate.setCellValue(DateTimeFormatter.ofPattern("dd.MM.yyyy").format(date));
+                        Cell cellLowRate = row.createCell(1);
+                        cellLowRate.setCellValue(MathUtils.round(lowRates.get(date), 3));
+                        Cell cellHighRate = row.createCell(2);
+                        cellHighRate.setCellValue(MathUtils.round(highRates.get(date), 3));
+                        Cell cellSums = row.createCell(3);
+                        cellSums.setCellValue(MathUtils.round((highRates.get(date) + lowRates.get(date)), 3));
+                    }
+                    return;
                 }
-                return;
-            }
-            case "Monthly": {
-                Map<LocalDate, Double> lowRates = new HashMap<>();
-                Map<LocalDate, Double> highRates = new HashMap<>();
-                getConsumptionElectricMonthly(data, lowRates, highRates, from, to);
+                case "Monthly": {
+                    Map<LocalDate, Double> lowRates = new HashMap<>();
+                    Map<LocalDate, Double> highRates = new HashMap<>();
+                    getConsumptionElectricMonthly(data, lowRates, highRates, from, to);
 
-                int rowNum = 2;
-                for (LocalDate month : lowRates.keySet().stream().sorted().collect(Collectors.toList())) {
-                    XSSFRow row = sheet.createRow(rowNum++);
-                    Cell cellDate = row.createCell(0);
-                    cellDate.setCellValue(month.getMonth().name().toLowerCase(Locale.ROOT) + "|" + month.getYear());
-                    Cell cellLowRate = row.createCell(1);
-                    cellLowRate.setCellValue(MathUtils.round(lowRates.get(month), 3));
-                    Cell cellHighRate = row.createCell(2);
-                    cellHighRate.setCellValue(MathUtils.round(highRates.get(month), 3));
-                    Cell cellSums = row.createCell(3);
-                    cellSums.setCellValue(MathUtils.round((highRates.get(month) + lowRates.get(month)), 3));
+                    int rowNum = 2;
+                    for (LocalDate month : lowRates.keySet().stream().sorted().collect(Collectors.toList())) {
+                        XSSFRow row = sheet.createRow(rowNum++);
+                        Cell cellDate = row.createCell(0);
+                        cellDate.setCellValue(month.getMonth().name().toLowerCase(Locale.ROOT) + "|" + month.getYear());
+                        Cell cellLowRate = row.createCell(1);
+                        cellLowRate.setCellValue(MathUtils.round(lowRates.get(month), 3));
+                        Cell cellHighRate = row.createCell(2);
+                        cellHighRate.setCellValue(MathUtils.round(highRates.get(month), 3));
+                        Cell cellSums = row.createCell(3);
+                        cellSums.setCellValue(MathUtils.round((highRates.get(month) + lowRates.get(month)), 3));
+                    }
+                    return;
                 }
-                return;
-            }
-            case "Yearly": {
-                Map<Integer, Double> lowRates = new HashMap<>();
-                Map<Integer, Double> highRates = new HashMap<>();
+                case "Yearly": {
+                    Map<Integer, Double> lowRates = new HashMap<>();
+                    Map<Integer, Double> highRates = new HashMap<>();
 
-                getConsumptionElectricYearly(data, lowRates, highRates, from, to);
+                    getConsumptionElectricYearly(data, lowRates, highRates, from, to);
 
-                int rowNum = 2;
-                for (Integer year : lowRates.keySet()) {
-                    XSSFRow row = sheet.createRow(rowNum++);
-                    Cell cellDate = row.createCell(0);
-                    cellDate.setCellValue(year);
-                    Cell cellLowRate = row.createCell(1);
-                    cellLowRate.setCellValue(MathUtils.round(lowRates.get(year), 3));
-                    Cell cellHighRate = row.createCell(2);
-                    cellHighRate.setCellValue(MathUtils.round(highRates.get(year), 3));
-                    Cell cellSums = row.createCell(3);
-                    cellSums.setCellValue(MathUtils.round((highRates.get(year) + lowRates.get(year)), 3));
+                    int rowNum = 2;
+                    for (Integer year : lowRates.keySet()) {
+                        XSSFRow row = sheet.createRow(rowNum++);
+                        Cell cellDate = row.createCell(0);
+                        cellDate.setCellValue(year);
+                        Cell cellLowRate = row.createCell(1);
+                        cellLowRate.setCellValue(MathUtils.round(lowRates.get(year), 3));
+                        Cell cellHighRate = row.createCell(2);
+                        cellHighRate.setCellValue(MathUtils.round(highRates.get(year), 3));
+                        Cell cellSums = row.createCell(3);
+                        cellSums.setCellValue(MathUtils.round((highRates.get(year) + lowRates.get(year)), 3));
+                    }
+                    return;
                 }
-                return;
             }
         }
     }

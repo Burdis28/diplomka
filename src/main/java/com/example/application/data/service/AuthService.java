@@ -28,6 +28,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service that provides an authentication.
+ */
 @Service
 public class AuthService {
 
@@ -39,6 +42,12 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Authenticates given information from login.
+     * @param username username
+     * @param password password
+     * @throws AuthException throws exception if authentication fails
+     */
     public void authenticate(String username, String password) throws AuthException {
         User user = userRepository.getByLogin(username);
 
@@ -56,6 +65,10 @@ public class AuthService {
         }
     }
 
+    /**
+     * Creates web app routes for specific session based on administrator rights.
+     * @param admin rights of user
+     */
     private void createRoutes(boolean admin) {
         // Získám si všechny routy povolené pro určitého uživatele a nastavím je skrze RouteConfiguration pro aktuální
         // session. Tudíž se uživatel bude schopen dostat jenom na jemu povolené views.
@@ -74,6 +87,11 @@ public class AuthService {
 
     }
 
+    /**
+     * Creates and returns a list of route objects.
+     * @param admin user rights
+     * @return AuthorizedRouteData objects list
+     */
     public static List<AuthorizedRouteData> getAuthorizedRoutes(boolean admin) {
         List<AuthorizedRouteData> routes = new ArrayList<>();
 
