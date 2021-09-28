@@ -6,7 +6,6 @@ import com.example.application.data.entity.data.DataElectric;
 import com.example.application.data.service.*;
 import com.example.application.data.service.data.DataElectricService;
 import com.example.application.utils.Colors;
-import com.example.application.utils.MathUtils;
 import com.example.application.utils.PatternStringUtils;
 import com.example.application.views.main.MainLayout;
 import com.example.application.views.sensors.components.SensorsUtil;
@@ -31,7 +30,6 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.template.Id;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.server.VaadinSession;
@@ -157,7 +155,7 @@ public class SensorElectricDashboard extends LitTemplate {
     private VerticalLayout gaugeMonthLayout;
 
     /**
-     * Creates a new SensorElDashboard.
+     * Dashboard for Sensor of Electric type.
      */
     public SensorElectricDashboard(SensorElectricService sensorElectricService,
                                    SensorService sensorService, DataElectricService dataElectricService,
@@ -185,7 +183,7 @@ public class SensorElectricDashboard extends LitTemplate {
 
             setInfoData();
             setConsumptionBar();
-            setDailyConsumptionChart();
+            setMainChart();
 
             setConsumptionPricesChangerForChart();
             setPeriodChangerForChart();
@@ -203,6 +201,10 @@ public class SensorElectricDashboard extends LitTemplate {
     }
 
 
+    /**
+     * Method that creates and sets configuration for progress bar, that represents Today consumption on
+     * an electric sensor.
+     */
     private void setTodayLimitBar() {
         LocalDate date = LocalDate.now();
         List<DataElectric> todayData = dataElectricService.findAllBySensorIdAndDate(sensor.getId(),
@@ -261,7 +263,6 @@ public class SensorElectricDashboard extends LitTemplate {
                 updateMainChartData(dateForChart.withDayOfYear(1), LocalDate.of(dateForChart.getYear(), 12, 31), consPricesRadioButtonGroup.getValue().equals("Consumption"));
             }
         }
-        //Notification.show("Teď jsem se posunul o něco dále").setPosition(Notification.Position.MIDDLE);
     }
 
     private void updateChartToPreviousData() {
@@ -277,7 +278,6 @@ public class SensorElectricDashboard extends LitTemplate {
                 updateMainChartData(dateForChart.withDayOfYear(1), LocalDate.of(dateForChart.getYear(), 12, 31), consPricesRadioButtonGroup.getValue().equals("Consumption"));
             }
         }
-        //Notification.show("Teď jsem se posunul o něco dřív").setPosition(Notification.Position.MIDDLE);
     }
 
     private void setConsumptionPricesChangerForChart() {
@@ -358,6 +358,10 @@ public class SensorElectricDashboard extends LitTemplate {
         }
     }
 
+    /**
+     * Method that creates and sets configuration for progress bar, that represents Monthly consumption on
+     * an electric sensor.
+     */
     private void setMonthlyLimitBar() {
         List<DataElectric> thisMonthData = dataElectricService.findAllBySensorIdAndDate(sensor.getId(), LocalDate.now().withDayOfMonth(1), LocalDate.now());
         double price = 0.0;
@@ -388,8 +392,10 @@ public class SensorElectricDashboard extends LitTemplate {
     }
 
 
-    private ArrayList<DataSeriesItem> getPricesForTime(Configuration configuration,
-                                                       LocalDate dateFrom, LocalDate dateTo) {
+    /**
+     * Method that returns aggregated prices for given time period.
+     */
+    private ArrayList<DataSeriesItem> getPricesForTime(LocalDate dateFrom, LocalDate dateTo) {
         List<DataElectric> dataElectrics = dataElectricService.findAllBySensorIdAndDate(
                 sensor.getId(), dateFrom, dateTo);
 
@@ -419,6 +425,10 @@ public class SensorElectricDashboard extends LitTemplate {
         return aggregatedPrices;
     }
 
+    /**
+     * Method that returns a map with representation of calculated prices for each hour of the day,
+     * based on given Electrics data. Hour is the key, prices are value.
+     */
     private Map<Integer, Double> calculatePricesForEachHourOfDay(List<DataElectric> dataElectrics) {
         Map<Integer, Double> pricesMap = new TreeMap<>(Comparator.naturalOrder());
         for (DataElectric data : dataElectrics) {
@@ -441,6 +451,10 @@ public class SensorElectricDashboard extends LitTemplate {
         return pricesMap;
     }
 
+    /**
+     * Method that returns a map with representation of calculated prices for each day of a month,
+     * based on given Electrics data. Day is the key, prices are value.
+     */
     private Map<LocalDate, Double> calculatePricesForEachDayOfMonth(List<DataElectric> dataElectrics) {
         Map<LocalDate, Double> pricesMap = new TreeMap<>(Comparator.naturalOrder());
         for (DataElectric data : dataElectrics) {
@@ -464,6 +478,10 @@ public class SensorElectricDashboard extends LitTemplate {
         return pricesMap;
     }
 
+    /**
+     * Method that returns a map with representation of calculated prices for each month of a year,
+     * based on given Electrics data. Month is the key, prices are value.
+     */
     private Map<Month, Double> calculatePricesForEachMonthOfYear(List<DataElectric> dataElectrics) {
         Map<Month, Double> pricesMap = new TreeMap<>(Comparator.naturalOrder());
         for (DataElectric data : dataElectrics) {
@@ -485,7 +503,11 @@ public class SensorElectricDashboard extends LitTemplate {
         return pricesMap;
     }
 
-    private void setDailyConsumptionChart() {
+    /**
+     * Creates a main chart for consumption and prices, that are aggregated based on selected
+     * time frame.
+     */
+    private void setMainChart() {
         //consumptionDatePicker.setValue(dateForChart);
 
         Configuration configuration = mainChart.getConfiguration();
@@ -620,7 +642,7 @@ public class SensorElectricDashboard extends LitTemplate {
             }
 
             ds.setName("Price");
-            ds.setData(getPricesForTime(configuration, dateFrom, dateTo));
+            ds.setData(getPricesForTime(dateFrom, dateTo));
             configuration.setSeries(ds);
         }
         try {
@@ -706,6 +728,9 @@ public class SensorElectricDashboard extends LitTemplate {
         }
     }
 
+    /**
+     * Method that sets hardware data to top right panel and its components.
+     */
     private void setHwInfoData() {
         Optional<Hardware> hw = hardwareService.getBySerialHW(sensor.getIdHw());
         if (hw.isPresent()) {
@@ -781,6 +806,10 @@ public class SensorElectricDashboard extends LitTemplate {
         createdField.setText("Created: " + new SimpleDateFormat("dd.MM.yyyy HH:mm").format(sensor.getCreatedDate()));
     }
 
+    /**
+     * Periodically refresh data for values that can change. Specifically: Current Consumption of a sensor
+     * and hardware status and signal strength.
+     */
     @Scheduled(fixedDelay = 10000)
     public void refreshDashboardData() {
         try {

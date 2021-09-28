@@ -276,7 +276,6 @@ public class WaterSensorView extends LitTemplate {
         setSensorFields(sensorWater);
     }
 
-
     private void validatePinOnNewHardware() throws Exception {
         List<Sensor> sensors = sensorService.findSensorByIdHw(sensorInfo.getAttachToHardwareSelect().getValue().getSerial_HW());
         sensors.removeIf(sensor1 -> sensor1.getId() == this.sensor.getId());

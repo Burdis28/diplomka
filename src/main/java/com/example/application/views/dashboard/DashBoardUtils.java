@@ -6,8 +6,18 @@ import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.*;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
 
+/**
+ * Utils class for dashboard related stuff.
+ */
 public class DashBoardUtils {
 
+    /**
+     * Method creates a chart of a Gauge type with given information and preset configuration.
+     * @param consumption consumption (data for chart)
+     * @param consumptionMaxValue maximum value of chart data
+     * @param electric type of a sensor (electric/water)
+     * @return Chart object ready to be displayed
+     */
     public static Chart createConsumptionGauge(double consumption, double consumptionMaxValue, boolean electric) {
         Chart chart = new Chart(ChartType.SOLIDGAUGE);
         chart.setClassName("gauge");
@@ -29,11 +39,9 @@ public class DashBoardUtils {
 
         YAxis yAxis = configuration.getyAxis();
         yAxis.setTickAmount(2);
-        //yAxis.setTitle("Consumption");
         yAxis.setMinorTickInterval("null");
         yAxis.getTitle().setY(-50);
         yAxis.getLabels().setEnabled(false);
-        //yAxis.getLabels().setY(16);
         yAxis.setMin(0);
         yAxis.setMax(100);
 

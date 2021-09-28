@@ -31,6 +31,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+/**
+ * Class that represent a Hardware tile component.
+ */
 //@EnableScheduling
 public class HardwareTile extends VerticalLayout {
 
@@ -122,6 +125,11 @@ public class HardwareTile extends VerticalLayout {
         add(bottomVerticalLayout);
     }
 
+    /**
+     * Method that creates and opens a modal dialog window for confirmation of deleting a hardware.
+     * @param empty boolean indicator that there are no active sensors connected to this hw
+     * @param hardware hardware object
+     */
     private void createHardwareDeleteDialog(boolean empty, Hardware hardware) {
         ConfirmDialog confirmDialog = new ConfirmDialog();
         confirmDialog.setConfirmButtonTheme("error primary");
@@ -157,6 +165,10 @@ public class HardwareTile extends VerticalLayout {
         dialog.open();
     }
 
+    /**
+     * Creates and opens a modal window for edit of a hardware object.
+     * @param hardware hardware object
+     */
     private void createHardwareEditDialog(Hardware hardware) {
         ConfirmDialog confirmDialog = new ConfirmDialog();
         H2 title = new H2("Edit " + hardware.getName());

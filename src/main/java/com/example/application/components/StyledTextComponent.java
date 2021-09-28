@@ -5,6 +5,9 @@ import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.html.Span;
 
+/**
+ * Component for text that can be styled through html tags.
+ */
 public class StyledTextComponent extends Composite<Span> implements HasText {
 
     private Span content = new Span();

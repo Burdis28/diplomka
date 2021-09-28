@@ -82,7 +82,7 @@ public class HardwareDetailView extends LitTemplate {
     private FormItem attachedSensorsFormItem;
 
     /**
-     * Creates a new HardwareDetail.
+     * Component that represents a detail information about Hardware.
      */
     public HardwareDetailView(@Autowired UserService userService, HardwareService hardwareService,
                               HardwareLiveService hardwareLiveService,
@@ -225,6 +225,9 @@ public class HardwareDetailView extends LitTemplate {
         //versionField.setReadOnly(b);
     }
 
+    /**
+     * Method that periodically refreshes status attribute of Hardware and its signal strength.
+     */
     @Scheduled(fixedDelay = 10000)
     private void refreshStatusAndSignal() {
         getUI().ifPresent(ui -> ui.access(() -> {

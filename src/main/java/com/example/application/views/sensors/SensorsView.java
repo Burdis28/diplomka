@@ -193,12 +193,14 @@ public class SensorsView extends LitTemplate {
     }
 
     private void createDeleteContextMenu(GridContextMenu<SensorGridRepresentation> contextMenu) {
-        contextMenu.addItem("Delete", event -> {
-            SensorGridRepresentation sensor = event.getItem().isPresent() ? event.getItem().get() : null;
-            if (sensor != null) {
-                createDeleteSensorDialog(sensor);
-            }
-        });
+        if (loggedUser.getAdmin()) {
+            contextMenu.addItem("Delete", event -> {
+                SensorGridRepresentation sensor = event.getItem().isPresent() ? event.getItem().get() : null;
+                if (sensor != null) {
+                    createDeleteSensorDialog(sensor);
+                }
+            });
+        }
     }
 
     private void createDeleteSensorDialog(SensorGridRepresentation sensor) {

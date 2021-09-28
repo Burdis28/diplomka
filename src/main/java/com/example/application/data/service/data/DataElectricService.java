@@ -15,6 +15,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+/**
+ * Service class for Electricity Data.
+ */
 @Service
 public class DataElectricService extends CrudService<DataElectric, Integer> {
 
@@ -42,6 +45,13 @@ public class DataElectricService extends CrudService<DataElectric, Integer> {
         return this.dataElectricRepository.findAllBySensorId(sensorId);
     }
 
+    /**
+     * Method that finds and returns list of data for a specific sensor and range of dates.
+     * @param sensorId ID of sensor
+     * @param dateFrom start of range date, included
+     * @param dateTo end of range date, excluded
+     * @return list of DataElectric objects
+     */
     public List<DataElectric> findAllBySensorIdAndDate(int sensorId, LocalDate dateFrom, LocalDate dateTo) {
         // Hledám podle UTC-2
         Calendar cal = Calendar.getInstance();

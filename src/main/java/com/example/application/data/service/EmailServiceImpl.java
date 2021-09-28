@@ -4,6 +4,9 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
+/**
+ * Implementation of Service class that provides communication through email.
+ */
 @Component
 public class EmailServiceImpl implements EmailService {
 
@@ -13,6 +16,12 @@ public class EmailServiceImpl implements EmailService {
         this.emailSender = emailSender;
     }
 
+    /**
+     * Method sends email text message.
+     * @param to receiver
+     * @param subject email subject
+     * @param text content of email message
+     */
     public void sendSimpleMessage(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("smart.home.upce@gmail.com");

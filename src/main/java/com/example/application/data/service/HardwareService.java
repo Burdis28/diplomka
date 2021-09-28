@@ -11,6 +11,9 @@ import org.vaadin.artur.helpers.CrudService;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service class for Hardware.
+ */
 @Service
 public class HardwareService extends CrudService<Hardware, Integer> {
 

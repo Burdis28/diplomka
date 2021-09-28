@@ -133,7 +133,6 @@ public class UserManagementView extends LitTemplate {
             span.setWidth("80px");
             return span;
         }).setHeader("Type").setWidth("130px").setFlexGrow(0);
-        ;
     }
 
     private void createPhoneColumn() {
@@ -154,7 +153,6 @@ public class UserManagementView extends LitTemplate {
             span.setWidth("120px");
             return span;
         }).setHeader("Active").setWidth("150px").setFlexGrow(0);
-        ;
     }
 
     private void createToolsColumn() {
@@ -301,9 +299,6 @@ public class UserManagementView extends LitTemplate {
     private void addFiltersToGrid() {
         HeaderRow filterRow = grid.appendHeaderRow();
 
-//        TextField idFilter = getIdFilter();
-//        filterRow.getCell(idColumn).setComponent(idFilter);
-
         TextField nameFilter = getNameFilter();
         filterRow.getCell(nameColumn).setComponent(nameFilter);
 
@@ -341,17 +336,6 @@ public class UserManagementView extends LitTemplate {
         nameFilter.addValueChangeListener(event -> gridListDataView
                 .addFilter(user -> StringUtils.containsIgnoreCase(user.getFullName(), nameFilter.getValue())));
         return nameFilter;
-    }
-
-    private TextField getIdFilter() {
-        TextField idFilter = new TextField();
-        idFilter.setPlaceholder("Filter");
-        idFilter.setClearButtonVisible(true);
-        idFilter.setWidth("100%");
-        idFilter.setValueChangeMode(ValueChangeMode.EAGER);
-        idFilter.addValueChangeListener(event -> gridListDataView.addFilter(
-                client -> StringUtils.containsIgnoreCase(Integer.toString(client.getId()), idFilter.getValue())));
-        return idFilter;
     }
 
     private TextField getEmailFilter() {

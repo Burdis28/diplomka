@@ -81,6 +81,9 @@ public class HardwaresView extends LitTemplate {
     private H5 lastUpdateText;
 
 
+    /**
+     *  View for grid representation of hardware entities. Provides edit, deletion and additional routing.
+     */
     public HardwaresView(@Autowired HardwareService hardwareService, HardwareLiveService hardwareLiveService,
                          SensorService sensorService, UserService userService,
                          NotificationLogHwService notificationLogHwService) {

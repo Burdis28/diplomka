@@ -57,7 +57,7 @@ public class CreateHardwareView extends LitTemplate {
     private User loggedUser;
 
     /**
-     * Creates a new CreateHardwareView.
+     * View that allows creation of a new hardware object.
      */
     public CreateHardwareView(HardwareService hardwareService,
                               HardwareLiveService hardwareLiveService,
@@ -90,6 +90,10 @@ public class CreateHardwareView extends LitTemplate {
         });
     }
 
+    /**
+     * Method that creates hardware related objects like NotificationLog or Live.
+     * @throws Exception
+     */
     private void createHardwareRelatedObjects() throws Exception {
         hardwareBinder.writeBean(hardware);
         hardwareService.createHw(hardware, loggedUser.getId());

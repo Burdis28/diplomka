@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.vaadin.artur.helpers.CrudService;
 
+/**
+ * Service class for Hardware Notification Logs.
+ */
 @Service
 public class NotificationLogHwService extends CrudService<NotificationLogHw, Integer> {
 
