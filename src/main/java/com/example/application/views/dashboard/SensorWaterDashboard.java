@@ -289,6 +289,7 @@ public class SensorWaterDashboard extends LitTemplate {
                 consumptionMaxValue = dataWater.getM3();
             }
         });
+        consumptionMaxValue *= 1.3;
     }
 
 
