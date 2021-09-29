@@ -155,12 +155,14 @@ public class HardwaresView extends LitTemplate {
     }
 
     private void createDeleteContextMenu(GridContextMenu<Hardware> contextMenu) {
-        contextMenu.addItem("Delete", event -> {
-            Hardware hardware = event.getItem().isPresent() ? event.getItem().get() : null;
-            if(hardware != null) {
-                createDeleteHardwareDialog(hardware);
-            }
-        });
+        if(loggedUser.getAdmin()) {
+            contextMenu.addItem("Delete", event -> {
+                Hardware hardware = event.getItem().isPresent() ? event.getItem().get() : null;
+                if (hardware != null) {
+                    createDeleteHardwareDialog(hardware);
+                }
+            });
+        }
     }
 
     private void createDeleteHardwareDialog(Hardware hardware) {
