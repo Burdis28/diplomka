@@ -790,6 +790,7 @@ public class SensorElectricDashboard extends LitTemplate {
                 consumptionMaxValue = dataElectric.getHighRate();
             }
         });
+        consumptionMaxValue *= 1.3;
     }
 
     private void setInfoData() {
